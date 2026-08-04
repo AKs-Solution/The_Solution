@@ -31,10 +31,12 @@ export class AppError extends Error {
 export class ValidationError extends AppError {
   public readonly fieldErrors: Record<string, string[]>;
 
-  constructor(fieldErrors: Record<string, string[]>) {
-    super("Validation failed", "VALIDATION_ERROR", 400, { fields: fieldErrors });
+  constructor(fieldErrors: Record<string, string[]> | string) {
+    const formatted = typeof fieldErrors === "string" ? { general: [fieldErrors] } : fieldErrors;
+    const msg = typeof fieldErrors === "string" ? fieldErrors : "Validation failed";
+    super(msg, "VALIDATION_ERROR", 400, { fields: formatted });
     this.name = "ValidationError";
-    this.fieldErrors = fieldErrors;
+    this.fieldErrors = formatted;
   }
 }
 

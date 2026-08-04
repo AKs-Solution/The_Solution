@@ -65,6 +65,7 @@ model User {
   assessmentComments          AssessmentComment[]
   recordSnapshots             RecordSnapshot[]
   dismissedAnomalies          AnomalyAlert[]
+  reasoningSessionsStarted    ReasoningSession[]           @relation("SessionTriggeredBy")
 
   @@index([email])
   @@index([status])
@@ -142,6 +143,10 @@ model Organization {
   negotiationSessions      NegotiationSession[]
   causalFlightTwins        CausalFlightTwin[]
   supplyChainReroutes      SupplyChainReroute[]
+  reasoningSessions        ReasoningSession[]
+  engineeringPrinciples    EngineeringPrinciple[]
+  reasoningGraphNodes      ReasoningGraphNode[]
+  reasoningGraphEdges      ReasoningGraphEdge[]
 
 
   @@index([slug])
@@ -2187,6 +2192,262 @@ model AnomalyAlert {
   @@index([workspaceId])
   @@index([alertType])
   @@index([isDismissed])
+}
+
+// ---------------------------------------------------------------------------
+// Engineering Reasoning Engine Domain Models
+// ---------------------------------------------------------------------------
+
+model ReasoningSession {
+  id               String    @id @default(cuid())
+  organizationId   String
+  title            String
+  problemStatement String
+  context          Json?
+  status           String    @default("QUEUED") // QUEUED | RUNNING | COMPLETED | FAILED | CANCELLED
+  triggeredById    String?
+  summary          String?
+  confidenceScore  Float?
+  uncertaintyNotes Json?
+  cancelRequested  Boolean   @default(false)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  triggeredBy  User?        @relation("SessionTriggeredBy", fields: [triggeredById], references: [id])
+
+  steps           ReasoningStep[]
+  graphNodes      ReasoningGraphNode[]
+  graphEdges      ReasoningGraphEdge[]
+  evidenceWeights EvidenceWeightRecord[]
+  constraints     ConstraintRecord[]
+  assumptions     AssumptionRecord[]
+  tradeoffs       TradeoffRecord[]
+  alternatives    AlternativeRecord[]
+  conflicts       ConflictRecord[]
+  conclusions     EngineeringConclusionRecord[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([triggeredById])
+}
+
+model EngineeringPrinciple {
+  id                     String   @id @default(cuid())
+  organizationId         String?  // null for platform standard principles, string for custom tenant principles
+  code                   String   @unique
+  name                   String
+  category               String   // Thermal | Structural | Materials | Reliability | Systems | Manufacturing | Safety
+  description            String
+  governingEquations     Json?    // Array of equation strings / formulas
+  domain                 String   // Mechanical | Electrical | Systems | Materials | Aerospace
+  version                Int      @default(1)
+  status                 String   @default("ACTIVE")
+  supportingEvidenceRefs Json?    // References to canonical evidence or literature
+  metadata               Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([category])
+  @@index([code])
+}
+
+model ReasoningStep {
+  id           String    @id @default(cuid())
+  sessionId    String
+  stageIndex   Int
+  stageName    String
+  status       String    // RUNNING | COMPLETED | FAILED | SKIPPED
+  inputData    Json?
+  outputData   Json?
+  durationMs   Int?
+  errorMessage String?
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([sessionId, stageIndex])
+}
+
+model ReasoningGraphNode {
+  id             String   @id @default(cuid())
+  sessionId      String
+  organizationId String
+  nodeType       String   // EVIDENCE | PRINCIPLE | CONSTRAINT | ASSUMPTION | TRADEOFF | ALTERNATIVE | RISK | RECOMMENDATION | CONCLUSION | STEP
+  label          String
+  entityId       String?  // Optional link to underlying canonical entity
+  properties     Json?
+  confidence     Float?
+  weight         Float?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  session      ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  outgoingEdges ReasoningGraphEdge[] @relation("EdgeSourceNode")
+  incomingEdges ReasoningGraphEdge[] @relation("EdgeTargetNode")
+
+  @@index([sessionId])
+  @@index([organizationId])
+  @@index([nodeType])
+}
+
+model ReasoningGraphEdge {
+  id             String   @id @default(cuid())
+  sessionId      String
+  organizationId String
+  sourceNodeId   String
+  targetNodeId   String
+  edgeType       String   // SUPPORTS | CONTRADICTS | INFLUENCES | DERIVED_FROM | MITIGATES | APPLIES | CONSTRAINS | REJECTS | CITING
+  justification  String   // Explicit "WHY" explanation
+  weight         Float?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  session      ReasoningSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sourceNode   ReasoningGraphNode @relation("EdgeSourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode   ReasoningGraphNode @relation("EdgeTargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([organizationId])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
+}
+
+model EvidenceWeightRecord {
+  id                      String   @id @default(cuid())
+  sessionId               String
+  evidenceId              String
+  evidenceType            String
+  title                   String
+  verificationLevel       Float
+  sourceQuality           Float
+  recencyScore            Float
+  relevanceScore          Float
+  repeatabilityScore      Float
+  independentConfirmation Float
+  engineeringConfidence   Float
+  historicalAccuracy      Float
+  conflictingScore        Float
+  finalWeight             Float
+  weightExplanation       String
+  createdAt               DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([evidenceId])
+}
+
+model ConstraintRecord {
+  id              String   @id @default(cuid())
+  sessionId       String
+  name            String
+  category        String   // Structural | Thermal | Operational | Material | Regulatory | Tolerance
+  description     String
+  limitValue      Float?
+  unit            String?
+  isHardConstraint Boolean @default(true)
+  isViolated      Boolean  @default(false)
+  violationDegree Float?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model AssumptionRecord {
+  id              String   @id @default(cuid())
+  sessionId       String
+  statement       String
+  justification   String
+  riskLevel       String   // LOW | MEDIUM | HIGH | CRITICAL
+  isVerified      Boolean  @default(false)
+  impactIfInvalid String
+  createdAt       DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model TradeoffRecord {
+  id                String   @id @default(cuid())
+  sessionId         String
+  criterion         String
+  alternativeAId    String
+  alternativeBId    String
+  comparisonDetails String
+  impactAnalysis    Json?
+  selectedOption    String?
+  createdAt         DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model AlternativeRecord {
+  id              String   @id @default(cuid())
+  sessionId       String
+  name            String
+  description     String
+  pros            Json     // String array
+  cons            Json     // String array
+  score           Float
+  status          String   // CONSIDERED | SELECTED | REJECTED
+  rejectionReason String?
+  createdAt       DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model ConflictRecord {
+  id                       String   @id @default(cuid())
+  sessionId                String
+  conflictType             String   // EVIDENCE_CONTRADICTION | PRINCIPLE_INCOMPATIBILITY | CONSTRAINT_VIOLATION | UNSUPPORTED_ASSUMPTION | CIRCULAR_REASONING | OUTDATED_EVIDENCE | INCONSISTENT_CONCLUSION
+  severity                 String   // LOW | MEDIUM | HIGH | CRITICAL
+  description              String
+  entitiesInvolved         Json     // Array of entity/evidence IDs
+  mitigationRecommendation String
+  isResolved               Boolean  @default(false)
+  createdAt                DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([sessionId, conflictType])
+}
+
+model EngineeringConclusionRecord {
+  id                      String   @id @default(cuid())
+  sessionId               String
+  statement               String
+  confidenceScore         Float
+  supportingEvidenceIds   Json     // String array
+  appliedPrincipleIds     Json     // String array
+  tradeoffIds             Json     // String array
+  unresolvedUncertainties Json     // String array
+  isSupportedByEvidence   Boolean  @default(true)
+  recommendation          String
+  createdAt               DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 }
 
 
