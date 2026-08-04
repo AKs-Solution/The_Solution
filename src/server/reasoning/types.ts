@@ -14,7 +14,9 @@ export type ReasoningStageName =
   | "CONFIDENCE_CALCULATION"
   | "CONCLUSION_GENERATION"
   | "EVIDENCE_CITATION"
-  | "RECOMMENDATION_GENERATION";
+  | "RECOMMENDATION_GENERATION"
+  | "MISSING_EVIDENCE_DETECTION"
+  | "CAUSAL_REASONING";
 
 export type ConflictType =
   | "EVIDENCE_CONTRADICTION"
@@ -37,7 +39,9 @@ export type ReasoningNodeType =
   | "RISK"
   | "RECOMMENDATION"
   | "CONCLUSION"
-  | "STEP";
+  | "STEP"
+  | "MISSING_EVIDENCE"
+  | "DECISION_BRANCH";
 
 export type ReasoningEdgeType =
   | "SUPPORTS"
@@ -48,7 +52,8 @@ export type ReasoningEdgeType =
   | "APPLIES"
   | "CONSTRAINS"
   | "REJECTS"
-  | "CITING";
+  | "CITING"
+  | "CAUSES";
 
 export interface EvidenceInput {
   id: string;
@@ -148,6 +153,22 @@ export interface ConflictData {
   isResolved?: boolean;
 }
 
+export interface MissingEvidenceData {
+  id?: string;
+  missingItem: string;
+  category: string;
+  impact: string;
+  requiredSource: string;
+}
+
+export interface CausalReasoningData {
+  sourceEntityId: string;
+  targetEntityId: string;
+  causalFactor: string;
+  propagationImpact: string;
+  probability: number;
+}
+
 export interface EngineeringConclusionData {
   id?: string;
   statement: string;
@@ -193,6 +214,25 @@ export interface ReasoningGraphData {
   }>;
 }
 
+export interface ReasoningSignoffData {
+  id?: string;
+  sessionId: string;
+  userId: string;
+  userName?: string;
+  status: "APPROVED" | "REJECTED" | "CHALLENGED";
+  comments: string;
+  createdAt?: string;
+}
+
+export interface DecisionTreeNode {
+  id: string;
+  label: string;
+  nodeType: "PROBLEM" | "CONSTRAINT_CHECK" | "PRINCIPLE_CHECK" | "ALTERNATIVE_BRANCH" | "DECISION_OUTCOME";
+  status: "PASSED" | "FAILED" | "PENDING" | "SELECTED";
+  details: string;
+  children?: DecisionTreeNode[];
+}
+
 export interface ReasoningExplanationPayload {
   sessionId: string;
   title: string;
@@ -207,8 +247,11 @@ export interface ReasoningExplanationPayload {
   assumptionsMade: AssumptionData[];
   tradeoffsConsidered: TradeoffData[];
   rejectedAlternatives: AlternativeData[];
+  missingEvidence: MissingEvidenceData[];
+  causalReasoning: CausalReasoningData[];
   remainingUncertainties: string[];
   conflictsDetected: ConflictData[];
+  signoffs: ReasoningSignoffData[];
   reasoningChainSteps: ReasoningStepData[];
 }
 
@@ -218,15 +261,24 @@ export interface StartReasoningSessionInput {
   context?: {
     subjectEntityId?: string;
     relatedEvidenceIds?: string[];
-    customConstraints?: Array<{
-      name: string;
-      category: string;
-      description: string;
-      limitValue?: number;
-      unit?: string;
-      isHardConstraint?: boolean;
-    }>;
+    customConstraints?: Array<{ name: string; category: string; description: string; limitValue?: number; unit?: string; isHardConstraint?: boolean }>;
     preferredPrinciples?: string[];
     parameters?: Record<string, unknown>;
   };
+}
+
+export interface ReasoningSearchInput {
+  query: string;
+  domain?: string;
+  limit?: number;
+}
+
+export interface ReasoningSearchResult {
+  query: string;
+  answer: string;
+  confidenceScore: number;
+  isSupportedByEvidence: boolean;
+  citedEvidence: Array<{ id: string; title: string; weight: number }>;
+  appliedPrinciples: Array<{ code: string; name: string }>;
+  uncertainties: string[];
 }

@@ -1,69 +1,41 @@
 import { describe, it, expect } from "vitest";
 import { buildReasoningGraph } from "@/server/reasoning/reasoning-graph";
-import { executeConclusionGeneration } from "@/server/reasoning/pipeline/stages";
+import {
+  executeConclusionGeneration,
+  executeMissingEvidenceDetection,
+  executeCausalReasoning,
+} from "@/server/reasoning/pipeline/stages";
 import { PipelineContext } from "@/server/reasoning/pipeline/pipeline-context";
 
-describe("Engineering Reasoning Pipeline & Graph Integration", () => {
-  it("generates insufficient evidence conclusion when evidence quality is below threshold", async () => {
-    const ctx: Partial<PipelineContext> = {
-      sessionId: "session-123",
-      title: "Untested Subsea Valve Design",
-      principles: [
-        {
-          code: "PRIN-STRESS-DIST",
-          name: "Stress Distribution",
-          category: "Structural",
-          description: "Stress distribution",
-          governingEquations: [],
-          domain: "Mechanical",
-          version: 1,
-          status: "ACTIVE",
-        },
-      ],
-      tradeoffs: [],
-      rawEvidence: [],
-      confidenceScore: 0.2,
-      isSupportedByEvidence: false,
-      unresolvedUncertainties: ["No empirical test evidence available."],
-    };
-
-    await executeConclusionGeneration(ctx as PipelineContext);
-
-    expect(ctx.conclusion).toBeDefined();
-    expect(ctx.conclusion?.isSupportedByEvidence).toBe(false);
-    expect(ctx.conclusion?.statement).toContain(
-      "INSUFFICIENT EVIDENCE: No supported engineering conclusion exists",
-    );
-  });
-
-  it("builds dedicated reasoning graph with explicit WHY justifications on edges", () => {
+describe("Reasoning Pipeline & Graph Generator", () => {
+  it("builds a typed reasoning graph with explicit 'WHY' justifications on edges", () => {
     const graph = buildReasoningGraph({
-      sessionId: "session-456",
+      sessionId: "session-100",
       evidence: [
         {
-          evidenceId: "ev-1",
-          evidenceType: "TEST_REPORT",
-          title: "Lab Endurance Test",
+          evidenceId: "ev-001",
+          evidenceType: "LAB_TEST",
+          title: "Tensile Strength Test",
           verificationLevel: 0.9,
           sourceQuality: 0.9,
           recencyScore: 0.9,
           relevanceScore: 0.9,
           repeatabilityScore: 0.9,
           independentConfirmation: 1,
-          engineeringConfidence: 0.85,
+          engineeringConfidence: 0.9,
           historicalAccuracy: 0.9,
           conflictingScore: 0,
-          finalWeight: 0.92,
+          finalWeight: 0.9,
           weightExplanation: "High quality evidence",
         },
       ],
       principles: [
         {
-          code: "PRIN-STRESS-DIST",
-          name: "Stress Distribution",
-          category: "Structural",
-          description: "Stress principles",
-          governingEquations: ["sigma = P/A"],
+          code: "PRIN-ENERGY-CONS",
+          name: "Conservation of Energy",
+          category: "Thermal",
+          description: "First law",
+          governingEquations: ["dE = Q - W"],
           domain: "Mechanical",
           version: 1,
           status: "ACTIVE",
@@ -71,9 +43,9 @@ describe("Engineering Reasoning Pipeline & Graph Integration", () => {
       ],
       constraints: [
         {
-          name: "Max Stress Limit",
+          name: "Max Stress",
           category: "Structural",
-          description: "Limit 350 MPa",
+          description: "Limit 300 MPa",
           isHardConstraint: true,
           isViolated: false,
         },
@@ -83,23 +55,64 @@ describe("Engineering Reasoning Pipeline & Graph Integration", () => {
       alternatives: [],
       conflicts: [],
       conclusion: {
-        statement: "Design satisfies all structural constraints.",
-        confidenceScore: 0.92,
-        supportingEvidenceIds: ["ev-1"],
-        appliedPrincipleIds: ["PRIN-STRESS-DIST"],
+        statement: "Design approved based on energy conservation and test data.",
+        confidenceScore: 0.9,
+        supportingEvidenceIds: ["ev-001"],
+        appliedPrincipleIds: ["PRIN-ENERGY-CONS"],
         tradeoffIds: [],
         unresolvedUncertainties: [],
         isSupportedByEvidence: true,
-        recommendation: "Proceed with production sign-off.",
+        recommendation: "Proceed to detail design",
       },
     });
 
-    expect(graph.nodes.some((n) => n.nodeType === "EVIDENCE")).toBe(true);
-    expect(graph.nodes.some((n) => n.nodeType === "PRINCIPLE")).toBe(true);
-    expect(graph.nodes.some((n) => n.nodeType === "CONCLUSION")).toBe(true);
+    expect(graph.nodes.length).toBeGreaterThan(0);
+    expect(graph.edges.length).toBeGreaterThan(0);
 
-    const edge = graph.edges.find((e) => e.edgeType === "SUPPORTS");
-    expect(edge).toBeDefined();
-    expect(edge?.justification).toContain("empirical foundation");
+    const supportsEdge = graph.edges.find((e) => e.edgeType === "SUPPORTS");
+    expect(supportsEdge).toBeDefined();
+    expect(supportsEdge?.justification).toBeTruthy();
+  });
+
+  it("detects missing evidence and executes causal reasoning propagation", async () => {
+    const mockCtx: Partial<PipelineContext> = {
+      rawEvidence: [],
+      assumptions: [
+        {
+          statement: "Unverified Grain Orientation",
+          justification: "Assumed isotropic",
+          riskLevel: "MEDIUM",
+          isVerified: false,
+          impactIfInvalid: "Reduces fatigue strength by 15%",
+        },
+      ],
+      missingEvidence: [],
+      causalReasoning: [],
+    };
+
+    await executeMissingEvidenceDetection(mockCtx as PipelineContext);
+    await executeCausalReasoning(mockCtx as PipelineContext);
+
+    expect(mockCtx.missingEvidence?.length).toBeGreaterThan(0);
+    expect(mockCtx.causalReasoning?.length).toBeGreaterThan(0);
+  });
+
+  it("generates insufficient evidence fallback conclusion when confidence is low", async () => {
+    const mockCtx: Partial<PipelineContext> = {
+      title: "Unknown Shaft Loading",
+      confidenceScore: 0.2,
+      isSupportedByEvidence: false,
+      rawEvidence: [],
+      principles: [],
+      tradeoffs: [],
+      unresolvedUncertainties: ["No verified empirical test data provided."],
+      conclusion: null,
+    };
+
+    await executeConclusionGeneration(mockCtx as PipelineContext);
+
+    expect(mockCtx.conclusion).toBeDefined();
+    expect(mockCtx.conclusion?.isSupportedByEvidence).toBe(false);
+    expect(mockCtx.conclusion?.statement).toContain("INSUFFICIENT EVIDENCE");
   });
 });

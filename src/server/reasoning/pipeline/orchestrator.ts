@@ -5,19 +5,21 @@ import { ReasoningStageName } from "../types";
 import { PipelineContext } from "./pipeline-context";
 import {
   executeAlternativeGeneration,
+  executeCausalReasoning,
   executeConclusionGeneration,
   executeConfidenceCalculation,
   executeConflictDetectionStage,
-  executeConstraintIdentification,
+  executeConstraintExtraction,
   executeEvidenceCitation,
   executeEvidenceCollection,
   executeEvidenceValidation,
-  executeEvidenceWeightingStage,
+  executeEvidenceWeighting,
+  executeMissingEvidenceDetection,
   executePrincipleSelection,
+  executeReasoningChainConstruction,
   executeRecommendationGeneration,
   executeRelationshipAnalysis,
   executeTradeoffEvaluation,
-  executeReasoningChainConstruction,
 } from "./stages";
 import { logger } from "@/shared/logging";
 
@@ -50,6 +52,8 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
     alternatives: [],
     tradeoffs: [],
     conflicts: [],
+    missingEvidence: [],
+    causalReasoning: [],
     relationshipMap: [],
     reasoningChains: [],
     confidenceScore: 0,
@@ -64,13 +68,15 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
   const stageHandlers: Record<ReasoningStageName, (context: PipelineContext) => Promise<void>> = {
     EVIDENCE_COLLECTION: executeEvidenceCollection,
     EVIDENCE_VALIDATION: executeEvidenceValidation,
-    EVIDENCE_WEIGHTING: executeEvidenceWeightingStage,
-    CONSTRAINT_IDENTIFICATION: executeConstraintIdentification,
+    EVIDENCE_WEIGHTING: executeEvidenceWeighting,
+    CONSTRAINT_IDENTIFICATION: executeConstraintExtraction,
     PRINCIPLE_SELECTION: executePrincipleSelection,
     RELATIONSHIP_ANALYSIS: executeRelationshipAnalysis,
     TRADEOFF_EVALUATION: executeTradeoffEvaluation,
     ALTERNATIVE_GENERATION: executeAlternativeGeneration,
     CONFLICT_DETECTION: executeConflictDetectionStage,
+    MISSING_EVIDENCE_DETECTION: executeMissingEvidenceDetection,
+    CAUSAL_REASONING: executeCausalReasoning,
     REASONING_CHAIN_CONSTRUCTION: executeReasoningChainConstruction,
     CONFIDENCE_CALCULATION: executeConfidenceCalculation,
     CONCLUSION_GENERATION: executeConclusionGeneration,
@@ -159,7 +165,7 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
       conclusion: ctx.conclusion,
     });
 
-    // Persist all domain records in single transaction / parallel writes
+    // Persist all domain records
     await Promise.all([
       // 1. Evidence Weight Records
       ...ctx.evidenceWeights.map((w) =>
@@ -256,6 +262,19 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
             entitiesInvolved: cf.entitiesInvolved,
             mitigationRecommendation: cf.mitigationRecommendation,
             isResolved: cf.isResolved ?? false,
+          },
+        }),
+      ),
+
+      // 7. Missing Evidence Records
+      ...ctx.missingEvidence.map((me) =>
+        prisma.missingEvidenceRecord.create({
+          data: {
+            sessionId: ctx.sessionId,
+            missingItem: me.missingItem,
+            category: me.category,
+            impact: me.impact,
+            requiredSource: me.requiredSource,
           },
         }),
       ),

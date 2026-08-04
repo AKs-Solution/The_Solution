@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { ReasoningChainViewer } from "./ReasoningChainViewer";
 import { ReasoningGraphVisualizer } from "./ReasoningGraphVisualizer";
 import { EvidenceWeightingTable } from "./EvidenceWeightingTable";
@@ -8,7 +8,11 @@ import { EngineeringPrincipleExplorer } from "./EngineeringPrincipleExplorer";
 import { TradeoffAlternativeComparator } from "./TradeoffAlternativeComparator";
 import { ConflictAlertCenter } from "./ConflictAlertCenter";
 import { ConclusionExplanationPanel } from "./ConclusionExplanationPanel";
+import { DecisionTreeViewer } from "./DecisionTreeViewer";
+import { EngineeringReviewWorkflowModal } from "./EngineeringReviewWorkflowModal";
+import { ReasoningSearchBar } from "./ReasoningSearchBar";
 import {
+  DecisionTreeNode,
   EngineeringPrincipleData,
   ReasoningExplanationPayload,
   ReasoningGraphData,
@@ -32,7 +36,14 @@ interface Props {
 }
 
 type TabType =
-  "CONCLUSION" | "PIPELINE" | "GRAPH" | "EVIDENCE" | "PRINCIPLES" | "TRADEOFFS" | "CONFLICTS";
+  | "CONCLUSION"
+  | "PIPELINE"
+  | "DECISION_TREE"
+  | "GRAPH"
+  | "EVIDENCE"
+  | "PRINCIPLES"
+  | "TRADEOFFS"
+  | "CONFLICTS";
 
 export function ReasoningWorkspace({
   initialSessions,
@@ -45,13 +56,33 @@ export function ReasoningWorkspace({
     initialActiveSession || null,
   );
   const [activeGraph, setActiveGraph] = useState<ReasoningGraphData | null>(initialGraph || null);
+  const [decisionTree, setDecisionTree] = useState<DecisionTreeNode | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("CONCLUSION");
 
-  // New Session Modal State
+  // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSignoffModalOpen, setIsSignoffModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newProblem, setNewProblem] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchSessionDetails = async (sessionId: string) => {
+    try {
+      const [expRes, graphRes, treeRes] = await Promise.all([
+        fetch(`/api/reasoning/sessions/${sessionId}/explanations`),
+        fetch(`/api/reasoning/sessions/${sessionId}/graph`),
+        fetch(`/api/reasoning/sessions/${sessionId}/decision-tree`),
+      ]);
+      const expJson = await expRes.json();
+      const graphJson = await graphRes.json();
+      const treeJson = await treeRes.json();
+      setActiveSession(expJson.data);
+      setActiveGraph(graphJson.data);
+      setDecisionTree(treeJson.data);
+    } catch (err) {
+      console.error("Failed to fetch session details", err);
+    }
+  };
 
   const handleStartSession = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,14 +97,7 @@ export function ReasoningWorkspace({
       });
       const json = await res.json();
       if (json.data) {
-        // Fetch full explanation payload & graph for new session
-        const expRes = await fetch(`/api/reasoning/sessions/${json.data.id}/explanations`);
-        const expJson = await expRes.json();
-        const graphRes = await fetch(`/api/reasoning/sessions/${json.data.id}/graph`);
-        const graphJson = await graphRes.json();
-
-        setActiveSession(expJson.data);
-        setActiveGraph(graphJson.data);
+        await fetchSessionDetails(json.data.id);
         setSessions([
           {
             id: json.data.id,
@@ -96,21 +120,6 @@ export function ReasoningWorkspace({
     }
   };
 
-  const selectSession = async (sessionId: string) => {
-    try {
-      const [expRes, graphRes] = await Promise.all([
-        fetch(`/api/reasoning/sessions/${sessionId}/explanations`),
-        fetch(`/api/reasoning/sessions/${sessionId}/graph`),
-      ]);
-      const expJson = await expRes.json();
-      const graphJson = await graphRes.json();
-      setActiveSession(expJson.data);
-      setActiveGraph(graphJson.data);
-    } catch (err) {
-      console.error("Failed to select session", err);
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -124,16 +133,31 @@ export function ReasoningWorkspace({
           </div>
           <p className="mt-1 max-w-2xl text-xs text-slate-400">
             Multidisciplinary engineering review board executing transparent, evidence-backed
-            reasoning chains, multi-factor evidence weighting, and conflict detection.
+            reasoning chains, multi-factor evidence weighting, missing evidence detection, and conflict detection.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-500/25 transition-all duration-200 hover:from-cyan-400 hover:to-blue-500"
-        >
-          + Start Reasoning Session
-        </button>
+        <div className="flex items-center gap-3">
+          {activeSession && (
+            <button
+              onClick={() => setIsSignoffModalOpen(true)}
+              className="rounded-xl border border-emerald-500/50 bg-emerald-950/60 px-4 py-2.5 text-xs font-bold text-emerald-300 shadow-md transition hover:bg-emerald-900"
+            >
+              Sign-off / Challenge
+            </button>
+          )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-500/25 transition-all duration-200 hover:from-cyan-400 hover:to-blue-500"
+          >
+            + Start Reasoning Session
+          </button>
+        </div>
+      </div>
+
+      {/* Reasoning Q&A Search Component */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 backdrop-blur-md">
+        <ReasoningSearchBar />
       </div>
 
       {/* Main Grid: Session Selector sidebar & Content Workspace */}
@@ -150,7 +174,7 @@ export function ReasoningWorkspace({
               return (
                 <button
                   key={s.id}
-                  onClick={() => selectSession(s.id)}
+                  onClick={() => fetchSessionDetails(s.id)}
                   className={`w-full rounded-xl border p-3 text-left transition-all ${
                     isSelected
                       ? "border-cyan-500/50 bg-cyan-950/40 text-slate-100 shadow-md shadow-cyan-950/30"
@@ -186,7 +210,7 @@ export function ReasoningWorkspace({
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Conclusion & Citations
+                  Conclusion &amp; Citations
                 </button>
                 <button
                   onClick={() => setActiveTab("PIPELINE")}
@@ -196,7 +220,17 @@ export function ReasoningWorkspace({
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  14-Stage Pipeline
+                  16-Stage Pipeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("DECISION_TREE")}
+                  className={`rounded-lg px-3 py-1.5 transition-all ${
+                    activeTab === "DECISION_TREE"
+                      ? "bg-cyan-500 font-bold text-slate-950 shadow-md shadow-cyan-500/20"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Decision Tree
                 </button>
                 <button
                   onClick={() => setActiveTab("GRAPH")}
@@ -236,7 +270,7 @@ export function ReasoningWorkspace({
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Tradeoffs & Alternatives
+                  Tradeoffs &amp; Alternatives
                 </button>
                 <button
                   onClick={() => setActiveTab("CONFLICTS")}
@@ -270,6 +304,8 @@ export function ReasoningWorkspace({
                     steps={activeSession.reasoningChainSteps as ReasoningStepData[]}
                   />
                 )}
+
+                {activeTab === "DECISION_TREE" && <DecisionTreeViewer tree={decisionTree} />}
 
                 {activeTab === "GRAPH" && activeGraph && (
                   <ReasoningGraphVisualizer graph={activeGraph} />
@@ -305,6 +341,16 @@ export function ReasoningWorkspace({
           )}
         </div>
       </div>
+
+      {/* Signoff Modal */}
+      {activeSession && (
+        <EngineeringReviewWorkflowModal
+          sessionId={activeSession.sessionId}
+          isOpen={isSignoffModalOpen}
+          onClose={() => setIsSignoffModalOpen(false)}
+          onSubmitted={() => fetchSessionDetails(activeSession.sessionId)}
+        />
+      )}
 
       {/* New Session Modal */}
       {isModalOpen && (

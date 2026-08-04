@@ -66,6 +66,7 @@ model User {
   recordSnapshots             RecordSnapshot[]
   dismissedAnomalies          AnomalyAlert[]
   reasoningSessionsStarted    ReasoningSession[]           @relation("SessionTriggeredBy")
+  reasoningSignoffs           ReasoningSignoff[]
 
   @@index([email])
   @@index([status])
@@ -2228,6 +2229,8 @@ model ReasoningSession {
   alternatives    AlternativeRecord[]
   conflicts       ConflictRecord[]
   conclusions     EngineeringConclusionRecord[]
+  signoffs        ReasoningSignoff[]
+  missingEvidence MissingEvidenceRecord[]
 
   @@index([organizationId])
   @@index([organizationId, status])
@@ -2444,6 +2447,35 @@ model EngineeringConclusionRecord {
   isSupportedByEvidence   Boolean  @default(true)
   recommendation          String
   createdAt               DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model ReasoningSignoff {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String
+  status    String   // APPROVED | REJECTED | CHALLENGED
+  comments  String
+  createdAt DateTime @default(now())
+
+  session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model MissingEvidenceRecord {
+  id             String   @id @default(cuid())
+  sessionId      String
+  missingItem    String
+  category       String   // MANDATORY_PARAM | TEST_REPORT | CERTIFICATION | BOUNDARY_SPEC
+  impact         String
+  requiredSource String
+  createdAt      DateTime @default(now())
 
   session ReasoningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 

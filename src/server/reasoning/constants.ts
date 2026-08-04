@@ -10,6 +10,8 @@ export const REASONING_STAGES: ReasoningStageName[] = [
   "TRADEOFF_EVALUATION",
   "ALTERNATIVE_GENERATION",
   "CONFLICT_DETECTION",
+  "MISSING_EVIDENCE_DETECTION",
+  "CAUSAL_REASONING",
   "REASONING_CHAIN_CONSTRUCTION",
   "CONFIDENCE_CALCULATION",
   "CONCLUSION_GENERATION",
@@ -18,57 +20,58 @@ export const REASONING_STAGES: ReasoningStageName[] = [
 ];
 
 export const DEFAULT_ENGINEERING_PRINCIPLES: EngineeringPrincipleData[] = [
+  // 1. Thermal
   {
     code: "PRIN-ENERGY-CONS",
     name: "Conservation of Energy",
     category: "Thermal",
-    description:
-      "Energy can neither be created nor destroyed, only transformed from one form to another. Total system energy remains constant in an isolated system.",
-    governingEquations: [
-      "dE/dt = Q_in - W_out + m_in(h_in + v_in^2/2 + gz_in) - m_out(h_out + v_out^2/2 + gz_out)",
-    ],
+    description: "Energy can neither be created nor destroyed, only transformed from one form to another. Total system energy remains constant in an isolated system.",
+    governingEquations: ["dE/dt = Q_in - W_out + m_in(h_in + v_in^2/2 + gz_in) - m_out(h_out + v_out^2/2 + gz_out)"],
     domain: "Mechanical",
     version: 1,
     status: "ACTIVE",
     supportingEvidenceRefs: ["ISO 80000-5", "Thermodynamics First Law Axiom"],
   },
   {
-    code: "PRIN-STRESS-DIST",
-    name: "Stress Distribution",
-    category: "Structural",
-    description:
-      "Internal forces are distributed across cross-sectional areas under applied external loads. Stress concentrations occur at geometric discontinuities.",
-    governingEquations: ["sigma = P / A", "sigma_max = K_t * (P / A)", "tau = V * Q / (I * b)"],
-    domain: "Mechanical",
-    version: 1,
-    status: "ACTIVE",
-    supportingEvidenceRefs: [
-      "Shigley Mechanical Engineering Design",
-      "Roark's Formulas for Stress and Strain",
-    ],
-  },
-  {
     code: "PRIN-HEAT-TRANSFER",
     name: "Heat Transfer",
     category: "Thermal",
-    description:
-      "Thermal energy moves from higher to lower temperature regions via conduction, convection, and radiation.",
-    governingEquations: [
-      "q = -k * A * (dT/dx)",
-      "q = h * A * (T_s - T_inf)",
-      "q = epsilon * sigma_SB * A * (T_s^4 - T_surr^4)",
-    ],
+    description: "Thermal energy moves from higher to lower temperature regions via conduction, convection, and radiation.",
+    governingEquations: ["q = -k * A * (dT/dx)", "q = h * A * (T_s - T_inf)", "q = epsilon * sigma_SB * A * (T_s^4 - T_surr^4)"],
     domain: "Thermal",
     version: 1,
     status: "ACTIVE",
     supportingEvidenceRefs: ["Incropera Fundamentals of Heat and Mass Transfer"],
   },
   {
+    code: "PRIN-THERMAL-EXP",
+    name: "Thermal Expansion",
+    category: "Thermal",
+    description: "Dimensional change in materials proportional to temperature variation and thermal expansion coefficient.",
+    governingEquations: ["delta_L = alpha * L_0 * delta_T", "sigma_thermal = E * alpha * delta_T"],
+    domain: "Thermal",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["ASTM E228 Linear Thermal Expansion Standard"],
+  },
+
+  // 2. Structural
+  {
+    code: "PRIN-STRESS-DIST",
+    name: "Stress Distribution",
+    category: "Structural",
+    description: "Internal forces are distributed across cross-sectional areas under applied external loads. Stress concentrations occur at geometric discontinuities.",
+    governingEquations: ["sigma = P / A", "sigma_max = K_t * (P / A)", "tau = V * Q / (I * b)"],
+    domain: "Mechanical",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["Shigley Mechanical Engineering Design", "Roark's Formulas for Stress and Strain"],
+  },
+  {
     code: "PRIN-FATIGUE",
     name: "Fatigue",
     category: "Structural",
-    description:
-      "Structural degradation and progressive failure occur under cyclic loading below ultimate tensile strength.",
+    description: "Structural degradation and progressive failure occur under cyclic loading below ultimate tensile strength.",
     governingEquations: ["S_f = a * N^b", "Sum(n_i / N_i) <= D_max (Miner's Rule)"],
     domain: "Mechanical",
     version: 1,
@@ -79,8 +82,7 @@ export const DEFAULT_ENGINEERING_PRINCIPLES: EngineeringPrincipleData[] = [
     code: "PRIN-BUCKLING",
     name: "Buckling",
     category: "Structural",
-    description:
-      "Slender structural members undergo sudden lateral instability failure under compressive loading before material yield point is reached.",
+    description: "Slender structural members undergo sudden lateral instability failure under compressive loading before material yield point is reached.",
     governingEquations: ["P_cr = (pi^2 * E * I) / (K * L)^2", "sigma_cr = P_cr / A"],
     domain: "Aerospace",
     version: 1,
@@ -88,11 +90,23 @@ export const DEFAULT_ENGINEERING_PRINCIPLES: EngineeringPrincipleData[] = [
     supportingEvidenceRefs: ["Euler Column Buckling Theory", "NASA SP-8007"],
   },
   {
+    code: "PRIN-STRUCT-EFF",
+    name: "Structural Efficiency",
+    category: "Structural",
+    description: "Maximizing load-carrying capacity while minimizing structural mass through geometry optimization.",
+    governingEquations: ["Efficiency = P_payload / M_structure", "Specific_Strength = sigma_y / rho"],
+    domain: "Aerospace",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["Bruhn Analysis and Design of Flight Vehicle Structures"],
+  },
+
+  // 3. Materials
+  {
     code: "PRIN-CORROSION",
     name: "Corrosion",
     category: "Materials",
-    description:
-      "Electrochemical degradation of materials when exposed to reactive environments, galvanic coupling, or oxidative electrolytes.",
+    description: "Electrochemical degradation of materials when exposed to reactive environments, galvanic coupling, or oxidative electrolytes.",
     governingEquations: ["CR = (K * W) / (A * T * D)", "E_cell = E_cathode - E_anode"],
     domain: "Materials",
     version: 1,
@@ -100,41 +114,23 @@ export const DEFAULT_ENGINEERING_PRINCIPLES: EngineeringPrincipleData[] = [
     supportingEvidenceRefs: ["NACE SP0169 Control of External Corrosion", "ASTM G31"],
   },
   {
-    code: "PRIN-REDUNDANCY",
-    name: "Redundancy",
-    category: "Reliability",
-    description:
-      "Duplication of critical components or paths ensures continuous system function despite single-point hardware or software failures.",
-    governingEquations: [
-      "R_sys = 1 - Prod(1 - R_i)",
-      "MTBF_parallel = MTBF_base * (1 + 1/2 + ... + 1/n)",
-    ],
-    domain: "Systems",
+    code: "PRIN-MAT-COMPAT",
+    name: "Material Compatibility",
+    category: "Materials",
+    description: "Adjacent materials in physical or fluid contact must prevent galvanic action, chemical dissolution, or outgassing contamination.",
+    governingEquations: ["delta_V_galvanic <= 0.15 V (harsh) / 0.25 V (normal)", "Solubility_Parameter_Diff = |delta_1 - delta_2|"],
+    domain: "Materials",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["MIL-HDBK-338B Reliability Design Handbook", "ARP4761"],
+    supportingEvidenceRefs: ["MIL-STD-889 Dissimilar Metals", "NASA MAPTIS Database"],
   },
-  {
-    code: "PRIN-SAFETY-MARGIN",
-    name: "Safety Margin",
-    category: "Safety",
-    description:
-      "Structural and functional capacity must exceed maximum expected operational loads by a prescribed factor.",
-    governingEquations: [
-      "MS = (Allowable_Load / (Actual_Load * FoS)) - 1",
-      "FoS = Yield_Strength / Working_Stress",
-    ],
-    domain: "Systems",
-    version: 1,
-    status: "ACTIVE",
-    supportingEvidenceRefs: ["NASA STD 5001 Structural Design and Test Factors of Safety"],
-  },
+
+  // 4. Manufacturing
   {
     code: "PRIN-TOLERANCE-STACK",
     name: "Tolerance Stack-up",
     category: "Manufacturing",
-    description:
-      "Accumulation of individual dimensional variations in assembled components influences clearance, interference, and alignment.",
+    description: "Accumulation of individual dimensional variations in assembled components influences clearance, interference, and alignment.",
     governingEquations: ["T_worst_case = Sum(|t_i|)", "T_rss = Sqrt(Sum(t_i^2))"],
     domain: "Manufacturing",
     version: 1,
@@ -142,115 +138,141 @@ export const DEFAULT_ENGINEERING_PRINCIPLES: EngineeringPrincipleData[] = [
     supportingEvidenceRefs: ["ASME Y14.5-2018 Dimensioning and Tolerancing", "ISO 286"],
   },
   {
-    code: "PRIN-THERMAL-EXP",
-    name: "Thermal Expansion",
-    category: "Thermal",
-    description:
-      "Dimensional change in materials proportional to temperature variation and thermal expansion coefficient.",
-    governingEquations: ["delta_L = alpha * L_0 * delta_T", "sigma_thermal = E * alpha * delta_T"],
-    domain: "Thermal",
+    code: "PRIN-MANUFACTURABILITY",
+    name: "Manufacturability",
+    category: "Manufacturing",
+    description: "Design features conform to tool access, material removal constraints, draft angles, and standard stock sizes.",
+    governingEquations: ["DFM_Index = Standard_Feature_Count / Total_Feature_Count"],
+    domain: "Manufacturing",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["ASTM E228 Linear Thermal Expansion Standard"],
+    supportingEvidenceRefs: ["Boothroyd Dewhurst Design for Manufacture and Assembly"],
   },
+
+  // 5. Electrical
   {
-    code: "PRIN-STRUCT-EFF",
-    name: "Structural Efficiency",
-    category: "Structural",
-    description:
-      "Maximizing load-carrying capacity while minimizing structural mass through geometry optimization.",
-    governingEquations: [
-      "Efficiency = P_payload / M_structure",
-      "Specific_Strength = sigma_y / rho",
-    ],
-    domain: "Aerospace",
+    code: "PRIN-CONTROL-STABILITY",
+    name: "Control Stability",
+    category: "Electrical",
+    description: "Closed-loop feedback systems maintain bounded outputs under bounded inputs without self-excited oscillation.",
+    governingEquations: ["Gain_Margin = 1 / |G(j*omega_180)|", "Phase_Margin = 180 + angle(G(j*omega_0dB))"],
+    domain: "Electrical",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["Bruhn Analysis and Design of Flight Vehicle Structures"],
+    supportingEvidenceRefs: ["Ogata Modern Control Engineering", "IEEE Control Systems Society"],
   },
+
+  // 6. Systems
   {
-    code: "PRIN-FAIL-PROP",
-    name: "Failure Propagation",
-    category: "Safety",
-    description:
-      "Initial localized damage must be contained to prevent cascading catastrophic collapse throughout adjacent subsystems.",
-    governingEquations: [
-      "P_cascade = 1 - Prod(1 - p_ij * S_j)",
-      "Damage_Radius = f(Energy_Release, Material_Toughness)",
-    ],
+    code: "PRIN-REDUNDANCY",
+    name: "Redundancy",
+    category: "Systems",
+    description: "Duplication of critical components or paths ensures continuous system function despite single-point hardware or software failures.",
+    governingEquations: ["R_sys = 1 - Prod(1 - R_i)", "MTBF_parallel = MTBF_base * (1 + 1/2 + ... + 1/n)"],
     domain: "Systems",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["IEC 61508 Functional Safety", "FMEA/FMECA Methodology"],
+    supportingEvidenceRefs: ["MIL-HDBK-338B Reliability Design Handbook", "ARP4761"],
   },
   {
     code: "PRIN-MAINTAINABILITY",
     name: "Maintainability",
-    category: "Systems",
-    description:
-      "System design facilitates rapid inspection, modular component replacement, and minimal mean time to repair (MTTR).",
+    category: "Maintainability",
+    description: "System design facilitates rapid inspection, modular component replacement, and minimal mean time to repair (MTTR).",
     governingEquations: ["MTTR = Sum(lambda_i * T_i) / Sum(lambda_i)", "M(t) = 1 - exp(-t / MTTR)"],
     domain: "Systems",
     version: 1,
     status: "ACTIVE",
     supportingEvidenceRefs: ["MIL-HDBK-470A Designing and Developing Maintainable Products"],
   },
-  {
-    code: "PRIN-MANUFACTURABILITY",
-    name: "Manufacturability",
-    category: "Manufacturing",
-    description:
-      "Design features conform to tool access, material removal constraints, draft angles, and standard stock sizes.",
-    governingEquations: [
-      "DFM_Index = Standard_Feature_Count / Total_Feature_Count",
-      "Cost_relative = f(Tolerance_Tightness, Machine_Passes)",
-    ],
-    domain: "Manufacturing",
-    version: 1,
-    status: "ACTIVE",
-    supportingEvidenceRefs: ["Boothroyd Dewhurst Design for Manufacture and Assembly"],
-  },
+
+  // 7. Reliability
   {
     code: "PRIN-RELIABILITY",
     name: "Reliability",
     category: "Reliability",
-    description:
-      "Probability that a system performs its required function without failure under stated conditions for a specified period.",
+    description: "Probability that a system performs its required function without failure under stated conditions for a specified period.",
     governingEquations: ["R(t) = exp(-lambda * t)", "MTBF = 1 / lambda"],
     domain: "Systems",
     version: 1,
     status: "ACTIVE",
     supportingEvidenceRefs: ["IEEE 1332 Reliability Program Standard", "MIL-HDBK-217F"],
   },
+
+  // 8. Safety
   {
-    code: "PRIN-CONTROL-STABILITY",
-    name: "Control Stability",
-    category: "Systems",
-    description:
-      "Closed-loop feedback systems maintain bounded outputs under bounded inputs without self-excited oscillation.",
-    governingEquations: [
-      "Gain_Margin = 1 / |G(j*omega_180)|",
-      "Phase_Margin = 180 + angle(G(j*omega_0dB))",
-    ],
-    domain: "Electrical",
+    code: "PRIN-SAFETY-MARGIN",
+    name: "Safety Margin",
+    category: "Safety",
+    description: "Structural and functional capacity must exceed maximum expected operational loads by a prescribed factor.",
+    governingEquations: ["MS = (Allowable_Load / (Actual_Load * FoS)) - 1", "FoS = Yield_Strength / Working_Stress"],
+    domain: "Systems",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["Ogata Modern Control Engineering", "IEEE Control Systems Society"],
+    supportingEvidenceRefs: ["NASA STD 5001 Structural Design and Test Factors of Safety"],
   },
   {
-    code: "PRIN-MAT-COMPAT",
-    name: "Material Compatibility",
-    category: "Materials",
-    description:
-      "Adjacent materials in physical or fluid contact must prevent galvanic action, chemical dissolution, or outgassing contamination.",
-    governingEquations: [
-      "delta_V_galvanic <= 0.15 V (harsh) / 0.25 V (normal)",
-      "Solubility_Parameter_Diff = |delta_1 - delta_2|",
-    ],
+    code: "PRIN-FAIL-PROP",
+    name: "Failure Propagation",
+    category: "Safety",
+    description: "Initial localized damage must be contained to prevent cascading catastrophic collapse throughout adjacent subsystems.",
+    governingEquations: ["P_cascade = 1 - Prod(1 - p_ij * S_j)"],
+    domain: "Systems",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["IEC 61508 Functional Safety", "FMEA/FMECA Methodology"],
+  },
+
+  // 9. Mechanical
+  {
+    code: "PRIN-KINEMATIC-ALIGN",
+    name: "Kinematic Alignment",
+    category: "Mechanical",
+    description: "Exactly 6 degrees of freedom must be constrained without over-constraining or introducing internal strain.",
+    governingEquations: ["DoF = 6 * (N - 1) - Sum(f_i)"],
+    domain: "Mechanical",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["Slocum Precision Machine Design"],
+  },
+
+  // 10. Certification
+  {
+    code: "PRIN-CERT-AIRWORTHINESS",
+    name: "Airworthiness Certification Compliance",
+    category: "Certification",
+    description: "Subsystem verification must demonstrate deterministic compliance against DO-178C / DO-254 software & hardware safety mandates.",
+    governingEquations: ["Coverage_DAL_A = MC/DC 100%"],
+    domain: "Aerospace",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["FAA AC 20-115D", "RTCA DO-178C"],
+  },
+
+  // 11. Quality
+  {
+    code: "PRIN-QUALITY-SIXSIGMA",
+    name: "Statistical Quality & Process Capability",
+    category: "Quality",
+    description: "Manufacturing processes must maintain Cpk >= 1.67 ensuring less than 3.4 defects per million opportunities (DPMO).",
+    governingEquations: ["Cpk = Min((USL - mu)/(3*sigma), (mu - LSL)/(3*sigma))"],
+    domain: "Manufacturing",
+    version: 1,
+    status: "ACTIVE",
+    supportingEvidenceRefs: ["ISO 22514 Process Capability", "ASQ Six Sigma Guide"],
+  },
+
+  // 12. Lifecycle
+  {
+    code: "PRIN-LIFECYCLE-DEGRADATION",
+    name: "Lifecycle Degradation & End-of-Life",
+    category: "Lifecycle",
+    description: "Long-term environmental weathering, outgassing, and UV exposure decay functional allowable thresholds over operating lifetime.",
+    governingEquations: ["Allowable(t) = Allowable_0 * (1 - k_decay * t)"],
     domain: "Materials",
     version: 1,
     status: "ACTIVE",
-    supportingEvidenceRefs: ["MIL-STD-889 Dissimilar Metals", "NASA MAPTIS Database"],
+    supportingEvidenceRefs: ["ASTM G154 UV Weathering", "NASA SP-8057"],
   },
 ];
 

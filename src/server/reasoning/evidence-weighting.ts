@@ -148,3 +148,10 @@ export function weightEvidenceCollection(
     highQualityEvidenceCount,
   };
 }
+
+export function evaluateEvidenceWeights(
+  evidenceList: EvidenceInput[],
+  config: WeightingConfig = DEFAULT_WEIGHTING_CONFIG,
+): EvidenceWeightResult[] {
+  return evidenceList.map((e) => calculateEvidenceWeight(e, config));
+}

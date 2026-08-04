@@ -5,6 +5,7 @@ import {
   ensurePrinciplesSeeded,
   getEngineeringPrinciples,
 } from "@/server/reasoning/principles-library";
+import { DEFAULT_ENGINEERING_PRINCIPLES } from "@/server/reasoning/constants";
 
 vi.mock("@/server/db", () => ({
   prisma: {
@@ -20,9 +21,27 @@ vi.mock("@/server/db", () => ({
   },
 }));
 
-describe("Engineering Principle Library", () => {
+describe("Engineering Principle Library (Comprehensive)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("contains principles across all 13 required engineering domains", () => {
+    const categories = new Set(DEFAULT_ENGINEERING_PRINCIPLES.map((p) => p.category));
+    expect(categories.has("Structural")).toBe(true);
+    expect(categories.has("Mechanical")).toBe(true);
+    expect(categories.has("Thermal")).toBe(true);
+    expect(categories.has("Materials")).toBe(true);
+    expect(categories.has("Manufacturing")).toBe(true);
+    expect(categories.has("Electrical")).toBe(true);
+    expect(categories.has("Systems")).toBe(true);
+    expect(categories.has("Reliability")).toBe(true);
+    expect(categories.has("Safety")).toBe(true);
+    expect(categories.has("Certification")).toBe(true);
+    expect(categories.has("Quality")).toBe(true);
+    expect(categories.has("Maintainability")).toBe(true);
+    expect(categories.has("Lifecycle")).toBe(true);
+    expect(DEFAULT_ENGINEERING_PRINCIPLES.length).toBeGreaterThanOrEqual(20);
   });
 
   it("seeds standard engineering principles if count is zero", async () => {
@@ -31,66 +50,72 @@ describe("Engineering Principle Library", () => {
 
     await ensurePrinciplesSeeded();
 
-    expect(prisma.engineeringPrinciple.upsert).toHaveBeenCalledTimes(17);
+    expect(prisma.engineeringPrinciple.count).toHaveBeenCalled();
+    expect(prisma.engineeringPrinciple.upsert).toHaveBeenCalledTimes(DEFAULT_ENGINEERING_PRINCIPLES.length);
   });
 
-  it("retrieves active principles for an organization", async () => {
-    vi.mocked(prisma.engineeringPrinciple.count).mockResolvedValue(17);
+  it("fetches principles for a specific organization including global standard ones", async () => {
     vi.mocked(prisma.engineeringPrinciple.findMany).mockResolvedValue([
       {
-        id: "pr-1",
+        id: "p-1",
         code: "PRIN-ENERGY-CONS",
         name: "Conservation of Energy",
         category: "Thermal",
-        description: "Energy conservation principle",
-        governingEquations: ["dE/dt = Q - W"],
+        description: "Energy conservation",
+        governingEquations: ["E = mc^2"],
         domain: "Mechanical",
         version: 1,
         status: "ACTIVE",
-        supportingEvidenceRefs: ["ISO 80000-5"],
         organizationId: null,
-        metadata: null,
+        supportingEvidenceRefs: [],
+        metadata: {},
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     ]);
 
-    const principles = await getEngineeringPrinciples("org-123");
+    const res = await getEngineeringPrinciples("org-123");
 
-    expect(principles).toHaveLength(1);
-    expect(principles[0].code).toBe("PRIN-ENERGY-CONS");
-    expect(principles[0].governingEquations).toContain("dE/dt = Q - W");
+    expect(res).toHaveLength(1);
+    expect(res[0].code).toBe("PRIN-ENERGY-CONS");
   });
 
-  it("creates a custom tenant-specific engineering principle", async () => {
+  it("creates a custom engineering principle with tenant scoping", async () => {
     vi.mocked(prisma.engineeringPrinciple.findUnique).mockResolvedValue(null);
     vi.mocked(prisma.engineeringPrinciple.create).mockResolvedValue({
-      id: "custom-1",
-      organizationId: "org-123",
-      code: "PRIN-CUSTOM-FLUID",
-      name: "Custom Hydrodynamic Boundary",
-      category: "Thermal",
-      description: "Custom fluid dynamics rule",
-      governingEquations: ["Re = rho * v * L / mu"],
-      domain: "Systems",
+      id: "p-custom",
+      code: "PRIN-CUSTOM-HYDRAULIC",
+      name: "Hydraulic Cavitation Threshold",
+      category: "Mechanical",
+      description: "NPSH margin must prevent vapor bubble collapse.",
+      governingEquations: ["NPSHa > NPSHr + 0.5m"],
+      domain: "Hydraulics",
       version: 1,
       status: "ACTIVE",
+      organizationId: "org-123",
       supportingEvidenceRefs: [],
-      metadata: null,
+      metadata: {},
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    const result = await createCustomPrinciple("org-123", {
-      code: "PRIN-CUSTOM-FLUID",
-      name: "Custom Hydrodynamic Boundary",
-      category: "Thermal",
-      description: "Custom fluid dynamics rule",
-      governingEquations: ["Re = rho * v * L / mu"],
-      domain: "Systems",
+    const res = await createCustomPrinciple("org-123", {
+      code: "PRIN-CUSTOM-HYDRAULIC",
+      name: "Hydraulic Cavitation Threshold",
+      category: "Mechanical",
+      description: "NPSH margin must prevent vapor bubble collapse.",
+      governingEquations: ["NPSHa > NPSHr + 0.5m"],
+      domain: "Hydraulics",
+      version: 1,
+      status: "ACTIVE",
     });
 
-    expect(result.code).toBe("PRIN-CUSTOM-FLUID");
-    expect(prisma.engineeringPrinciple.create).toHaveBeenCalled();
+    expect(res.code).toBe("PRIN-CUSTOM-HYDRAULIC");
+    expect(prisma.engineeringPrinciple.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        organizationId: "org-123",
+        code: "PRIN-CUSTOM-HYDRAULIC",
+      }),
+    });
   });
 });

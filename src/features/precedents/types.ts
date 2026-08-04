@@ -113,3 +113,66 @@ export interface PrecedentQuery {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
+
+export type Precedent = EngineeringPrecedent;
+export type PrecedentFilter = PrecedentQuery;
+
+export interface PrecedentCreateInput {
+  title: string;
+  summary: string;
+  engineeringQuestion?: string;
+  decisionMade: string;
+  outcome?: string;
+  lessonsLearned?: string;
+  relatedProjects?: string[];
+  relatedSuppliers?: string[];
+  relatedRequirements?: string[];
+  relatedDocuments?: string[];
+  relatedComponents?: string[];
+  relatedStandards?: string[];
+  relatedCertifications?: string[];
+  tags?: string[];
+  type?: PrecedentType;
+  description?: string;
+  rootCause?: string;
+  correctiveAction?: string;
+  resolutionStatus?: string;
+  confidenceScore?: number;
+  applicableSystems?: string[];
+}
+
+export type PrecedentUpdateInput = Partial<PrecedentCreateInput>;
+
+export interface PrecedentMatchContext {
+  question?: string;
+  componentName?: string;
+  systemName?: string;
+  supplierId?: string;
+  suppliers?: string[];
+  components?: string[];
+  requirements?: string[];
+  standards?: string[];
+  certifications?: string[];
+  documents?: string[];
+  contradictions?: string[];
+  evidence?: string[];
+  missingEvidence?: string[];
+  project?: string;
+  tags?: string[];
+}
+
+export interface MatchedPrecedent {
+  precedent: EngineeringPrecedent;
+  similarityScore: number;
+  whyRelevant: string;
+  matchingFactors: string[];
+  matchReasons?: string[];
+  id?: string;
+  title?: string;
+  summary?: string;
+}
+
+export interface PrecedentSearchResult {
+  precedents: MatchedPrecedent[];
+  totalMatches: number;
+}

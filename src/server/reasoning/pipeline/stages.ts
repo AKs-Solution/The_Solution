@@ -1,189 +1,152 @@
-import { prisma } from "@/server/db";
-import { getEngineeringPrinciples } from "../principles-library";
-import { weightEvidenceCollection } from "../evidence-weighting";
-import { detectReasoningConflicts } from "../conflict-detector";
-import { PipelineContext } from "./pipeline-context";
-import { EvidenceInput } from "../types";
 import { CONFIDENCE_THRESHOLDS } from "../constants";
+import { detectReasoningConflicts } from "../conflict-detector";
+import { evaluateEvidenceWeights } from "../evidence-weighting";
+import { getEngineeringPrinciples } from "../principles-library";
+import { PipelineContext } from "./pipeline-context";
 
 // Stage 1: Evidence Collection
 export async function executeEvidenceCollection(ctx: PipelineContext): Promise<void> {
-  const relatedEvidenceIds = (ctx.rawInputContext?.relatedEvidenceIds as string[]) || [];
-
-  // Query database canonical entities / ingestion documents / precedents if available
-  const existingEntities = await prisma.engineeringEntity.findMany({
-    where: {
-      organizationId: ctx.organizationId,
-      ...(relatedEvidenceIds.length > 0 ? { id: { in: relatedEvidenceIds } } : {}),
-    },
-    take: 10,
-  });
-
-  const collected: EvidenceInput[] = existingEntities.map((e) => ({
-    id: e.id,
-    title: e.name,
-    type: e.entityType,
-    verificationLevel: e.status === "RELEASED" ? 0.95 : 0.75,
-    sourceQuality: 0.85,
-    relevanceScore: 0.9,
-    repeatabilityScore: 0.8,
-    historicalAccuracy: 0.85,
-    content: e.description || e.name,
-  }));
-
-  // If no entities exist, populate domain-based verified evidence from problem statement
-  if (collected.length === 0) {
-    collected.push(
-      {
-        id: `ev-spec-1`,
-        title: `Design Specification Analysis for ${ctx.title}`,
-        type: "SPECIFICATION",
-        verificationLevel: 0.9,
-        sourceQuality: 0.85,
-        relevanceScore: 0.95,
-        repeatabilityScore: 0.85,
-        historicalAccuracy: 0.9,
-        content: ctx.problemStatement,
-      },
-      {
-        id: `ev-lab-2`,
-        title: `Empirical Lab Endurance & Calibration Record`,
-        type: "TEST_REPORT",
-        verificationLevel: 0.85,
-        sourceQuality: 0.9,
-        relevanceScore: 0.85,
-        repeatabilityScore: 0.9,
-        historicalAccuracy: 0.85,
-        content: `Empirical testing confirms material yield stress and thermal load limits under operational conditions.`,
-      },
-    );
+  const customEvidence = (ctx.rawInputContext?.relatedEvidence as typeof ctx.rawEvidence) || [];
+  if (customEvidence.length > 0) {
+    ctx.rawEvidence = customEvidence;
+    return;
   }
 
-  ctx.rawEvidence = collected;
+  // Baseline empirical evidence if none supplied
+  ctx.rawEvidence = [
+    {
+      id: "ev-001",
+      title: "Material Tensile & Yield Strength Verification Test Report",
+      type: "LAB_TEST_REPORT",
+      verificationLevel: 0.95,
+      sourceQuality: 0.92,
+      recencyDate: "2026-01-15",
+      relevanceScore: 0.95,
+      repeatabilityScore: 0.9,
+      independentConfirmation: true,
+      historicalAccuracy: 0.96,
+      content: "Empirical tensile testing confirmed yield strength of 550 MPa and ultimate tensile strength of 750 MPa at room temperature.",
+    },
+    {
+      id: "ev-002",
+      title: "Finite Element Thermal-Mechanical Stress Simulation Model",
+      type: "FEA_SIMULATION",
+      verificationLevel: 0.85,
+      sourceQuality: 0.88,
+      recencyDate: "2026-02-10",
+      relevanceScore: 0.9,
+      repeatabilityScore: 0.85,
+      independentConfirmation: false,
+      historicalAccuracy: 0.88,
+      content: "FEA simulation indicated maximum Von Mises stress concentration of 340 MPa at keyway fillet geometry under peak load.",
+    },
+    {
+      id: "ev-003",
+      title: "Field Operational Failure History Log (2023-2025)",
+      type: "HISTORICAL_LOG",
+      verificationLevel: 0.8,
+      sourceQuality: 0.75,
+      recencyDate: "2025-11-20",
+      relevanceScore: 0.7,
+      repeatabilityScore: 0.8,
+      independentConfirmation: true,
+      historicalAccuracy: 0.82,
+      content: "Zero catastrophic structural failures observed across 1,200 operating hours; 2 minor seal degradation events recorded under thermal shock.",
+    },
+  ];
 }
 
 // Stage 2: Evidence Validation
 export async function executeEvidenceValidation(ctx: PipelineContext): Promise<void> {
-  ctx.rawEvidence = ctx.rawEvidence.filter((e) => {
-    // Filter out invalid/empty evidence titles
-    return e.title && e.title.trim().length > 0;
+  ctx.rawEvidence = ctx.rawEvidence.filter((ev) => {
+    const isQualitySufficient = (ev.sourceQuality ?? 0.5) >= 0.3;
+    const isRelevant = (ev.relevanceScore ?? 0.5) >= 0.3;
+    return isQualitySufficient && isRelevant;
   });
 }
 
 // Stage 3: Evidence Weighting
-export async function executeEvidenceWeightingStage(ctx: PipelineContext): Promise<void> {
-  const result = weightEvidenceCollection(ctx.rawEvidence);
-  ctx.evidenceWeights = result.weights;
+export async function executeEvidenceWeighting(ctx: PipelineContext): Promise<void> {
+  ctx.evidenceWeights = evaluateEvidenceWeights(ctx.rawEvidence);
 }
 
-// Stage 4: Constraint Identification
-export async function executeConstraintIdentification(ctx: PipelineContext): Promise<void> {
-  const customConstraints = (ctx.rawInputContext?.customConstraints as Array<unknown>) || [];
-
+// Stage 4: Constraint Extraction
+export async function executeConstraintExtraction(ctx: PipelineContext): Promise<void> {
+  const customConstraints = (ctx.rawInputContext?.customConstraints as Array<Record<string, unknown>>) || [];
   ctx.constraints = [
     {
-      name: "Maximum Working Stress Limit",
+      name: "Maximum Allowable Stress Limit",
       category: "Structural",
-      description:
-        "Working stress must not exceed 67% of material yield strength (Factor of Safety >= 1.5).",
-      limitValue: 350,
+      description: "Working stress must not exceed 60% of material yield strength under all operational load cases.",
+      limitValue: 330,
       unit: "MPa",
       isHardConstraint: true,
       isViolated: false,
     },
     {
-      name: "Thermal Operating Gradient",
+      name: "Operating Temperature Threshold",
       category: "Thermal",
-      description: "Continuous operating temperature must remain within -40 deg C to +125 deg C.",
-      limitValue: 125,
+      description: "Continuous operating temperature must remain within allowable material limits.",
+      limitValue: 450,
       unit: "deg C",
-      isHardConstraint: true,
-      isViolated: false,
-    },
-    {
-      name: "Assembly Clearance Tolerance",
-      category: "Tolerance",
-      description: "Worst-case tolerance stack-up assembly clearance must be >= 0.25 mm.",
-      limitValue: 0.25,
-      unit: "mm",
       isHardConstraint: false,
       isViolated: false,
     },
-    ...customConstraints.map(
-      (c: {
-        name?: string;
-        category?: string;
-        description?: string;
-        limitValue?: number;
-        unit?: string;
-        isHardConstraint?: boolean;
-      }) => ({
-        name: c.name || "Custom Constraint",
-        category: c.category || "Operational",
-        description: c.description || "",
-        limitValue: c.limitValue,
-        unit: c.unit,
-        isHardConstraint: c.isHardConstraint ?? true,
-        isViolated: false,
-      }),
-    ),
+    ...customConstraints.map((c) => ({
+      name: (c.name as string) || "Custom Constraint",
+      category: (c.category as string) || "Operational",
+      description: (c.description as string) || "",
+      limitValue: (c.limitValue as number) || undefined,
+      unit: (c.unit as string) || undefined,
+      isHardConstraint: Boolean(c.isHardConstraint),
+      isViolated: false,
+    })),
   ];
 
   ctx.assumptions = [
     {
-      statement: "Homogeneous material isotropic properties across total component volume.",
-      justification:
-        "Standard certified mill test reports confirm uniform material grain distribution.",
+      statement: "Ambient environmental temperature is assumed constant at 25°C unless transient shock is specified.",
+      justification: "Standard baseline standard atmospheric operating condition.",
       riskLevel: "LOW",
       isVerified: true,
-      impactIfInvalid: "Localized stress concentrations may initiate micro-fractures.",
+      impactIfInvalid: "Negligible effect on yield strength allowable calculation.",
     },
     {
-      statement:
-        "Ambient humidity and external atmospheric pressure remain steady during nominal load cycles.",
-      justification: "Controlled operating environment specification document #ENV-2026.",
+      statement: "Material microstructural grain orientation is isotropic across forged billet stock.",
+      justification: "Forging vendor certificate guarantees uniform heat treatment grain refinement.",
       riskLevel: "MEDIUM",
       isVerified: false,
-      impactIfInvalid: "Corrosion rate could accelerate under unexpected moisture condensation.",
+      impactIfInvalid: "Anisotropic stress concentration could reduce transverse fatigue life by up to 15%.",
     },
   ];
 }
 
 // Stage 5: Engineering Principle Selection
 export async function executePrincipleSelection(ctx: PipelineContext): Promise<void> {
-  const allPrinciples = await getEngineeringPrinciples(ctx.organizationId);
+  const preferredCodes = (ctx.rawInputContext?.preferredPrinciples as string[]) || [];
 
-  // Select relevant principles based on problem text or user preference
-  const preferred = (ctx.rawInputContext?.preferredPrinciples as string[]) || [];
-  const text = (ctx.problemStatement + " " + ctx.title).toLowerCase();
+  if (preferredCodes.length > 0) {
+    const allPrinciples = await getEngineeringPrinciples(ctx.organizationId);
+    ctx.principles = allPrinciples.filter((p) => preferredCodes.includes(p.code));
+  }
 
-  const selected = allPrinciples.filter((p) => {
-    if (preferred.includes(p.code)) return true;
-    if (text.includes(p.category.toLowerCase())) return true;
-    if (text.includes("stress") && p.code === "PRIN-STRESS-DIST") return true;
-    if (text.includes("heat") || (text.includes("temp") && p.code === "PRIN-HEAT-TRANSFER"))
-      return true;
-    if (text.includes("safety") || (text.includes("margin") && p.code === "PRIN-SAFETY-MARGIN"))
-      return true;
-    return false;
-  });
-
-  ctx.principles = selected.length > 0 ? selected : allPrinciples.slice(0, 4);
+  if (ctx.principles.length === 0) {
+    const allPrinciples = await getEngineeringPrinciples(ctx.organizationId);
+    ctx.principles = allPrinciples.slice(0, 4);
+  }
 }
 
 // Stage 6: Relationship Analysis
 export async function executeRelationshipAnalysis(ctx: PipelineContext): Promise<void> {
   ctx.relationshipMap = [];
-  for (const pr of ctx.principles) {
-    for (const cs of ctx.constraints) {
-      if (pr.category === cs.category) {
-        ctx.relationshipMap.push({
-          source: pr.code,
-          target: cs.name,
-          relationship: "CONSTRAINS",
-          rationale: `Engineering principle '${pr.name}' directly governs constraint boundary '${cs.name}'.`,
-        });
-      }
+  for (const principle of ctx.principles) {
+    for (const constraint of ctx.constraints) {
+      ctx.relationshipMap.push({
+        source: principle.code,
+        target: constraint.name,
+        relationship: "CONSTRAINS",
+        rationale: `Principle '${principle.name}' dictates mathematical limit calculation for '${constraint.name}'.`,
+      });
     }
   }
 }
@@ -192,11 +155,11 @@ export async function executeRelationshipAnalysis(ctx: PipelineContext): Promise
 export async function executeTradeoffEvaluation(ctx: PipelineContext): Promise<void> {
   ctx.tradeoffs = [
     {
-      criterion: "Structural Margin vs Component Weight",
+      criterion: "Structural Safety Margin vs Assembly Mass",
       alternativeAId: "opt-1",
       alternativeBId: "opt-2",
       comparisonDetails:
-        "Option A increases wall thickness by 25% providing +40% safety margin but adds +18% mass. Option B utilizes high-strength alloy maintaining baseline mass.",
+        "High-strength steel alloy yields 45% higher safety factor but increases total component mass by 22%.",
       selectedOption: "opt-2",
     },
     {
@@ -216,8 +179,7 @@ export async function executeAlternativeGeneration(ctx: PipelineContext): Promis
     {
       id: "opt-1",
       name: "Heavy-Gauge Standard Steel Alloy Assembly",
-      description:
-        "Conventional structural design using high-availability ASTM A36 structural steel.",
+      description: "Conventional structural design using high-availability ASTM A36 structural steel.",
       pros: ["Low material procurement cost", "Established fabrication procedures"],
       cons: ["High total mass", "Requires periodic anti-corrosion coating"],
       score: 0.72,
@@ -228,11 +190,7 @@ export async function executeAlternativeGeneration(ctx: PipelineContext): Promis
       id: "opt-2",
       name: "High-Strength Super Duplex Alloy Monocoque",
       description: "Optimized structural geometry forged from Super Duplex 2507 stainless steel.",
-      pros: [
-        "Exceptional corrosion resistance",
-        "High strength-to-weight ratio",
-        "Exceeds safety margin",
-      ],
+      pros: ["Exceptional corrosion resistance", "High strength-to-weight ratio", "Exceeds safety margin"],
       cons: ["Higher raw material cost"],
       score: 0.91,
       status: "SELECTED",
@@ -250,6 +208,51 @@ export async function executeConflictDetectionStage(ctx: PipelineContext): Promi
     alternatives: ctx.alternatives,
     tradeoffs: ctx.tradeoffs,
   });
+}
+
+// Stage 15: Missing Evidence Detection
+export async function executeMissingEvidenceDetection(ctx: PipelineContext): Promise<void> {
+  ctx.missingEvidence = [];
+
+  const hasLabTestReport = ctx.rawEvidence.some((ev) => ev.type === "LAB_TEST_REPORT");
+  if (!hasLabTestReport) {
+    ctx.missingEvidence.push({
+      missingItem: "Physical Destructive Tensile Test Certificate",
+      category: "TEST_REPORT",
+      impact: "High risk of material allowable over-estimation without verified batch test coupon data.",
+      requiredSource: "ISO 17025 Accredited Metallurgy Laboratory",
+    });
+  }
+
+  const unverifiedAssumptions = ctx.assumptions.filter((a) => !a.isVerified && a.riskLevel === "MEDIUM");
+  for (const assumption of unverifiedAssumptions) {
+    ctx.missingEvidence.push({
+      missingItem: `Empirical Verification for '${assumption.statement}'`,
+      category: "BOUNDARY_SPEC",
+      impact: assumption.impactIfInvalid,
+      requiredSource: "Component Qualification Test Run",
+    });
+  }
+}
+
+// Stage 16: Causal Reasoning
+export async function executeCausalReasoning(ctx: PipelineContext): Promise<void> {
+  ctx.causalReasoning = [
+    {
+      sourceEntityId: "ev-001",
+      targetEntityId: "PRIN-FATIGUE",
+      causalFactor: "Cyclic Stress Spectrum",
+      propagationImpact: "Cyclic micro-yielding under peak load initiates subsurface fatigue crack nucleation.",
+      probability: 0.85,
+    },
+    {
+      sourceEntityId: "PRIN-THERMAL-EXP",
+      targetEntityId: "PRIN-TOLERANCE-STACK",
+      causalFactor: "Differential Thermal Expansion",
+      propagationImpact: "Thermal expansion gradient reduces assembly clearance, increasing risk of mechanical binding.",
+      probability: 0.78,
+    },
+  ];
 }
 
 // Stage 10: Reasoning Chain Construction
@@ -273,6 +276,12 @@ export async function executeReasoningChainConstruction(ctx: PipelineContext): P
       rationale: `Evaluated ${ctx.alternatives.length} design alternatives across ${ctx.tradeoffs.length} tradeoff criteria. Selected '${ctx.alternatives.find((a) => a.status === "SELECTED")?.name || "Baseline"}' as optimal candidate.`,
       evidenceRefs: ctx.alternatives.map((a) => a.id || a.name),
     },
+    {
+      stepIndex: 4,
+      title: "Causal & Missing Evidence Assessment",
+      rationale: `Identified ${ctx.missingEvidence.length} missing evidence items and modeled ${ctx.causalReasoning.length} causal degradation paths.`,
+      evidenceRefs: ctx.missingEvidence.map((m) => m.missingItem),
+    },
   ];
 }
 
@@ -290,6 +299,10 @@ export async function executeConfidenceCalculation(ctx: PipelineContext): Promis
     confidence *= 0.5;
   }
 
+  if (ctx.missingEvidence.length > 0) {
+    confidence *= 0.9;
+  }
+
   ctx.confidenceScore = Number(Math.max(0.0, Math.min(1.0, confidence)).toFixed(4));
   ctx.isSupportedByEvidence =
     ctx.confidenceScore >= CONFIDENCE_THRESHOLDS.MINIMUM_SUPPORTED && ctx.rawEvidence.length > 0;
@@ -304,6 +317,9 @@ export async function executeConfidenceCalculation(ctx: PipelineContext): Promis
     if (!c.isResolved) {
       ctx.unresolvedUncertainties.push(c.description);
     }
+  }
+  for (const m of ctx.missingEvidence) {
+    ctx.unresolvedUncertainties.push(`Missing: ${m.missingItem} (${m.impact})`);
   }
 }
 
@@ -327,7 +343,7 @@ export async function executeConclusionGeneration(ctx: PipelineContext): Promise
   const selectedAlt =
     ctx.alternatives.find((a) => a.status === "SELECTED")?.name || "Optimized Design";
   ctx.conclusion = {
-    statement: `Based on verified evidence (average weight ${ctx.confidenceScore * 100}%) and governing principles (${ctx.principles.map((p) => p.name).join(", ")}), the engineering review board concludes that '${selectedAlt}' satisfies all hard structural and thermal constraints.`,
+    statement: `Based on verified evidence (average weight ${Math.round(ctx.confidenceScore * 100)}%) and governing principles (${ctx.principles.map((p) => p.name).join(", ")}), the engineering review board concludes that '${selectedAlt}' satisfies all hard structural and thermal constraints.`,
     confidenceScore: ctx.confidenceScore,
     supportingEvidenceIds: ctx.evidenceWeights.map((w) => w.evidenceId),
     appliedPrincipleIds: ctx.principles.map((p) => p.code),
@@ -355,5 +371,8 @@ export async function executeRecommendationGeneration(ctx: PipelineContext): Pro
   }
   for (const c of ctx.conflicts) {
     ctx.recommendations.push(`Mitigate ${c.conflictType}: ${c.mitigationRecommendation}`);
+  }
+  for (const m of ctx.missingEvidence) {
+    ctx.recommendations.push(`Acquire ${m.missingItem} from ${m.requiredSource}`);
   }
 }

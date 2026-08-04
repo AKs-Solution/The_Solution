@@ -1091,3 +1091,24 @@ export async function getUniqueSystems(organizationId?: string): Promise<string[
   });
   return Array.from(systems).sort();
 }
+
+export const listPrecedents = getPrecedents;
+export const getPrecedent = getPrecedentById;
+export const getPrecedentWithVersions = getPrecedentById;
+
+export async function getPrecedentVersions(id: string, organizationId?: string) {
+  const precedent = await getPrecedentById(id, organizationId || "");
+  return precedent?.versions || [];
+}
+
+export async function findSimilarPrecedents(
+  context: PrecedentMatchContext,
+  organizationId?: string,
+  minScore?: number,
+  limit?: number,
+) {
+  const orgId = organizationId || "";
+  const matches = await getPrecedentsBySimilarity(orgId, context);
+  const filtered = minScore ? matches.filter((m) => m.similarityScore >= minScore) : matches;
+  return limit ? filtered.slice(0, limit) : filtered;
+}

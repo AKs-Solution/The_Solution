@@ -1,12 +1,14 @@
 import {
   AlternativeData,
   AssumptionData,
+  CausalReasoningData,
   ConflictData,
   ConstraintData,
   EngineeringConclusionData,
   EngineeringPrincipleData,
   EvidenceInput,
   EvidenceWeightResult,
+  MissingEvidenceData,
   ReasoningStepData,
   TradeoffData,
 } from "../types";
@@ -29,6 +31,8 @@ export interface PipelineContext {
   alternatives: AlternativeData[];
   tradeoffs: TradeoffData[];
   conflicts: ConflictData[];
+  missingEvidence: MissingEvidenceData[];
+  causalReasoning: CausalReasoningData[];
 
   // Analysis & Reasoning outputs
   relationshipMap: Array<{

@@ -22,6 +22,8 @@ const nodeTypeColors: Record<ReasoningNodeType, { bg: string; border: string; te
   },
   CONCLUSION: { bg: "bg-emerald-900/80", border: "border-emerald-400", text: "text-emerald-200" },
   STEP: { bg: "bg-slate-900/60", border: "border-slate-700", text: "text-slate-300" },
+  MISSING_EVIDENCE: { bg: "bg-rose-950/80", border: "border-rose-600", text: "text-rose-200" },
+  DECISION_BRANCH: { bg: "bg-amber-900/70", border: "border-amber-500", text: "text-amber-200" },
 };
 
 export function ReasoningGraphVisualizer({ graph }: Props) {
