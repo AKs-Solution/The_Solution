@@ -11,7 +11,7 @@ export interface UnifiedSearchOptions {
 
 export interface UnifiedSearchResultItem {
   id: string;
-  type: string; // e.g. "ENTITY", "DECISION", "DOCUMENT", "PRECEDENT", "RULE", "SUPPLIER", "PROGRAM", "CONTRADICTION"
+  type: string; // "ENTITY" | "DECISION" | "DOCUMENT" | "PRECEDENT" | "RULE" | "SUPPLIER" | "PROGRAM" | "CONTRADICTION" | "ASSUMPTION" | "REJECTED_ALTERNATIVE" | "LESSON_LEARNED"
   title: string;
   subtitle: string;
   description?: string;
@@ -30,7 +30,7 @@ export interface UnifiedSearchResponse {
 /**
  * High-Performance Unified Search Engine
  * Searches across canonical Entities, Decisions, Ingestion Documents, Historical Precedents,
- * Rules, Suppliers, Programs, Contradictions, and Knowledge Graph Nodes.
+ * Rules, Suppliers, Programs, Contradictions, Assumptions, Rejected Alternatives, and Lessons Learned.
  */
 export async function executeUnifiedSearch(
   options: UnifiedSearchOptions,
@@ -49,144 +49,204 @@ export async function executeUnifiedSearch(
     !entityTypes || entityTypes.length === 0 || entityTypes.includes(typeKey);
 
   try {
-    const [entities, decisions, documents, precedents, rules, suppliers, programs, contradictions] =
-      await Promise.all([
-        filterType("ENTITY")
-          ? prisma.engineeringEntity
-              .findMany({
-                where: {
-                  organizationId,
-                  deletedAt: null,
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { identifier: { contains: q, mode: "insensitive" } },
-                    { description: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { updatedAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+    const [
+      entities,
+      decisions,
+      documents,
+      precedents,
+      rules,
+      suppliers,
+      programs,
+      contradictions,
+      assumptions,
+      rejectedAlternatives,
+      designPatterns,
+    ] = await Promise.all([
+      filterType("ENTITY")
+        ? prisma.engineeringEntity
+            .findMany({
+              where: {
+                organizationId,
+                deletedAt: null,
+                OR: [
+                  { name: { contains: q, mode: "insensitive" } },
+                  { identifier: { contains: q, mode: "insensitive" } },
+                  { description: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { updatedAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("DECISION")
-          ? prisma.engineeringDecision
-              .findMany({
-                where: {
-                  organizationId,
-                  OR: [
-                    { description: { contains: q, mode: "insensitive" } },
-                    { rationale: { contains: q, mode: "insensitive" } },
-                    { decisionType: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { createdAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("DECISION")
+        ? prisma.engineeringDecision
+            .findMany({
+              where: {
+                organizationId,
+                OR: [
+                  { description: { contains: q, mode: "insensitive" } },
+                  { rationale: { contains: q, mode: "insensitive" } },
+                  { decisionType: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("DOCUMENT")
-          ? prisma.ingestionDocument
-              .findMany({
-                where: {
-                  organizationId,
-                  deletedAt: null,
-                  fileName: { contains: q, mode: "insensitive" },
-                },
-                take: perCategoryLimit,
-                orderBy: { createdAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("DOCUMENT")
+        ? prisma.ingestionDocument
+            .findMany({
+              where: {
+                organizationId,
+                deletedAt: null,
+                fileName: { contains: q, mode: "insensitive" },
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("PRECEDENT")
-          ? prisma.historicalPrecedent
-              .findMany({
-                where: {
-                  organizationId,
-                  deletedAt: null,
-                  OR: [
-                    { title: { contains: q, mode: "insensitive" } },
-                    { summary: { contains: q, mode: "insensitive" } },
-                    { decisionMade: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { createdAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("PRECEDENT")
+        ? prisma.historicalPrecedent
+            .findMany({
+              where: {
+                organizationId,
+                deletedAt: null,
+                OR: [
+                  { title: { contains: q, mode: "insensitive" } },
+                  { summary: { contains: q, mode: "insensitive" } },
+                  { decisionMade: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("RULE")
-          ? prisma.rule
-              .findMany({
-                where: {
-                  organizationId,
-                  deletedAt: null,
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { description: { contains: q, mode: "insensitive" } },
-                    { category: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { updatedAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("RULE")
+        ? prisma.rule
+            .findMany({
+              where: {
+                organizationId,
+                deletedAt: null,
+                OR: [
+                  { name: { contains: q, mode: "insensitive" } },
+                  { description: { contains: q, mode: "insensitive" } },
+                  { category: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { updatedAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("SUPPLIER")
-          ? prisma.supplier
-              .findMany({
-                where: {
-                  organizationId,
-                  deletedAt: null,
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { identifier: { contains: q, mode: "insensitive" } },
-                    { description: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { updatedAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("SUPPLIER")
+        ? prisma.supplier
+            .findMany({
+              where: {
+                organizationId,
+                deletedAt: null,
+                OR: [
+                  { name: { contains: q, mode: "insensitive" } },
+                  { identifier: { contains: q, mode: "insensitive" } },
+                  { description: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { updatedAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("PROGRAM")
-          ? prisma.program
-              .findMany({
-                where: {
-                  organizationId,
-                  OR: [
-                    { name: { contains: q, mode: "insensitive" } },
-                    { aircraft: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { createdAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
+      filterType("PROGRAM")
+        ? prisma.program
+            .findMany({
+              where: {
+                organizationId,
+                OR: [
+                  { name: { contains: q, mode: "insensitive" } },
+                  { aircraft: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
 
-        filterType("CONTRADICTION")
-          ? prisma.contradiction
-              .findMany({
-                where: {
-                  organizationId,
-                  OR: [
-                    { label: { contains: q, mode: "insensitive" } },
-                    { description: { contains: q, mode: "insensitive" } },
-                    { type: { contains: q, mode: "insensitive" } },
-                  ],
-                },
-                take: perCategoryLimit,
-                orderBy: { createdAt: "desc" },
-              })
-              .catch(() => [])
-          : Promise.resolve([]),
-      ]);
+      filterType("CONTRADICTION")
+        ? prisma.contradiction
+            .findMany({
+              where: {
+                organizationId,
+                OR: [
+                  { label: { contains: q, mode: "insensitive" } },
+                  { description: { contains: q, mode: "insensitive" } },
+                  { type: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
+
+      filterType("ASSUMPTION")
+        ? prisma.assumptionRecord
+            .findMany({
+              where: {
+                OR: [
+                  { statement: { contains: q, mode: "insensitive" } },
+                  { justification: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
+
+      filterType("REJECTED_ALTERNATIVE")
+        ? prisma.alternativeRecord
+            .findMany({
+              where: {
+                status: "REJECTED",
+                OR: [
+                  { name: { contains: q, mode: "insensitive" } },
+                  { description: { contains: q, mode: "insensitive" } },
+                  { rejectionReason: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
+
+      filterType("LESSON_LEARNED")
+        ? prisma.drawingDesignPattern
+            .findMany({
+              where: {
+                organizationId,
+                OR: [
+                  { lessonsLearned: { contains: q, mode: "insensitive" } },
+                  { partType: { contains: q, mode: "insensitive" } },
+                  { material: { contains: q, mode: "insensitive" } },
+                ],
+              },
+              take: perCategoryLimit,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
+    ]);
 
     for (const e of entities) {
       results.push({
@@ -287,6 +347,45 @@ export async function executeUnifiedSearch(
         href: `/contradictions`,
         score: 0.8,
         createdAt: c.createdAt.toISOString(),
+      });
+    }
+
+    for (const asm of assumptions) {
+      results.push({
+        id: asm.id,
+        type: "ASSUMPTION",
+        title: `Assumption: ${asm.statement.slice(0, 60)}`,
+        subtitle: `Risk Level: ${asm.riskLevel} • ${asm.isVerified ? "Verified" : "Unverified"}`,
+        description: asm.justification,
+        href: `/reasoning`,
+        score: 0.92,
+        createdAt: asm.createdAt.toISOString(),
+      });
+    }
+
+    for (const rej of rejectedAlternatives) {
+      results.push({
+        id: rej.id,
+        type: "REJECTED_ALTERNATIVE",
+        title: `Rejected Option: ${rej.name}`,
+        subtitle: `Reason: ${rej.rejectionReason || "Deselected"}`,
+        description: rej.description,
+        href: `/decisions`,
+        score: 0.91,
+        createdAt: rej.createdAt.toISOString(),
+      });
+    }
+
+    for (const dp of designPatterns) {
+      results.push({
+        id: dp.id,
+        type: "LESSON_LEARNED",
+        title: `Lesson: ${dp.partType} ${dp.material}`,
+        subtitle: `Geometry: ${dp.geometryClass} • Yield: ${dp.yieldRate}%`,
+        description: dp.lessonsLearned,
+        href: `/precedents`,
+        score: 0.89,
+        createdAt: dp.createdAt.toISOString(),
       });
     }
   } catch (err) {
