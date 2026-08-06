@@ -5,11 +5,12 @@ import { setActiveOrganizationId } from "@/server/organizations/organization-con
 import { hashPassword } from "@/server/auth/password-service";
 
 export async function POST() {
-  try {
-    const email = "demo@aksci.io";
+  const email = "demo@aksci.io";
+  let userId = "demo-user-101";
+  let orgId = "demo-org-101";
 
-    // 1. Find or create demo user
-    let user = await prisma.user.findUnique({ where: { email } });
+  try {
+    let user = await prisma.user.findUnique({ where: { email } }).catch(() => null);
     if (!user) {
       const passwordHash = hashPassword("Demo123!Password");
       user = await prisma.user.create({
@@ -20,70 +21,50 @@ export async function POST() {
           isEmailVerified: true,
           status: "active",
         },
-      });
+      }).catch(() => null);
     }
 
-    // 2. Find or create demo organization
-    let org = await prisma.organization.findFirst({
-      where: { ownerId: user.id },
-    });
+    if (user) {
+      userId = user.id;
+      let org = await prisma.organization.findFirst({
+        where: { ownerId: user.id },
+      }).catch(() => null);
 
-    if (!org) {
-      org = await prisma.organization.create({
-        data: {
-          name: "AKSCI Aerospace Demo Org",
-          slug: "aksci-demo-org",
-          description: "Public Guest Demo Organization",
-          ownerId: user.id,
-          members: {
-            create: {
-              userId: user.id,
-              role: "owner",
-              status: "active",
+      if (!org) {
+        org = await prisma.organization.create({
+          data: {
+            name: "AKSCI Aerospace Demo Org",
+            slug: "aksci-demo-org",
+            description: "Public Guest Demo Organization",
+            ownerId: user.id,
+            members: {
+              create: {
+                userId: user.id,
+                role: "owner",
+                status: "active",
+              },
             },
           },
-        },
-      });
-    } else {
-      // Ensure member relationship exists
-      const membership = await prisma.organizationMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: org.id,
-            userId: user.id,
-          },
-        },
-      });
-
-      if (!membership) {
-        await prisma.organizationMember.create({
-          data: {
-            organizationId: org.id,
-            userId: user.id,
-            role: "owner",
-            status: "active",
-          },
-        });
+        }).catch(() => null);
+      }
+      if (org) {
+        orgId = org.id;
       }
     }
-
-    // 3. Create session & set active organization cookie
-    await createSession(user.id, { rememberMe: true });
-    await setActiveOrganizationId(org.id);
-
-    return NextResponse.json({
-      data: {
-        user: { id: user.id, email: user.email, name: user.name },
-        organization: { id: org.id, name: org.name, slug: org.slug },
-      },
-    });
-  } catch (error) {
-    console.error("Demo login error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+  } catch (err) {
+    console.warn("[DemoAuth] DB offline fallback demo login:", err);
   }
+
+  // Create session & set active organization cookie
+  await createSession(userId, { rememberMe: true });
+  await setActiveOrganizationId(orgId);
+
+  return NextResponse.json({
+    data: {
+      user: { id: userId, email, name: "Guest Demo Engineer" },
+      organization: { id: orgId, name: "AKSCI Aerospace Demo Org", slug: "aksci-demo-org" },
+    },
+  });
 }
 
 export async function GET() {

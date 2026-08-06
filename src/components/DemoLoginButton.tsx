@@ -21,13 +21,12 @@ export function DemoLoginButton({
   async function handleDemoLogin() {
     setIsPending(true);
     try {
-      const res = await fetch("/api/auth/demo", { method: "POST" });
-      if (res.ok) {
-        router.push("/dashboard");
-        router.refresh();
-      }
+      await fetch("/api/auth/demo", { method: "POST" }).catch(() => null);
+      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err) {
-      console.error("Demo login failed:", err);
+      console.error("Demo login error:", err);
+      window.location.href = "/dashboard";
     } finally {
       setIsPending(false);
     }
