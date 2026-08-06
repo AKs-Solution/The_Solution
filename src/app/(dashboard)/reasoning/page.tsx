@@ -38,7 +38,14 @@ export default async function ReasoningWorkspacePage() {
     }
   }
 
-  const sessionsSummary = sessionsRes.data.map((s) => ({
+  const sessionsSummary = (sessionsRes.data as Array<{
+    id: string;
+    title: string;
+    problemStatement: string;
+    status: string;
+    confidenceScore: number;
+    createdAt: Date;
+  }>).map((s) => ({
     id: s.id,
     title: s.title,
     problemStatement: s.problemStatement,
