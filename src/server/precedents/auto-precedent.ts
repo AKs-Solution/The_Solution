@@ -1,6 +1,6 @@
 import { prisma } from "@/server/db";
 import { createPrecedent, updatePrecedent } from "./precedent-service";
-import { PrecedentCreateInput, PrecedentMatchContext } from "@/features/precedents/types";
+import { PrecedentMatchContext } from "@/features/precedents/types";
 import { logger } from "@/shared/logging";
 
 interface DecisionData {
@@ -27,8 +27,6 @@ interface DecisionData {
 
 /**
  * Automatically create or update a precedent based on completed decision data.
- * Uses deterministic dedup: if a precedent already exists for the same source entity
- * with the same title/question, it updates rather than duplicates.
  */
 export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
   if (!data.organizationId) {
@@ -42,31 +40,31 @@ export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
       ? `Decision: ${data.question.slice(0, 80)}`
       : `Engineering Decision ${new Date().toISOString().slice(0, 10)}`;
 
-  // Check for existing precedent by source entity or similar title
-  const existing = await prisma.precedent.findFirst({
+  const existing = await prisma.historicalPrecedent.findFirst({
     where: {
       organizationId: data.organizationId,
       deletedAt: null,
       OR: [
-        data.entityId ? { sourceEntityId: data.entityId } : { id: "" },
+        data.entityId ? { sourceEntityId: data.entityId } : undefined,
         { title: { contains: title.slice(0, 60) } },
-      ].filter(Boolean),
+      ].filter((x): x is Exclude<typeof x, undefined> => Boolean(x)),
     },
     orderBy: { createdAt: "desc" },
   });
 
-  const input: PrecedentCreateInput = {
+  const input = {
     organizationId: data.organizationId,
     title,
     summary: data.question
       ? `Engineering decision for: ${data.question}`
       : `Engineering decision for ${data.entityName || "unknown entity"}`,
-    engineeringQuestion: data.question || null,
-    decisionMade: data.decision || null,
-    outcome: data.outcome || null,
+    engineeringQuestion: data.question || "",
+    decisionMade: data.decision || "Decision recorded.",
     supportingEvidence: data.supportingEvidence || [],
     contradictions: data.contradictions || [],
     missingEvidence: data.missingEvidence || [],
+    outcome: data.outcome || "",
+    lessonsLearned: "",
     relatedSuppliers: data.suppliers || [],
     relatedComponents: data.components || [],
     relatedStandards: data.standards || [],
@@ -74,32 +72,21 @@ export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
     relatedRequirements: data.requirements || [],
     relatedDocuments: data.documents || [],
     tags: data.tags || [],
-    confidence: data.confidence ?? 0.9,
-    decisionDate: new Date().toISOString(),
-    decisionOwner: null,
-    sourceEntityId: data.entityId || null,
+    userId: data.userId,
   };
 
   if (existing) {
-    await updatePrecedent(
-      {
-        id: existing.id,
-        ...input,
-      },
-      data.userId,
-    );
+    await updatePrecedent(existing.id, data.organizationId, input);
     logger.info("Auto-precedent updated", { id: existing.id, title });
   } else {
-    await createPrecedent(input, data.userId);
+    await createPrecedent(input);
     logger.info("Auto-precedent created", { title });
   }
 }
 
-/**
- * Extracts relevant context from a resolution result to create a precedent match context.
- */
 export function buildPrecedentMatchContext(data: DecisionData): PrecedentMatchContext {
   return {
+    question: data.question,
     suppliers: data.suppliers,
     components: data.components,
     requirements: data.requirements,
@@ -108,32 +95,9 @@ export function buildPrecedentMatchContext(data: DecisionData): PrecedentMatchCo
     documents: data.documents,
     contradictions: data.contradictions,
     evidence: data.supportingEvidence,
+    missingEvidence: data.missingEvidence,
     tags: data.tags,
-    question: data.question,
   };
 }
 
-/**
- * Call this from the orchestrator pipeline after a successful assessment.
- */
-export async function createPrecedentFromAssessment(input: {
-  organizationId: string;
-  assessmentId?: string;
-  entityId: string;
-  entityName: string;
-  entityType: string;
-  question?: string;
-  outcome?: string;
-  userId?: string;
-}): Promise<void> {
-  await autoCreatePrecedent({
-    organizationId: input.organizationId,
-    userId: input.userId,
-    question: input.question,
-    entityId: input.entityId,
-    entityName: input.entityName,
-    entityType: input.entityType,
-    outcome: input.outcome || "Assessment completed",
-    tags: [input.entityType.toLowerCase()],
-  });
-}
+export const createPrecedentFromAssessment = autoCreatePrecedent;

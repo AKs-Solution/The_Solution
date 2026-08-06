@@ -5,6 +5,7 @@ import {
   PrecedentQuery,
   HistoricalPrecedentAuditLog,
   PrecedentType,
+  PrecedentMatchContext,
 } from "@/features/precedents/types";
 import { logger } from "@/shared/logging";
 import { Prisma } from "@prisma/client";
@@ -1109,6 +1110,6 @@ export async function findSimilarPrecedents(
 ) {
   const orgId = organizationId || "";
   const matches = await getPrecedentsBySimilarity(orgId, context);
-  const filtered = minScore ? matches.filter((m) => m.similarityScore >= minScore) : matches;
+  const filtered = minScore ? matches.filter((m) => (m.similarityScore ?? 0) >= minScore) : matches;
   return limit ? filtered.slice(0, limit) : filtered;
 }

@@ -6,6 +6,22 @@ import { logger } from "@/shared/logging";
 type NodeRef = Pick<GraphNodeIndex, "id" | "entityId" | "label" | "entityType">;
 type SubgraphEdge = GraphEdgeIndex & { sourceNode: NodeRef; targetNode: NodeRef };
 
+export const DOMAIN_RELATIONSHIP_TYPES = [
+  "AFFECTS",
+  "SUPPLIED_BY",
+  "JUSTIFIED_BY",
+  "CAUSED_BY",
+  "SATISFIED_BY",
+  "IMPACTS",
+  "SUPERSEDES",
+  "ASSOCIATED_WITH",
+  "CONTAINS",
+  "VERIFIED_BY",
+  "GOVERNED_BY",
+  "DERIVED_FROM",
+  "MITIGATES",
+] as const;
+
 export async function syncGraphIndexes(organizationId: string) {
   const [entities, relationships] = await Promise.all([
     prisma.engineeringEntity.findMany({
@@ -220,12 +236,6 @@ export async function getNodeNeighbors(nodeIndexId: string, organizationId: stri
   return { node, outgoing, incoming };
 }
 
-/**
- * Breadth-first subgraph expansion, one batched pair of queries per depth
- * level (all frontier node ids fetched together) instead of one pair per
- * node - keeps a depth-3 expansion over a densely connected graph to a
- * handful of round trips rather than one per visited node.
- */
 export async function expandSubgraph(nodeIds: string[], organizationId: string, depth: number = 1) {
   const visited = new Set<string>();
   const visitedEdges = new Set<string>();
@@ -271,6 +281,67 @@ export async function expandSubgraph(nodeIds: string[], organizationId: string, 
   }
 
   return { nodes: Object.values(nodes), edges };
+}
+
+/**
+ * Multi-hop Graph Traversal Service
+ * Finds explicit directional paths between a source and target node up to maxHops depth.
+ */
+export async function findPathsBetweenNodes(
+  sourceNodeId: string,
+  targetNodeId: string,
+  organizationId: string,
+  maxHops: number = 4,
+) {
+  try {
+    const paths: Array<{ nodes: GraphNodeIndex[]; edges: SubgraphEdge[] }> = [];
+
+    const queue: Array<{
+      currentNodeId: string;
+      nodePath: string[];
+      edgePath: SubgraphEdge[];
+    }> = [{ currentNodeId: sourceNodeId, nodePath: [sourceNodeId], edgePath: [] }];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (current.nodePath.length > maxHops + 1) continue;
+
+      if (current.currentNodeId === targetNodeId && current.edgePath.length > 0) {
+        const pathNodes = await prisma.graphNodeIndex.findMany({
+          where: { id: { in: current.nodePath }, organizationId },
+        });
+        const nodeMap = new Map(pathNodes.map((n) => [n.id, n]));
+        const orderedNodes = current.nodePath.map((id) => nodeMap.get(id)!).filter(Boolean);
+
+        paths.push({ nodes: orderedNodes, edges: current.edgePath });
+        if (paths.length >= 10) break;
+        continue;
+      }
+
+      const outgoingEdges = await prisma.graphEdgeIndex.findMany({
+        where: { sourceNodeId: current.currentNodeId, organizationId },
+        include: {
+          sourceNode: { select: { id: true, entityId: true, label: true, entityType: true } },
+          targetNode: { select: { id: true, entityId: true, label: true, entityType: true } },
+        },
+      });
+
+      for (const edge of outgoingEdges) {
+        if (!current.nodePath.includes(edge.targetNodeId)) {
+          queue.push({
+            currentNodeId: edge.targetNodeId,
+            nodePath: [...current.nodePath, edge.targetNodeId],
+            edgePath: [...current.edgePath, edge],
+          });
+        }
+      }
+    }
+
+    return paths;
+  } catch (err) {
+    console.warn("Graph path traversal fallback on DB disconnect:", err);
+    return [];
+  }
 }
 
 export async function getSubgraph(

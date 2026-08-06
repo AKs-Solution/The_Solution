@@ -6,6 +6,7 @@ import {
   listReasoningSessions,
 } from "@/server/reasoning";
 import { ReasoningWorkspace } from "@/features/reasoning/components/ReasoningWorkspace";
+export const dynamic = "force-dynamic";
 
 export default async function ReasoningWorkspacePage() {
   let organizationId: string | undefined;

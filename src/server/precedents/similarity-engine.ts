@@ -5,7 +5,7 @@ interface MatchResult {
   reasons: string[];
 }
 
-function jaccardSimilarity(a: string[], b: string[]): number {
+export function jaccardSimilarity(a: string[], b: string[]): number {
   if (a.length === 0 && b.length === 0) return 0;
   const setA = new Set(a.map((s) => s.toLowerCase().trim()));
   const setB = new Set(b.map((s) => s.toLowerCase().trim()));
@@ -197,9 +197,14 @@ export function matchPrecedents(
     .map((p) => {
       const { score, reasons } = computeSimilarity(p, context);
       return {
-        ...p,
+        precedent: p,
         similarityScore: score,
+        whyRelevant: reasons.join("; ") || "General precedent match.",
+        matchingFactors: reasons,
         matchReasons: reasons,
+        id: p.id,
+        title: p.title,
+        summary: p.summary,
       };
     })
     .filter((p) => p.similarityScore >= minScore)

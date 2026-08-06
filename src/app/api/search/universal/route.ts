@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/server/auth/session-service";
 import { getActiveOrganizationId } from "@/server/organizations/organization-context";
-import { prisma } from "@/server/db";
+import { executeUnifiedSearch } from "@/server/retrieval/unified-search";
 
 export async function GET(request: Request) {
   try {
@@ -22,36 +22,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: [] });
     }
 
-    const [drawings, decisions, suppliers, programs] = await Promise.all([
-      prisma.drawingProject.findMany({
-        where: { ownerId: session.userId, name: { contains: query, mode: "insensitive" } },
-        take: 4,
-      }),
-      prisma.engineeringDecision.findMany({
-        where: { organizationId: orgId, description: { contains: query, mode: "insensitive" } },
-        take: 4,
-      }),
-      prisma.supplier.findMany({
-        where: { organizationId: orgId, name: { contains: query, mode: "insensitive" } },
-        take: 4,
-      }),
-      prisma.program.findMany({
-        where: { organizationId: orgId, name: { contains: query, mode: "insensitive" } },
-        take: 4,
-      }),
-    ]);
+    const unifiedResult = await executeUnifiedSearch({
+      organizationId: orgId,
+      query,
+      limit: 16,
+    });
 
-    const results = [
-      ...drawings.map((d) => ({ id: d.id, title: d.name, type: "Drawing", href: `/drawings` })),
-      ...decisions.map((d) => ({
-        id: d.id,
-        title: d.description,
-        type: "Decision",
-        href: `/decisions`,
-      })),
-      ...suppliers.map((s) => ({ id: s.id, title: s.name, type: "Supplier", href: `/suppliers` })),
-      ...programs.map((p) => ({ id: p.id, title: p.name, type: "Program", href: `/programs` })),
-    ];
+    const results = unifiedResult.data.map((item) => ({
+      id: item.id,
+      title: item.title,
+      type: item.type,
+      href: item.href,
+    }));
 
     return NextResponse.json({ data: results });
   } catch (error) {

@@ -1,20 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/server/db";
 import { requireActiveOrganization } from "@/server/organizations/organization-context";
 import { validateSession } from "@/server/auth/session-service";
 import { requirePermission } from "@/server/rbac";
-import { ENTITY_TYPE_LABELS } from "@/server/engineering/constants";
+import { executeUnifiedSearch } from "@/server/retrieval/unified-search";
 import { AppError } from "@/shared/errors";
-
-interface SearchResult {
-  id: string;
-  type: "entity" | "document" | "organization" | "user";
-  label: string;
-  subtitle: string;
-  href: string;
-  icon: "Tags" | "FileText" | "Building2" | "Hash";
-}
 
 const searchQuerySchema = z.object({
   q: z.string().trim().max(500).default(""),
@@ -55,116 +45,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: [] });
     }
 
-    const typeCount = type ? 1 : 4;
-    const perType = Math.ceil(limit / typeCount);
-    const results: SearchResult[] = [];
+    const unifiedResult = await executeUnifiedSearch({
+      organizationId: orgId,
+      query: q,
+      limit,
+      entityTypes: type ? [type.toUpperCase()] : undefined,
+    });
 
-    const shouldSearch = (candidate: SearchResult["type"]) => !type || type === candidate;
+    const mappedData = unifiedResult.data.map((item) => ({
+      id: item.id,
+      type: item.type.toLowerCase(),
+      label: item.title,
+      subtitle: item.subtitle,
+      href: item.href,
+      icon: item.type === "ENTITY" ? "Tags" : item.type === "DOCUMENT" ? "FileText" : "Hash",
+    }));
 
-    const [entities, documents, organizations, users] = await Promise.all([
-      shouldSearch("entity")
-        ? prisma.engineeringEntity.findMany({
-            where: {
-              organizationId: orgId,
-              deletedAt: null,
-              OR: [
-                { name: { contains: q, mode: "insensitive" } },
-                { identifier: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-              ],
-            },
-            take: perType,
-            orderBy: { updatedAt: "desc" },
-            select: { id: true, name: true, identifier: true, entityType: true },
-          })
-        : Promise.resolve([]),
-      shouldSearch("document")
-        ? prisma.ingestionDocument.findMany({
-            where: {
-              organizationId: orgId,
-              deletedAt: null,
-              fileName: { contains: q, mode: "insensitive" },
-            },
-            take: perType,
-            orderBy: { updatedAt: "desc" },
-            select: { id: true, fileName: true, fileExtension: true },
-          })
-        : Promise.resolve([]),
-      shouldSearch("organization")
-        ? prisma.organization.findMany({
-            where: {
-              members: { some: { userId: session.userId, status: "active" } },
-              OR: [
-                { name: { contains: q, mode: "insensitive" } },
-                { slug: { contains: q, mode: "insensitive" } },
-              ],
-            },
-            take: perType,
-            orderBy: { name: "asc" },
-            select: { id: true, name: true, slug: true },
-          })
-        : Promise.resolve([]),
-      shouldSearch("user")
-        ? prisma.user.findMany({
-            where: {
-              memberships: { some: { organizationId: orgId, status: "active" } },
-              OR: [
-                { email: { contains: q, mode: "insensitive" } },
-                { name: { contains: q, mode: "insensitive" } },
-              ],
-            },
-            take: perType,
-            orderBy: { name: "asc" },
-            select: { id: true, name: true, email: true },
-          })
-        : Promise.resolve([]),
-    ]);
-
-    for (const entity of entities) {
-      results.push({
-        id: entity.id,
-        type: "entity",
-        label: entity.name,
-        subtitle: ENTITY_TYPE_LABELS[entity.entityType] ?? entity.entityType,
-        href: `/entities/${entity.id}`,
-        icon: "Tags",
-      });
-    }
-
-    for (const doc of documents) {
-      results.push({
-        id: doc.id,
-        type: "document",
-        label: doc.fileName,
-        subtitle: doc.fileExtension.toUpperCase(),
-        href: `/ingestion/documents/${doc.id}`,
-        icon: "FileText",
-      });
-    }
-
-    for (const org of organizations) {
-      results.push({
-        id: org.id,
-        type: "organization",
-        label: org.name,
-        subtitle: org.slug,
-        href: `/organizations/${org.id}/settings`,
-        icon: "Building2",
-      });
-    }
-
-    for (const user of users) {
-      results.push({
-        id: user.id,
-        type: "user",
-        label: user.name ?? user.email,
-        subtitle: user.email,
-        href: `/organizations/${orgId}/settings`,
-        icon: "Hash",
-      });
-    }
-
-    return NextResponse.json({ data: results.slice(0, limit) });
+    return NextResponse.json({ data: mappedData });
   } catch (error) {
     if (error instanceof AppError) {
       return NextResponse.json(
