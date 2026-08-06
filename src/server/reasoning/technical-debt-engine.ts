@@ -58,7 +58,8 @@ export async function detectTechnicalDebt(organizationId: string): Promise<Techn
         include: { session: true },
       }),
       prisma.drawingRevision.findMany({
-        where: { project: { organizationId } },
+        orderBy: { uploadedAt: "desc" },
+        take: 50,
       }),
     ]);
 
@@ -170,20 +171,20 @@ export async function detectTechnicalDebt(organizationId: string): Promise<Techn
 
     // 5. OBSOLETE_DOCUMENTATION
     for (const dwg of drawings) {
-      if (dwg.status === "SUPERSEDED" || dwg.status === "OBSOLETE") {
+      if (dwg.notesJson && dwg.notesJson.toLowerCase().includes("obsolete")) {
         debtItems.push({
           id: `td-dwg-${dwg.id}`,
           category: "OBSOLETE_DOCUMENTATION",
           title: `Superseded Drawing Document Active in Registry`,
-          description: `Drawing revision ${dwg.revision} is marked ${dwg.status}.`,
+          description: `Drawing revision ${dwg.revisionLabel} is marked obsolete.`,
           severity: "MEDIUM",
           confidence: 0.98,
-          evidenceHashes: [dwg.fileHash],
-          affectedSystems: [dwg.revision],
+          evidenceHashes: [dwg.fileKey],
+          affectedSystems: [dwg.revisionLabel],
           recommendedActions: [
             "Archive superseded drawing files and update downstream assembly links.",
           ],
-          createdAt: dwg.createdAt.toISOString(),
+          createdAt: dwg.uploadedAt.toISOString(),
         });
       }
     }
