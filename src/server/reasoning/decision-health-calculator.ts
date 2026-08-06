@@ -26,7 +26,7 @@ export interface DecisionHealthBreakdown {
  * Calculates a fully explainable, 10-dimension Decision Health Score (0 - 100).
  */
 export async function calculateDecisionHealth(
-  organizationId: string,
+  _organizationId: string,
   decisionId: string,
 ): Promise<DecisionHealthBreakdown> {
   try {

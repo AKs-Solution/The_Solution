@@ -57,8 +57,8 @@ export async function detectTechnicalDebt(organizationId: string): Promise<Techn
       prisma.assumptionRecord.findMany({
         include: { session: true },
       }),
-      prisma.technicalDrawing.findMany({
-        where: { organizationId },
+      prisma.drawingRevision.findMany({
+        where: { project: { organizationId } },
       }),
     ]);
 
@@ -175,11 +175,11 @@ export async function detectTechnicalDebt(organizationId: string): Promise<Techn
           id: `td-dwg-${dwg.id}`,
           category: "OBSOLETE_DOCUMENTATION",
           title: `Superseded Drawing Document Active in Registry`,
-          description: `Drawing ${dwg.drawingNumber} rev ${dwg.revision} is marked ${dwg.status}.`,
+          description: `Drawing revision ${dwg.revision} is marked ${dwg.status}.`,
           severity: "MEDIUM",
           confidence: 0.98,
           evidenceHashes: [dwg.fileHash],
-          affectedSystems: [dwg.partName || dwg.drawingNumber],
+          affectedSystems: [dwg.revision],
           recommendedActions: [
             "Archive superseded drawing files and update downstream assembly links.",
           ],

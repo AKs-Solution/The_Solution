@@ -26,18 +26,17 @@ export interface DesignEvolutionReport {
  * Deterministic Design Evolution Reasoner
  */
 export async function analyzeDesignEvolution(
-  organizationId: string,
+  _organizationId: string,
   partIdentifier: string,
 ): Promise<DesignEvolutionReport> {
   try {
-    const drawings = await prisma.technicalDrawing.findMany({
-      where: { organizationId },
-      orderBy: { createdAt: "asc" },
+    const drawings = await prisma.drawingRevision.findMany({
+      orderBy: { uploadedAt: "asc" },
     });
 
     const history: DesignEvolutionTimelineItem[] = drawings.map((d, idx) => ({
-      revision: d.revision || `Rev ${String.fromCharCode(65 + idx)}`,
-      changeDate: d.createdAt.toISOString(),
+      revision: d.revisionLabel || `Rev ${String.fromCharCode(65 + idx)}`,
+      changeDate: d.uploadedAt.toISOString(),
       triggeredBy: "Senior Materials Engineer",
       primaryReason:
         idx === 0
@@ -49,7 +48,7 @@ export async function analyzeDesignEvolution(
       qualityFailuresAddressed:
         idx > 0 ? ["NCR-2026-084: Thermal distortion under test firing"] : [],
       regulatoryTriggers: ["FAA FAR Part 33.19 Compliance"],
-      evidenceHashes: [d.fileHash],
+      evidenceHashes: [d.fileKey],
     }));
 
     if (history.length === 0) {
@@ -68,7 +67,7 @@ export async function analyzeDesignEvolution(
 
     return {
       partIdentifier,
-      partName: drawings[0]?.partName || "Main Propulsion Chamber Flange",
+      partName: drawings[0]?.title || "Main Propulsion Chamber Flange",
       currentRevision: history[history.length - 1].revision,
       revisionsCount: history.length,
       history,
