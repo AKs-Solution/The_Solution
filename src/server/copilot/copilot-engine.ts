@@ -47,7 +47,7 @@ export async function queryEngineeringCopilot(
       });
     }
 
-    const matchesCount = searchResults?.totalMatches || 3;
+    const matchesCount = searchResults?.totalResults || 3;
     const reasoningChain = [
       `1. Analyzed query: "${userQuery}" against institutional memory and unified search index (${matchesCount} index matches found).`,
       `2. Identified material decision: Titanium 6Al-4V (DEC-PROP-102).`,
