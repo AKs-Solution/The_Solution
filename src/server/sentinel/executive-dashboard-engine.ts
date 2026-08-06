@@ -34,8 +34,7 @@ export async function getExecutiveDashboardData(
         where: { organizationId },
       }),
       prisma.anomalyAlert.findMany({
-        where: { organizationId },
-        orderBy: { createdAt: "desc" },
+        orderBy: { detectedAt: "desc" },
         take: 10,
       }),
     ]);
@@ -43,12 +42,12 @@ export async function getExecutiveDashboardData(
     const realtimeAlerts: RealtimeAlertItem[] = alerts.map((a) => ({
       id: a.id,
       type: "DECISION_INVALIDATED",
-      title: a.title,
+      title: a.alertType,
       reason: a.description,
       evidenceHashes: [],
-      affectedSystems: [a.entityId || "Propulsion Subsystem"],
+      affectedSystems: [a.recordId || "Propulsion Subsystem"],
       recommendedAction: "Conduct immediate engineering safety review.",
-      timestamp: a.createdAt.toISOString(),
+      timestamp: a.detectedAt.toISOString(),
     }));
 
     if (realtimeAlerts.length === 0) {
