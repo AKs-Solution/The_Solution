@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
 import { Prisma } from "@prisma/client";
 import type {
@@ -34,7 +35,7 @@ export async function persistExtraction(input: PersistenceInput): Promise<Persis
   const { provenance, extractedAt } = input;
 
   await prisma.$transaction(
-    async (tx) => {
+    async (tx: any) => {
       const localIdToDbId = new Map<string, string>();
 
       for (const entity of input.entities) {
@@ -114,7 +115,7 @@ export async function persistExtraction(input: PersistenceInput): Promise<Persis
             code: issue.code,
             message: issue.message,
             stage: issue.stage,
-            context: (issue.context ?? Prisma.DbNull) as Prisma.InputJsonValue,
+            context: typeof issue.context === "object" ? JSON.stringify(issue.context) : (issue.context ?? null),
           })),
         });
       }
