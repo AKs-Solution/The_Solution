@@ -1,82 +1,75 @@
 import { prisma } from "@/server/db";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  RateLimitedError,
+  UnauthorizedError,
+} from "@/shared/errors";
 import { hashPassword, verifyPassword } from "./password-service";
-import {
-  createSession,
-  destroyAllUserSessions,
-  destroySession,
-  validateSession,
-} from "./session-service";
-import { createVerificationToken, consumeVerificationToken } from "./token-service";
-import {
-  loginRateLimiter,
-  passwordResetRateLimiter,
-  recordSecurityEvent,
-  registrationRateLimiter,
-} from "@/server/security";
-import { AppError, ValidationError, UnauthorizedError, RateLimitedError } from "@/shared/errors";
+import { createSession, destroySession, validateSession } from "./session-service";
+import { recordSecurityEvent } from "./security-event-service";
+import { loginRateLimiter, passwordResetRateLimiter } from "./rate-limiter";
+import type { LoginInput, RegisterInput, ResetPasswordInput } from "./validation";
 
-export interface RegisterInput {
+export interface AuthUserResult {
+  id: string;
   email: string;
-  password: string;
-  name?: string;
-  ipAddress?: string;
+  name: string | null;
 }
 
-interface RegisterResult {
-  user: { id: string; email: string; name: string | null };
-}
-
-export async function registerUser(input: RegisterInput): Promise<RegisterResult> {
-  const { email, password, name, ipAddress } = input;
-
-  const ipKey = ipAddress ? `ip:${ipAddress}` : null;
-  const ipRetryAfter = ipKey ? registrationRateLimiter.check(ipKey) : null;
-  if (ipRetryAfter !== null) {
-    throw new RateLimitedError("Too many registration attempts. Try again later.", ipRetryAfter);
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email } });
+export async function registerUser(
+  input: RegisterInput,
+  opts?: { userAgent?: string; ipAddress?: string },
+): Promise<{ user: AuthUserResult }> {
+  const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) {
-    if (ipKey) registrationRateLimiter.record(ipKey);
-    throw new ValidationError({ email: ["Email is already registered"] });
+    throw new ConflictError("An account with this email already exists");
   }
 
-  const passwordHash = hashPassword(password);
-
+  const passwordHash = hashPassword(input.password);
   const user = await prisma.user.create({
-    data: { email, name, passwordHash },
+    data: {
+      email: input.email,
+      name: input.name,
+      passwordHash,
+      status: "active",
+    },
   });
 
-  if (ipKey) registrationRateLimiter.record(ipKey);
+  await createSession(user.id, { userAgent: opts?.userAgent, ipAddress: opts?.ipAddress });
 
   await prisma.authEvent.create({
-    data: { userId: user.id, action: "user.registered", metadata: { email }, ipAddress },
+    data: {
+      userId: user.id,
+      action: "auth.register",
+      metadata: { email: user.email },
+      ipAddress: opts?.ipAddress,
+      userAgent: opts?.userAgent,
+    },
   });
 
   return { user: { id: user.id, email: user.email, name: user.name } };
 }
 
-export interface LoginInput {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-  userAgent?: string;
-  ipAddress?: string;
-}
-
-interface LoginResult {
-  user: { id: string; email: string; name: string | null };
-}
-
-export async function loginUser(input: LoginInput): Promise<LoginResult> {
-  const { email, password, rememberMe, userAgent, ipAddress } = input;
+export async function loginUser(
+  input: LoginInput,
+  opts?: { userAgent?: string; ipAddress?: string },
+): Promise<{ user: AuthUserResult }> {
+  const { email, password, rememberMe } = input;
+  const ipAddress = opts?.ipAddress;
+  const userAgent = opts?.userAgent;
 
   const emailKey = `email:${email}`;
   const ipKey = ipAddress ? `ip:${ipAddress}` : null;
 
   const emailRetryAfter = loginRateLimiter.check(emailKey);
   const ipRetryAfter = ipKey ? loginRateLimiter.check(ipKey) : null;
-  const retryAfter = emailRetryAfter ?? ipRetryAfter;
+  const retryAfter =
+    emailRetryAfter !== null && ipRetryAfter !== null
+      ? Math.max(emailRetryAfter, ipRetryAfter)
+      : emailRetryAfter ?? ipRetryAfter;
+
   if (retryAfter !== null) {
     await recordSecurityEvent("auth.rate_limited", { ipAddress, userAgent, metadata: { email } });
     throw new RateLimitedError("Too many login attempts. Try again later.", retryAfter);
@@ -95,7 +88,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
     throw new UnauthorizedError("Account is disabled");
   }
 
-  const isValid = verifyPassword(password, user.passwordHash);
+  const isValid = user.passwordHash ? verifyPassword(password, user.passwordHash) : false;
   if (!isValid) {
     loginRateLimiter.record(emailKey);
     if (ipKey) loginRateLimiter.record(ipKey);
@@ -178,44 +171,51 @@ export async function requestPasswordReset(email: string, ipAddress?: string): P
 
   const emailRetryAfter = passwordResetRateLimiter.check(emailKey);
   const ipRetryAfter = ipKey ? passwordResetRateLimiter.check(ipKey) : null;
-  if (emailRetryAfter !== null || ipRetryAfter !== null) {
-    await recordSecurityEvent("auth.rate_limited", {
-      ipAddress,
-      metadata: { email, flow: "password_reset" },
-    });
-    return; // same response shape as success - does not reveal whether the rate limit or the email lookup is why nothing was sent
+  const retryAfter =
+    emailRetryAfter !== null && ipRetryAfter !== null
+      ? Math.max(emailRetryAfter, ipRetryAfter)
+      : emailRetryAfter ?? ipRetryAfter;
+
+  if (retryAfter !== null) {
+    throw new RateLimitedError("Too many password reset requests. Try again later.", retryAfter);
   }
+
   passwordResetRateLimiter.record(emailKey);
   if (ipKey) passwordResetRateLimiter.record(ipKey);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return;
 
-  await createVerificationToken(user.id, "password_reset", 1);
+  const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-  await prisma.authEvent.create({
-    data: { userId: user.id, action: "auth.password.reset.requested", ipAddress },
+  await prisma.passwordResetToken.create({
+    data: {
+      userId: user.id,
+      token,
+      expiresAt,
+    },
   });
 }
 
-export async function resetPassword(token: string, newPassword: string): Promise<void> {
-  const result = await consumeVerificationToken(token, "password_reset");
-  if (!result) {
-    throw new AppError("Invalid or expired reset token", "INVALID_RESET_TOKEN", 400);
+export async function resetPassword(input: ResetPasswordInput): Promise<void> {
+  const resetToken = await prisma.passwordResetToken.findUnique({
+    where: { token: input.token },
+    include: { user: true },
+  });
+
+  if (!resetToken || resetToken.expiresAt < new Date()) {
+    throw new BadRequestError("Invalid or expired reset token");
   }
 
-  const passwordHash = hashPassword(newPassword);
+  const passwordHash = hashPassword(input.password);
 
-  await prisma.user.update({
-    where: { id: result.userId },
-    data: { passwordHash },
-  });
-
-  // A leaked/stolen session should not survive a password reset - the whole
-  // point of the reset is to lock out whoever had access to the old password.
-  await destroyAllUserSessions(result.userId);
-
-  await prisma.authEvent.create({
-    data: { userId: result.userId, action: "auth.password.reset.completed" },
-  });
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: resetToken.userId },
+      data: { passwordHash },
+    }),
+    prisma.passwordResetToken.delete({ where: { id: resetToken.id } }),
+    prisma.session.deleteMany({ where: { userId: resetToken.userId } }),
+  ]);
 }
