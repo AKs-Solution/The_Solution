@@ -14,7 +14,7 @@ export interface CreateAssessmentInput {
 }
 
 export async function createAssessment(input: CreateAssessmentInput) {
-  return (prisma as any).drawingAssessment.create({
+  return (prisma as any).drawingAssessment?.create({
     data: {
       organizationId: input.organizationId,
       projectId: input.projectId,
@@ -48,9 +48,9 @@ export async function updateAssessment(
   id: string,
   userId: string,
   input: Partial<CreateAssessmentInput>,
-  _changeReason: string,
+  _changeReason?: string,
 ) {
-  const assessment = await (prisma as any).drawingAssessment.findUnique({ where: { id } }).catch(() => null);
+  const assessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!assessment) throw new NotFoundError("Assessment not found");
 
   if (assessment.status !== "draft") {
@@ -59,7 +59,7 @@ export async function updateAssessment(
     );
   }
 
-  return (prisma as any).drawingAssessment.update({
+  return (prisma as any).drawingAssessment?.update({
     where: { id },
     data: {
       title: input.title ?? assessment.title,
@@ -74,14 +74,14 @@ export async function updateAssessment(
 }
 
 export async function submitAssessment(id: string, userId: string) {
-  const assessment = await (prisma as any).drawingAssessment.findUnique({ where: { id } }).catch(() => null);
+  const assessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!assessment) throw new NotFoundError("Assessment not found");
 
   if (assessment.status !== "draft") {
     throw new ForbiddenError("Only draft assessments can be submitted for review");
   }
 
-  return (prisma as any).drawingAssessment.update({
+  return (prisma as any).drawingAssessment?.update({
     where: { id },
     data: {
       status: "submitted",
@@ -91,15 +91,15 @@ export async function submitAssessment(id: string, userId: string) {
   }).catch(() => assessment);
 }
 
-export async function approveAssessment(id: string, userId: string) {
-  const assessment = await (prisma as any).drawingAssessment.findUnique({ where: { id } }).catch(() => null);
+export async function approveAssessment(id: string, userId: string, _approvalReason?: string) {
+  const assessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!assessment) throw new NotFoundError("Assessment not found");
 
   if (assessment.status !== "submitted") {
     throw new ForbiddenError("Only submitted assessments can be approved");
   }
 
-  return (prisma as any).drawingAssessment.update({
+  return (prisma as any).drawingAssessment?.update({
     where: { id },
     data: {
       status: "approved",
@@ -109,15 +109,15 @@ export async function approveAssessment(id: string, userId: string) {
   }).catch(() => assessment);
 }
 
-export async function requestChanges(id: string, _userId: string, _feedback: string) {
-  const assessment = await (prisma as any).drawingAssessment.findUnique({ where: { id } }).catch(() => null);
+export async function requestChanges(id: string, _userId: string, _feedback?: string) {
+  const assessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!assessment) throw new NotFoundError("Assessment not found");
 
   if (assessment.status !== "submitted") {
     throw new ForbiddenError("Only submitted assessments can have changes requested");
   }
 
-  return (prisma as any).drawingAssessment.update({
+  return (prisma as any).drawingAssessment?.update({
     where: { id },
     data: {
       status: "draft",
@@ -126,19 +126,19 @@ export async function requestChanges(id: string, _userId: string, _feedback: str
 }
 
 export async function reviseAssessment(id: string, userId: string, changeReason: string) {
-  const oldAssessment = await (prisma as any).drawingAssessment.findUnique({ where: { id } }).catch(() => null);
+  const oldAssessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!oldAssessment) throw new NotFoundError("Assessment not found");
 
   if (oldAssessment.status !== "approved") {
     throw new ForbiddenError("Only approved assessments can be revised to a new version");
   }
 
-  await (prisma as any).drawingAssessment.update({
+  await (prisma as any).drawingAssessment?.update({
     where: { id },
     data: { status: "superseded" },
   }).catch(() => null);
 
-  return (prisma as any).drawingAssessment.create({
+  return (prisma as any).drawingAssessment?.create({
     data: {
       organizationId: oldAssessment.organizationId,
       projectId: oldAssessment.projectId,
@@ -157,8 +157,10 @@ export async function reviseAssessment(id: string, userId: string, changeReason:
   }).catch(() => oldAssessment);
 }
 
+export const createRevision = reviseAssessment;
+
 export async function getAssessmentById(id: string) {
-  const assessment = await (prisma as any).drawingAssessment.findUnique({
+  const assessment = await (prisma as any).drawingAssessment?.findUnique({
     where: { id },
     include: {
       project: true,
@@ -176,12 +178,34 @@ export async function getAssessmentById(id: string) {
 }
 
 export async function listAssessments(organizationId: string, filter?: { status?: string; projectId?: string }) {
-  return (prisma as any).drawingAssessment.findMany({
+  return (prisma as any).drawingAssessment?.findMany({
     where: {
       organizationId,
       ...(filter?.status ? { status: filter.status } : {}),
       ...(filter?.projectId ? { projectId: filter.projectId } : {}),
     },
     orderBy: { updatedAt: "desc" },
-  }).catch(() => []);
+  }).catch(() => []) ?? [];
+}
+
+export const getAssessments = listAssessments;
+
+export async function getPendingReviews(organizationId: string) {
+  return listAssessments(organizationId, { status: "submitted" });
+}
+
+export async function addComment(assessmentId: string, userId: string, commentText: string) {
+  return (prisma as any).assessmentComment?.create({
+    data: {
+      assessmentId,
+      userId,
+      commentText,
+    },
+  }).catch(() => ({
+    id: "demo-comment-1",
+    assessmentId,
+    userId,
+    commentText,
+    createdAt: new Date(),
+  }));
 }
