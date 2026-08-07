@@ -66,7 +66,7 @@ export async function GET(request: Request) {
           fileName: true,
           status: true,
           createdAt: true,
-          uploadedBy: { select: { name: true } },
+          uploadedById: true,
         },
       }),
       prisma.ingestionJob.findMany({
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
         description: `Uploaded document (${doc.status.toLowerCase()})`,
         href: `/ingestion/documents/${doc.id}`,
         timestamp: doc.createdAt.toISOString(),
-        actor: doc.uploadedBy?.name ?? undefined,
+        actor: doc.uploadedById ?? undefined,
       });
     }
 
