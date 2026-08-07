@@ -125,7 +125,7 @@ export async function requestChanges(id: string, _userId: string, _feedback?: st
   }).catch(() => assessment);
 }
 
-export async function reviseAssessment(id: string, userId: string, changeReason: string) {
+export async function reviseAssessment(id: string, userId: string, changeReason?: string) {
   const oldAssessment = await (prisma as any).drawingAssessment?.findUnique({ where: { id } }).catch(() => null);
   if (!oldAssessment) throw new NotFoundError("Assessment not found");
 
@@ -152,7 +152,7 @@ export async function reviseAssessment(id: string, userId: string, changeReason:
       lastEditedById: userId,
       lastEditedAt: new Date(),
       replacesId: oldAssessment.id,
-      changeReason,
+      changeReason: changeReason || "Revision update",
     },
   }).catch(() => oldAssessment);
 }
@@ -190,7 +190,7 @@ export async function listAssessments(organizationId: string, filter?: { status?
 
 export const getAssessments = listAssessments;
 
-export async function getPendingReviews(organizationId: string) {
+export async function getPendingReviews(organizationId: string, _userId?: string) {
   return listAssessments(organizationId, { status: "submitted" });
 }
 
