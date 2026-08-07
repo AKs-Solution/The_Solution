@@ -64,7 +64,6 @@ export async function listAuditEvents(organizationId: string, filters: AuditFilt
         entityId: true,
         metadata: true,
         createdAt: true,
-        updatedAt: true,
       },
     }),
     prisma.auditLog.count({ where }),
