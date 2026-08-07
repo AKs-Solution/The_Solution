@@ -7,12 +7,16 @@ export interface RegisterInput {
   email: string;
   password: string;
   name?: string;
+  userAgent?: string;
+  ipAddress?: string;
 }
 
 export interface LoginInput {
   email: string;
   password: string;
   rememberMe?: boolean;
+  userAgent?: string;
+  ipAddress?: string;
 }
 
 export interface ResetPasswordInput {
@@ -30,6 +34,9 @@ export async function registerUser(
   input: RegisterInput,
   opts?: { userAgent?: string; ipAddress?: string },
 ): Promise<{ user: AuthUserResult }> {
+  const userAgent = input.userAgent || opts?.userAgent;
+  const ipAddress = input.ipAddress || opts?.ipAddress;
+
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) {
     throw new Error("An account with this email already exists");
@@ -45,15 +52,15 @@ export async function registerUser(
     },
   });
 
-  await createSession(user.id, { userAgent: opts?.userAgent, ipAddress: opts?.ipAddress });
+  await createSession(user.id, { userAgent, ipAddress });
 
   await (prisma as any).authEvent?.create({
     data: {
       userId: user.id,
       action: "auth.register",
       metadata: { email: user.email },
-      ipAddress: opts?.ipAddress,
-      userAgent: opts?.userAgent,
+      ipAddress,
+      userAgent,
     },
   }).catch(() => null);
 
@@ -65,8 +72,8 @@ export async function loginUser(
   opts?: { userAgent?: string; ipAddress?: string },
 ): Promise<{ user: AuthUserResult }> {
   const { email, password, rememberMe } = input;
-  const ipAddress = opts?.ipAddress;
-  const userAgent = opts?.userAgent;
+  const ipAddress = input.ipAddress || opts?.ipAddress;
+  const userAgent = input.userAgent || opts?.userAgent;
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
