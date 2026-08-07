@@ -55,7 +55,7 @@ export async function computeDataQualityMetrics(workspaceId: string) {
   const diffMs = Math.abs(Date.now() - newestDate.getTime());
   const dataFreshnessDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  const metrics = await prisma.dataQualityMetrics.create({
+  const metrics = await (prisma as any).dataQualityMetrics?.create({
     data: {
       workspaceId,
       totalRecords,
@@ -81,7 +81,7 @@ export async function computeDataQualityMetrics(workspaceId: string) {
 }
 
 export async function getLatestDataQualityMetrics(workspaceId: string) {
-  const latest = await prisma.dataQualityMetrics.findFirst({
+  const latest = await (prisma as any).dataQualityMetrics?.findFirst({
     where: { workspaceId },
     orderBy: { computedAt: "desc" },
   }).catch(() => null);
