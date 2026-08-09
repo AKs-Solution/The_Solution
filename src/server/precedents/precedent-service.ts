@@ -181,10 +181,10 @@ export async function ensurePrecedentsSeeded(
   try {
     let creatorId = userId || null;
     if (!creatorId) {
-      const firstUser = await prisma.user.findFirst({
-        where: { memberships: { some: { organizationId } } },
-      });
-      creatorId = firstUser?.id || null;
+      const member = await (prisma as any).organizationMember?.findFirst({
+        where: { organizationId },
+      }).catch(() => null);
+      creatorId = member?.userId || null;
     }
 
     for (const p of INITIAL_PRECEDENTS) {
