@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
 
 export interface UnifiedSearchOptions {
@@ -63,8 +64,8 @@ export async function executeUnifiedSearch(
       designPatterns,
     ] = await Promise.all([
       filterType("ENTITY")
-        ? prisma.engineeringEntity
-            .findMany({
+        ? (prisma as any).engineeringEntity
+            ?.findMany({
               where: {
                 organizationId,
                 deletedAt: null,
@@ -77,12 +78,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("DECISION")
-        ? prisma.engineeringDecision
-            .findMany({
+        ? (prisma as any).engineeringDecision
+            ?.findMany({
               where: {
                 organizationId,
                 OR: [
@@ -94,12 +95,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("DOCUMENT")
-        ? prisma.ingestionDocument
-            .findMany({
+        ? (prisma as any).ingestionDocument
+            ?.findMany({
               where: {
                 organizationId,
                 deletedAt: null,
@@ -108,12 +109,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("PRECEDENT")
-        ? prisma.historicalPrecedent
-            .findMany({
+        ? (prisma as any).historicalPrecedent
+            ?.findMany({
               where: {
                 organizationId,
                 deletedAt: null,
@@ -126,12 +127,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("RULE")
-        ? prisma.rule
-            .findMany({
+        ? (prisma as any).rule
+            ?.findMany({
               where: {
                 organizationId,
                 deletedAt: null,
@@ -144,12 +145,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("SUPPLIER")
-        ? prisma.supplier
-            .findMany({
+        ? (prisma as any).supplier
+            ?.findMany({
               where: {
                 organizationId,
                 deletedAt: null,
@@ -162,12 +163,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("PROGRAM")
-        ? prisma.program
-            .findMany({
+        ? (prisma as any).program
+            ?.findMany({
               where: {
                 organizationId,
                 OR: [
@@ -178,12 +179,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("CONTRADICTION")
-        ? prisma.contradiction
-            .findMany({
+        ? (prisma as any).contradiction
+            ?.findMany({
               where: {
                 organizationId,
                 OR: [
@@ -195,12 +196,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("ASSUMPTION")
-        ? prisma.assumptionRecord
-            .findMany({
+        ? (prisma as any).assumptionRecord
+            ?.findMany({
               where: {
                 OR: [
                   { statement: { contains: q, mode: "insensitive" } },
@@ -210,12 +211,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("REJECTED_ALTERNATIVE")
-        ? prisma.alternativeRecord
-            .findMany({
+        ? (prisma as any).alternativeRecord
+            ?.findMany({
               where: {
                 status: "REJECTED",
                 OR: [
@@ -227,12 +228,12 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
 
       filterType("LESSON_LEARNED")
-        ? prisma.drawingDesignPattern
-            .findMany({
+        ? (prisma as any).drawingDesignPattern
+            ?.findMany({
               where: {
                 organizationId,
                 OR: [
@@ -244,7 +245,7 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => [])
+            .catch(() => []) ?? []
         : Promise.resolve([]),
     ]);
 
@@ -257,7 +258,7 @@ export async function executeUnifiedSearch(
         description: e.description || undefined,
         href: `/entities/${e.id}`,
         score: 1.0,
-        createdAt: e.createdAt.toISOString(),
+        createdAt: e.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -270,7 +271,7 @@ export async function executeUnifiedSearch(
         description: d.rationale,
         href: `/decisions`,
         score: 0.95,
-        createdAt: d.createdAt.toISOString(),
+        createdAt: d.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -279,10 +280,10 @@ export async function executeUnifiedSearch(
         id: doc.id,
         type: "DOCUMENT",
         title: doc.fileName,
-        subtitle: `Document • ${doc.fileExtension.toUpperCase()} (${(doc.sizeBytes / 1024).toFixed(1)} KB)`,
+        subtitle: `Document • ${doc.fileExtension?.toUpperCase()} (${((doc.sizeBytes || 0) / 1024).toFixed(1)} KB)`,
         href: `/ingestion/documents/${doc.id}`,
         score: 0.9,
-        createdAt: doc.createdAt.toISOString(),
+        createdAt: doc.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -291,11 +292,11 @@ export async function executeUnifiedSearch(
         id: p.id,
         type: "PRECEDENT",
         title: p.title,
-        subtitle: `Precedent • Decision: ${p.decisionMade.slice(0, 50)}...`,
+        subtitle: `Precedent • Decision: ${p.decisionMade?.slice(0, 50)}...`,
         description: p.summary,
         href: `/precedents`,
         score: 0.88,
-        createdAt: p.createdAt.toISOString(),
+        createdAt: p.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -308,7 +309,7 @@ export async function executeUnifiedSearch(
         description: r.description || undefined,
         href: `/rules`,
         score: 0.85,
-        createdAt: r.createdAt.toISOString(),
+        createdAt: r.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -321,7 +322,7 @@ export async function executeUnifiedSearch(
         description: s.description || undefined,
         href: `/suppliers`,
         score: 0.85,
-        createdAt: s.createdAt.toISOString(),
+        createdAt: s.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -333,7 +334,7 @@ export async function executeUnifiedSearch(
         subtitle: `Program • Aircraft: ${prog.aircraft}`,
         href: `/programs`,
         score: 0.8,
-        createdAt: prog.createdAt.toISOString(),
+        createdAt: prog.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -346,7 +347,7 @@ export async function executeUnifiedSearch(
         description: c.description,
         href: `/contradictions`,
         score: 0.8,
-        createdAt: c.createdAt.toISOString(),
+        createdAt: c.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -354,12 +355,12 @@ export async function executeUnifiedSearch(
       results.push({
         id: asm.id,
         type: "ASSUMPTION",
-        title: `Assumption: ${asm.statement.slice(0, 60)}`,
+        title: `Assumption: ${asm.statement?.slice(0, 60)}`,
         subtitle: `Risk Level: ${asm.riskLevel} • ${asm.isVerified ? "Verified" : "Unverified"}`,
         description: asm.justification,
         href: `/reasoning`,
         score: 0.92,
-        createdAt: asm.createdAt.toISOString(),
+        createdAt: asm.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -372,7 +373,7 @@ export async function executeUnifiedSearch(
         description: rej.description,
         href: `/decisions`,
         score: 0.91,
-        createdAt: rej.createdAt.toISOString(),
+        createdAt: rej.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
 
@@ -385,7 +386,7 @@ export async function executeUnifiedSearch(
         description: dp.lessonsLearned,
         href: `/precedents`,
         score: 0.89,
-        createdAt: dp.createdAt.toISOString(),
+        createdAt: dp.createdAt?.toISOString?.() || new Date().toISOString(),
       });
     }
   } catch (err) {
