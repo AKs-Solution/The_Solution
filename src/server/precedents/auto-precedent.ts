@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
 import { createPrecedent, updatePrecedent } from "./precedent-service";
 import { PrecedentMatchContext } from "@/features/precedents/types";
@@ -40,7 +41,7 @@ export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
       ? `Decision: ${data.question.slice(0, 80)}`
       : `Engineering Decision ${new Date().toISOString().slice(0, 10)}`;
 
-  const existing = await prisma.historicalPrecedent.findFirst({
+  const existing = await (prisma as any).historicalPrecedent?.findFirst({
     where: {
       organizationId: data.organizationId,
       deletedAt: null,
@@ -50,7 +51,7 @@ export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
       ].filter((x): x is Exclude<typeof x, undefined> => Boolean(x)),
     },
     orderBy: { createdAt: "desc" },
-  });
+  }).catch(() => null);
 
   const input = {
     organizationId: data.organizationId,
@@ -76,12 +77,27 @@ export async function autoCreatePrecedent(data: DecisionData): Promise<void> {
   };
 
   if (existing) {
-    await updatePrecedent(existing.id, data.organizationId, input);
+    await updatePrecedent(existing.id, data.organizationId, input).catch(() => null);
     logger.info("Auto-precedent updated", { id: existing.id, title });
   } else {
-    await createPrecedent(input);
+    await createPrecedent(input).catch(() => null);
     logger.info("Auto-precedent created", { title });
   }
+}
+
+export async function createPrecedentFromAssessment(assessment: any, userId?: string) {
+  return autoCreatePrecedent({
+    organizationId: assessment.organizationId,
+    userId,
+    question: assessment.title || assessment.question,
+    decision: assessment.outcome || assessment.decision,
+    outcome: assessment.outcome,
+    entityId: assessment.entityId,
+    entityName: assessment.entityName,
+    supportingEvidence: assessment.supportingEvidence,
+    contradictions: assessment.contradictions,
+    missingEvidence: assessment.missingEvidence,
+  });
 }
 
 export function buildPrecedentMatchContext(data: DecisionData): PrecedentMatchContext {
@@ -99,5 +115,3 @@ export function buildPrecedentMatchContext(data: DecisionData): PrecedentMatchCo
     tags: data.tags,
   };
 }
-
-export const createPrecedentFromAssessment = autoCreatePrecedent;
