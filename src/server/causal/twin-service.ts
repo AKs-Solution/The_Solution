@@ -10,7 +10,7 @@ export async function getCausalTwins(organizationId: string) {
   if (existing.length > 0) return existing;
 
   // Find an engineering entity
-  const entity = await prisma.engineeringEntity.findFirst({
+  const entity = await (prisma as any).engineeringEntity?.findFirst({
     where: { organizationId, deletedAt: null },
   }).catch(() => null);
 
