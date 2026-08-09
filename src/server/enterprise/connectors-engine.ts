@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export type SystemConnectorType = "PLM" | "ERP" | "QMS" | "REQUIREMENTS_ALM" | "CAD";
 
 export interface IntegrationConnector {

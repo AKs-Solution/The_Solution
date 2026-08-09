@@ -80,14 +80,7 @@ class ParserRegistry {
   ): Promise<{ document: ParsedDocument; parserName: string; parserVersion: string }> {
     const parser = this.resolve(file);
     if (!parser) {
-      // Fallback to generic text/binary parser for any file type (CAD, STEP, DXF, CSV, XLSX, etc.)
-      const document = await genericTextFallbackParser.parse(buffer, context);
-      this.recordSuccess(genericTextFallbackParser.name);
-      return {
-        document,
-        parserName: genericTextFallbackParser.name,
-        parserVersion: genericTextFallbackParser.version,
-      };
+      throw new Error(`No parser registered for file extension "${file.extension}"`);
     }
 
     try {
@@ -128,8 +121,4 @@ if (!globalForRegistry.ingestionParserRegistry) {
   parserRegistry.register(pdfParser);
   parserRegistry.register(imageParser);
   parserRegistry.register(genericTextFallbackParser);
-}
-
-if (process.env.NODE_ENV !== "production") {
-  globalForRegistry.ingestionParserRegistry = parserRegistry;
 }

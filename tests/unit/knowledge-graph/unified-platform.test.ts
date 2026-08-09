@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import { executeUnifiedSearch } from "../../../src/server/retrieval/unified-search";
 import {
   findPathsBetweenNodes,

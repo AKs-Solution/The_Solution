@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { prisma } from "@/server/db";

@@ -17,46 +17,54 @@ export async function createRelationship(
   }
 
   const [source, target] = await Promise.all([
-    (prisma as any).engineeringEntity?.findFirst({
-      where: { id: input.sourceEntityId, organizationId, deletedAt: null },
-    }).catch(() => null),
-    (prisma as any).engineeringEntity?.findFirst({
-      where: { id: input.targetEntityId, organizationId, deletedAt: null },
-    }).catch(() => null),
+    Promise.resolve(
+      (prisma as any).engineeringEntity?.findFirst({
+        where: { id: input.sourceEntityId, organizationId, deletedAt: null },
+      }),
+    ).catch(() => null),
+    Promise.resolve(
+      (prisma as any).engineeringEntity?.findFirst({
+        where: { id: input.targetEntityId, organizationId, deletedAt: null },
+      }),
+    ).catch(() => null),
   ]);
 
   if (!source) throw new NotFoundError("Source entity", input.sourceEntityId);
   if (!target) throw new NotFoundError("Target entity", input.targetEntityId);
 
-  const existing = await (prisma as any).engineeringRelationship?.findUnique({
-    where: {
-      organizationId_sourceEntityId_targetEntityId_relationshipType: {
-        organizationId,
-        sourceEntityId: input.sourceEntityId,
-        targetEntityId: input.targetEntityId,
-        relationshipType: input.relationshipType,
+  const existing = await Promise.resolve(
+    (prisma as any).engineeringRelationship?.findUnique({
+      where: {
+        organizationId_sourceEntityId_targetEntityId_relationshipType: {
+          organizationId,
+          sourceEntityId: input.sourceEntityId,
+          targetEntityId: input.targetEntityId,
+          relationshipType: input.relationshipType,
+        },
       },
-    },
-  }).catch(() => null);
+    }),
+  ).catch(() => null);
 
   if (existing) {
     throw new ValidationError({ relationship: ["This relationship already exists"] });
   }
 
-  const relationship = await (prisma as any).engineeringRelationship?.create({
-    data: {
-      organizationId,
-      sourceEntityId: input.sourceEntityId,
-      targetEntityId: input.targetEntityId,
-      relationshipType: input.relationshipType,
-      metadata: (input.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
-      createdById: userId,
-    },
-    include: {
-      sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-      targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-    },
-  }).catch(() => ({
+  const relationship = await Promise.resolve(
+    (prisma as any).engineeringRelationship?.create({
+      data: {
+        organizationId,
+        sourceEntityId: input.sourceEntityId,
+        targetEntityId: input.targetEntityId,
+        relationshipType: input.relationshipType,
+        metadata: (input.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
+        createdById: userId,
+      },
+      include: {
+        sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+        targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+      },
+    }),
+  ).catch(() => ({
     id: `rel-${Date.now()}`,
     organizationId,
     sourceEntityId: input.sourceEntityId,
@@ -95,17 +103,19 @@ export async function listRelationships(organizationId: string, filters: Record<
   if (relationshipType) where.relationshipType = relationshipType;
 
   const [data, total] = await Promise.all([
-    (prisma as any).engineeringRelationship?.findMany({
-      where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: { createdAt: "desc" },
-      include: {
-        sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-        targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-      },
-    }).catch(() => []) ?? [],
-    (prisma as any).engineeringRelationship?.count({ where }).catch(() => 0) ?? 0,
+    Promise.resolve(
+      (prisma as any).engineeringRelationship?.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { createdAt: "desc" },
+        include: {
+          sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+          targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+        },
+      }),
+    ).catch(() => []) ?? [],
+    Promise.resolve((prisma as any).engineeringRelationship?.count({ where })).catch(() => 0) ?? 0,
   ]);
 
   return { data, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
@@ -116,14 +126,20 @@ export async function deleteRelationship(
   organizationId: string,
   userId: string,
 ) {
-  const relationship = await (prisma as any).engineeringRelationship?.findFirst({
-    where: { id: relationshipId, organizationId },
-  }).catch(() => null);
+  const relationship = await Promise.resolve(
+    (prisma as any).engineeringRelationship?.findFirst({
+      where: { id: relationshipId, organizationId },
+    }),
+  ).catch(() => null);
 
   if (!relationship) throw new NotFoundError("EngineeringRelationship", relationshipId);
 
-  await (prisma as any).engineeringRelationship?.delete({ where: { id: relationshipId } }).catch(() => null);
-  await (prisma as any).graphEdgeIndex?.deleteMany({ where: { relationshipId } }).catch(() => null);
+  await Promise.resolve(
+    (prisma as any).engineeringRelationship?.delete({ where: { id: relationshipId } }),
+  ).catch(() => null);
+  await Promise.resolve(
+    (prisma as any).graphEdgeIndex?.deleteMany({ where: { relationshipId } }),
+  ).catch(() => null);
 
   await recordAudit(
     relationship.sourceEntityId,
@@ -148,26 +164,32 @@ export async function deleteRelationship(
 }
 
 export async function getEntityRelationships(entityId: string, organizationId: string) {
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { id: entityId, organizationId, deletedAt: null },
-  }).catch(() => null);
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findFirst({
+      where: { id: entityId, organizationId, deletedAt: null },
+    }),
+  ).catch(() => null);
   if (!entity) throw new NotFoundError("EngineeringEntity", entityId);
 
   const [incoming, outgoing] = await Promise.all([
-    (prisma as any).engineeringRelationship?.findMany({
-      where: { targetEntityId: entityId, organizationId },
-      include: {
-        sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }).catch(() => []) ?? [],
-    (prisma as any).engineeringRelationship?.findMany({
-      where: { sourceEntityId: entityId, organizationId },
-      include: {
-        targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }).catch(() => []) ?? [],
+    Promise.resolve(
+      (prisma as any).engineeringRelationship?.findMany({
+        where: { targetEntityId: entityId, organizationId },
+        include: {
+          sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ).catch(() => []) ?? [],
+    Promise.resolve(
+      (prisma as any).engineeringRelationship?.findMany({
+        where: { sourceEntityId: entityId, organizationId },
+        include: {
+          targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ).catch(() => []) ?? [],
   ]);
 
   return { incoming, outgoing };

@@ -24,15 +24,21 @@ export async function queryEngineeringCopilot(
   userQuery: string,
 ): Promise<CopilotResponse> {
   try {
-    const searchResults = await executeUnifiedSearch({
+    const searchPromise = executeUnifiedSearch({
       organizationId,
       query: userQuery,
     }).catch(() => null);
 
-    const decisions = await (prisma as any).engineeringDecision?.findMany({
-      where: { organizationId },
-      take: 5,
-    }).catch(() => []) ?? [];
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+
+    const searchResults = await Promise.race([searchPromise, timeoutPromise]);
+
+    const decisions = await Promise.resolve(
+      (prisma as any).engineeringDecision?.findMany({
+        where: { organizationId },
+        take: 5,
+      }),
+    ).catch(() => []) ?? [];
 
     const linkedRecords = decisions.map((d: any) => ({
       id: d.id,

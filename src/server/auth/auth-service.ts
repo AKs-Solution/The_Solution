@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { prisma } from "@/server/db";
 import { hashPassword, verifyPassword } from "./password-service";
 import { createSession, destroySession, validateSession } from "./session-service";

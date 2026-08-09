@@ -12,14 +12,16 @@ export async function createEntity(
   input: CreateEntityInput,
   userId: string,
 ) {
-  const existing = await (prisma as any).engineeringEntity?.findUnique({
-    where: {
-      organizationId_identifier: {
-        organizationId,
-        identifier: input.identifier,
+  const existing = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findUnique({
+      where: {
+        organizationId_identifier: {
+          organizationId,
+          identifier: input.identifier,
+        },
       },
-    },
-  }).catch(() => null);
+    }),
+  ).catch(() => null);
 
   if (existing && !existing.deletedAt) {
     throw new ValidationError({
@@ -27,18 +29,20 @@ export async function createEntity(
     });
   }
 
-  const entity = await (prisma as any).engineeringEntity?.create({
-    data: {
-      organizationId,
-      createdById: userId,
-      updatedById: userId,
-      entityType: input.entityType,
-      identifier: input.identifier,
-      name: input.name,
-      description: input.description ?? null,
-      status: input.status ?? "DRAFT",
-    },
-  }).catch(() => ({
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.create({
+      data: {
+        organizationId,
+        createdById: userId,
+        updatedById: userId,
+        entityType: input.entityType,
+        identifier: input.identifier,
+        name: input.name,
+        description: input.description ?? null,
+        status: input.status ?? "DRAFT",
+      },
+    }),
+  ).catch(() => ({
     id: `ent-${Date.now()}`,
     organizationId,
     entityType: input.entityType,
@@ -64,22 +68,24 @@ export async function createEntity(
 }
 
 export async function getEntity(entityId: string, organizationId: string) {
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { id: entityId, organizationId, deletedAt: null },
-    include: {
-      sourceRelationships: {
-        include: {
-          targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findFirst({
+      where: { id: entityId, organizationId, deletedAt: null },
+      include: {
+        sourceRelationships: {
+          include: {
+            targetEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+          },
         },
-      },
-      targetRelationships: {
-        include: {
-          sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+        targetRelationships: {
+          include: {
+            sourceEntity: { select: { id: true, identifier: true, name: true, entityType: true } },
+          },
         },
+        versions: { orderBy: { createdAt: "desc" }, take: 1 },
       },
-      versions: { orderBy: { createdAt: "desc" }, take: 1 },
-    },
-  }).catch(() => null);
+    }),
+  ).catch(() => null);
 
   if (!entity) throw new NotFoundError("EngineeringEntity", entityId);
   return entity;
@@ -104,16 +110,18 @@ export async function listEntities(organizationId: string, filters: Record<strin
   const orderBy = sort ? { [sort]: order ?? "asc" } : { updatedAt: "desc" as const };
 
   const [data, total] = await Promise.all([
-    (prisma as any).engineeringEntity?.findMany({
-      where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy,
-      include: {
-        _count: { select: { sourceRelationships: true, targetRelationships: true } },
-      },
-    }).catch(() => []) ?? [],
-    (prisma as any).engineeringEntity?.count({ where }).catch(() => 0) ?? 0,
+    Promise.resolve(
+      (prisma as any).engineeringEntity?.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy,
+        include: {
+          _count: { select: { sourceRelationships: true, targetRelationships: true } },
+        },
+      }),
+    ).catch(() => []) ?? [],
+    Promise.resolve((prisma as any).engineeringEntity?.count({ where })).catch(() => 0) ?? 0,
   ]);
 
   return { data, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
@@ -125,9 +133,11 @@ export async function updateEntity(
   input: UpdateEntityInput,
   userId: string,
 ) {
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { id: entityId, organizationId, deletedAt: null },
-  }).catch(() => null);
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findFirst({
+      where: { id: entityId, organizationId, deletedAt: null },
+    }),
+  ).catch(() => null);
 
   if (!entity) throw new NotFoundError("EngineeringEntity", entityId);
 
@@ -139,33 +149,43 @@ export async function updateEntity(
   if (input.tags !== undefined) updateData.tags = input.tags;
   if (input.labels !== undefined) updateData.labels = input.labels;
   if (input.metadata !== undefined) updateData.metadata = input.metadata;
-  const updated = await (prisma as any).engineeringEntity?.update({
-    where: { id: entityId },
-    data: updateData as Prisma.EngineeringEntityUpdateInput,
-  }).catch(() => entity);
+  const updated = await Promise.resolve(
+    (prisma as any).engineeringEntity?.update({
+      where: { id: entityId },
+      data: updateData as Prisma.EngineeringEntityUpdateInput,
+    }),
+  ).catch(() => entity);
 
   await recordAudit(entity.id, "ENTITY_UPDATED", { changes: Object.keys(input) }, userId);
   return updated;
 }
 
 export async function deleteEntity(entityId: string, organizationId: string, userId: string) {
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { id: entityId, organizationId, deletedAt: null },
-  }).catch(() => null);
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findFirst({
+      where: { id: entityId, organizationId, deletedAt: null },
+    }),
+  ).catch(() => null);
 
   if (!entity) throw new NotFoundError("EngineeringEntity", entityId);
 
-  await (prisma as any).engineeringEntity?.update({
-    where: { id: entityId },
-    data: { deletedAt: new Date(), updatedById: userId },
-  }).catch(() => null);
+  await Promise.resolve(
+    (prisma as any).engineeringEntity?.update({
+      where: { id: entityId },
+      data: { deletedAt: new Date(), updatedById: userId },
+    }),
+  ).catch(() => null);
 
-  const node = await (prisma as any).graphNodeIndex?.findUnique({ where: { entityId } }).catch(() => null);
+  const node = await Promise.resolve(
+    (prisma as any).graphNodeIndex?.findUnique({ where: { entityId } }),
+  ).catch(() => null);
   if (node) {
-    await (prisma as any).graphEdgeIndex?.deleteMany({
-      where: { OR: [{ sourceNodeId: node.id }, { targetNodeId: node.id }] },
-    }).catch(() => null);
-    await (prisma as any).graphNodeIndex?.delete({ where: { id: node.id } }).catch(() => null);
+    await Promise.resolve(
+      (prisma as any).graphEdgeIndex?.deleteMany({
+        where: { OR: [{ sourceNodeId: node.id }, { targetNodeId: node.id }] },
+      }),
+    ).catch(() => null);
+    await Promise.resolve((prisma as any).graphNodeIndex?.delete({ where: { id: node.id } })).catch(() => null);
   }
 
   await recordAudit(entity.id, "ENTITY_DELETED", {}, userId);
@@ -179,19 +199,23 @@ export async function changeEntityStatus(
   userId: string,
   reason?: string,
 ) {
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { id: entityId, organizationId, deletedAt: null },
-  }).catch(() => null);
+  const entity = await Promise.resolve(
+    (prisma as any).engineeringEntity?.findFirst({
+      where: { id: entityId, organizationId, deletedAt: null },
+    }),
+  ).catch(() => null);
 
   if (!entity) throw new NotFoundError("EngineeringEntity", entityId);
 
   const error = validateLifecycleTransition(entity.status, newStatus);
   if (error) throw new ValidationError({ status: [error] });
 
-  const updated = await (prisma as any).engineeringEntity?.update({
-    where: { id: entityId },
-    data: { status: newStatus, updatedById: userId },
-  }).catch(() => entity);
+  const updated = await Promise.resolve(
+    (prisma as any).engineeringEntity?.update({
+      where: { id: entityId },
+      data: { status: newStatus, updatedById: userId },
+    }),
+  ).catch(() => entity);
 
   await recordAudit(
     entity.id,
