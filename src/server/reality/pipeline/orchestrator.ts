@@ -79,7 +79,7 @@ export async function runRealityAssessment(assessmentId: string): Promise<void> 
     organizationId: assessment.organizationId,
     triggeredById: assessment.triggeredById ?? undefined,
     subjectEntityId: assessment.subjectEntityId,
-    orchestrationRunId: assessment.orchestrationRunId ?? undefined,
+    orchestrationRunId: assessment.orchestrationRunId || "",
   };
 
   let stageIndex = 0;
