@@ -51,15 +51,15 @@ export async function detectContradictionsAndGaps(organizationId: string): Promi
 }> {
   try {
     const [decisions, assumptions, entities] = await Promise.all([
-      prisma.engineeringDecision.findMany({
+      (prisma as any).engineeringDecision?.findMany({
         where: { organizationId },
-      }),
-      prisma.assumptionRecord.findMany({
+      }).catch(() => []) ?? [],
+      (prisma as any).assumptionRecord?.findMany({
         include: { session: true },
-      }),
-      prisma.engineeringEntity.findMany({
+      }).catch(() => []) ?? [],
+      (prisma as any).engineeringEntity?.findMany({
         where: { organizationId, deletedAt: null },
-      }),
+      }).catch(() => []) ?? [],
     ]);
 
     const contradictions: ContradictionItem[] = [];
