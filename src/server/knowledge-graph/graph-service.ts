@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
-import { Prisma, type GraphNodeIndex, type GraphEdgeIndex } from "@prisma/client";
 import { NotFoundError, ValidationError } from "@/shared/errors";
 import { logger } from "@/shared/logging";
 
-type NodeRef = Pick<GraphNodeIndex, "id" | "entityId" | "label" | "entityType">;
-type SubgraphEdge = GraphEdgeIndex & { sourceNode: NodeRef; targetNode: NodeRef };
+export type NodeRef = { id: string; entityId: string; label: string; entityType: string };
+export type SubgraphEdge = any;
 
 export const DOMAIN_RELATIONSHIP_TYPES = [
   "AFFECTS",
@@ -46,7 +45,7 @@ export async function syncGraphIndexes(organizationId: string) {
           identifier: entity.identifier,
           label: entity.name,
           status: entity.status,
-          metadata: (entity.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
+          metadata: (entity.metadata ?? null) as any,
         },
       }).catch(() => null);
     } else {
@@ -58,7 +57,7 @@ export async function syncGraphIndexes(organizationId: string) {
           identifier: entity.identifier,
           label: entity.name,
           status: entity.status,
-          metadata: (entity.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
+          metadata: (entity.metadata ?? null) as any,
         },
       }).catch(() => null);
     }
@@ -82,7 +81,7 @@ export async function syncGraphIndexes(organizationId: string) {
         where: { id: existingRel.id },
         data: {
           relationshipType: rel.relationshipType,
-          metadata: (rel.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
+          metadata: (rel.metadata ?? null) as any,
         },
       }).catch(() => null);
     } else {
@@ -93,7 +92,7 @@ export async function syncGraphIndexes(organizationId: string) {
           sourceNodeId: sourceNode.id,
           targetNodeId: targetNode.id,
           relationshipType: rel.relationshipType,
-          metadata: (rel.metadata ?? Prisma.DbNull) as Prisma.InputJsonValue,
+          metadata: (rel.metadata ?? null) as any,
         },
       }).catch(() => null);
     }
@@ -258,7 +257,7 @@ export async function getNodeNeighbors(nodeIndexId: string, organizationId: stri
 export async function expandSubgraph(nodeIds: string[], organizationId: string, depth: number = 1) {
   const visited = new Set<string>();
   const visitedEdges = new Set<string>();
-  const nodes: Record<string, GraphNodeIndex> = {};
+  const nodes: Record<string, any> = {};
   const edges: SubgraphEdge[] = [];
 
   let frontier = Array.from(new Set(nodeIds));
@@ -313,7 +312,7 @@ export async function findPathsBetweenNodes(
   maxHops: number = 4,
 ) {
   try {
-    const paths: Array<{ nodes: GraphNodeIndex[]; edges: SubgraphEdge[] }> = [];
+    const paths: Array<{ nodes: any[]; edges: SubgraphEdge[] }> = [];
 
     const queue: Array<{
       currentNodeId: string;

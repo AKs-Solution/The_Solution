@@ -8,7 +8,6 @@ import {
   PrecedentMatchContext,
 } from "@/features/precedents/types";
 import { logger } from "@/shared/logging";
-import { Prisma } from "@prisma/client";
 import { ValidationError } from "@/shared/errors";
 
 // High-fidelity seed data reflecting real historical engineering rationale, failures, and wisdom.
@@ -426,7 +425,7 @@ export async function getPrecedents(query: PrecedentQuery & { organizationId?: s
   }
 
   // Construct filters
-  const andFilters: Prisma.HistoricalPrecedentWhereInput[] = [
+  const andFilters: any[] = [
     { organizationId: orgId, deletedAt: null },
   ];
 
@@ -530,12 +529,12 @@ export async function getPrecedents(query: PrecedentQuery & { organizationId?: s
     });
   }
 
-  const where: Prisma.HistoricalPrecedentWhereInput = { AND: andFilters };
+  const where: any = { AND: andFilters };
 
   // Sorting
   const sortBy = query.sortBy || "decisionDate";
   const sortOrder = query.sortOrder || "desc";
-  const orderBy: Prisma.HistoricalPrecedentOrderByWithRelationInput = {};
+  const orderBy: any = {};
   if (
     sortBy === "title" ||
     sortBy === "summary" ||
