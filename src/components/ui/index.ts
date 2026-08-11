@@ -81,6 +81,8 @@ export type {
   TableHeadProps,
   TableCellProps,
 } from "./table";
+export { DataTable } from "./data-table";
+export type { DataTableColumn, DataTableProps } from "./data-table";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
 export { QueryError } from "./query-error";

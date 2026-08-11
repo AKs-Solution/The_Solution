@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Building2, KeyRound, LogOut, Moon, Sun, User } from "lucide-react";
+import {   Building2, KeyRound, LayoutDashboard, LogOut, Moon, RotateCcw, Sun, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/ui/query-error";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DensitySwitcher } from "@/components/layout/workspace-controls";
+import { useWorkspacePreferences } from "@/components/layout/workspace-preferences";
 
 interface CurrentUser {
   id: string;
@@ -21,7 +23,7 @@ interface CurrentUser {
 
 type ThemePreference = "light" | "dark" | "system";
 
-const THEME_STORAGE_KEY = "morningstar.theme";
+const THEME_STORAGE_KEY = "morningstar-theme";
 
 function readTheme(): ThemePreference {
   if (typeof window === "undefined") return "system";
@@ -35,6 +37,76 @@ function applyTheme(theme: ThemePreference) {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const useDark = theme === "dark" || (theme === "system" && prefersDark);
   root.classList.toggle("dark", useDark);
+}
+
+function WorkspaceSettingsCard() {
+  const { density, views, activeViewId, applyView, deleteView, resetWorkspace } =
+    useWorkspacePreferences();
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <LayoutDashboard className="size-4" aria-hidden="true" />
+          Workspace layout
+        </CardTitle>
+        <CardDescription>
+          Density, saved views, and widget preferences persist across devices via your profile.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <span className="text-muted-foreground text-sm font-medium">Layout density</span>
+          <DensitySwitcher />
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-muted-foreground text-sm font-medium">
+            Saved views ({views.length})
+          </span>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {views.map((view) => (
+              <div
+                key={view.id}
+                className="border-border hover:bg-surface-hover flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors"
+              >
+                <button
+                  type="button"
+                  onClick={() => applyView(view.id)}
+                  className="text-foreground flex-1 text-left text-sm font-medium"
+                >
+                  {view.name}
+                </button>
+                {view.id === activeViewId && (
+                  <Badge variant="secondary" size="sm">
+                    Active
+                  </Badge>
+                )}
+                {view.id.startsWith("custom-") && (
+                  <button
+                    type="button"
+                    onClick={() => deleteView(view.id)}
+                    className="text-muted-foreground hover:text-destructive rounded p-1 transition-colors"
+                    aria-label={`Delete view ${view.name}`}
+                  >
+                    <Trash2 className="size-3.5" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground text-xs">
+              Current density: <span className="text-foreground font-medium">{density}</span>
+            </span>
+            <Button variant="secondary" size="sm" onClick={() => resetWorkspace()}>
+              <RotateCcw className="mr-1.5 size-3.5" aria-hidden="true" />
+              Reset workspace defaults
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function SettingsPanel() {
@@ -199,6 +271,8 @@ export function SettingsPanel() {
           </div>
         </CardContent>
       </Card>
+
+      <WorkspaceSettingsCard />
     </div>
   );
 }

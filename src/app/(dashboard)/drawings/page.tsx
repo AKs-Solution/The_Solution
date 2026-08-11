@@ -230,14 +230,14 @@ export default function DrawingsDashboardPage() {
             </div>
 
             {/* TAB SWITCHER */}
-            <div className="flex items-center gap-1 rounded-xl border border-zinc-800 bg-zinc-900/60 p-1">
+            <div className="border-border bg-background flex items-center gap-1 rounded-xl border p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab("RISK_ASSESSMENT")}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-colors ${
                   activeTab === "RISK_ASSESSMENT"
-                    ? "bg-indigo-600 text-white"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Cpu className="size-4" /> 3-Layer Risk Engine
@@ -247,8 +247,8 @@ export default function DrawingsDashboardPage() {
                 onClick={() => setActiveTab("REVISION_COMPARE")}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-colors ${
                   activeTab === "REVISION_COMPARE"
-                    ? "bg-indigo-600 text-white"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Layers className="size-4" /> Revision Compare

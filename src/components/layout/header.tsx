@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Search, Settings, User } from "lucide-react";
+import { DensitySwitcher, ViewSwitcher } from "@/components/layout/workspace-controls";
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -121,6 +122,10 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden items-center gap-2 xl:flex">
+            <DensitySwitcher />
+            <ViewSwitcher />
+          </div>
           <button
             type="button"
             onClick={openSearchPalette}

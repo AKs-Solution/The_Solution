@@ -19,7 +19,7 @@ import {
   Clock,
 } from "lucide-react";
 import { PageContainer, Section, Panel, GridLayout, Stack } from "@/components/layout";
-import { MetricCard, LoadingSpinner, EmptyState, Button } from "@/components/ui";
+import { MetricCard, EmptyState, Button, DataTable } from "@/components/ui";
 import { cn } from "@/shared/utils";
 import { EngineeringPrecedent, PrecedentType } from "@/features/precedents/types";
 
@@ -460,146 +460,153 @@ export default function PrecedentEnginePage() {
           <div className="flex flex-col items-start gap-6 lg:flex-row">
             {/* Left Column: Ledger Table */}
             <Panel padding="none" className="w-full flex-1 overflow-hidden">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-24">
-                  <LoadingSpinner />
-                </div>
-              ) : precedents.length === 0 ? (
-                <EmptyState
-                  icon={<History className="text-muted-foreground size-10" />}
-                  title="No matched precedents"
-                  description="Refine your search parameters or submit a new custom precedent record."
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left">
-                    <thead>
-                      <tr className="text-muted-foreground border-b bg-zinc-50 font-mono text-xs tracking-wider uppercase dark:bg-zinc-900/50">
-                        <th className="px-6 py-4 font-medium">Record Title</th>
-                        <th className="px-6 py-4 font-medium">Type</th>
-                        <th className="px-6 py-4 font-medium">Target Systems</th>
-                        <th className="px-6 py-4 font-medium">Confidence</th>
-                        <th className="px-6 py-4 font-medium">Verification Status</th>
-                        <th className="px-6 py-4 font-medium">Created At</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y text-sm">
-                      {precedents.map((prec) => {
-                        const precType = prec.tags?.[0] || "FAILURE";
-                        const relatedComps = prec.relatedComponents || [];
-                        const outcomeStatus = prec.outcome || "RESOLVED";
-                        return (
-                          <tr
-                            key={prec.id}
-                            onClick={() => setSelectedPrecedent(prec)}
-                            className={cn(
-                              "group cursor-pointer transition-all hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20",
-                              selectedPrecedent?.id === prec.id
-                                ? "border-l-2 border-l-amber-500 bg-amber-500/5 dark:bg-amber-500/5"
-                                : "",
-                            )}
+              <DataTable
+                data={precedents}
+                rowKey={(prec) => prec.id}
+                loading={isLoading}
+                skeletonRows={6}
+                onRowClick={(prec) => setSelectedPrecedent(prec)}
+                emptyState={
+                  <EmptyState
+                    icon={<History className="text-muted-foreground size-10" />}
+                    title="No matched precedents"
+                    description="Refine your search parameters or submit a new custom precedent record."
+                  />
+                }
+                columns={[
+                  {
+                    key: "title",
+                    header: "Record Title",
+                    sortValue: (prec) => prec.title,
+                    className: "max-w-md",
+                    accessor: (prec) => (
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={cn(
+                            "text-foreground text-sm font-semibold transition-colors",
+                            selectedPrecedent?.id === prec.id && "text-amber-500",
+                          )}
+                        >
+                          {prec.title}
+                        </span>
+                        <span className="text-muted-foreground line-clamp-2 text-xs">
+                          {prec.summary}
+                        </span>
+                        {prec.engineeringQuestion && (
+                          <div className="mt-2 rounded border border-red-500/10 bg-red-500/5 px-2.5 py-1.5 text-xs text-red-700 dark:text-red-400">
+                            <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
+                              Engineering Question
+                            </span>
+                            {prec.engineeringQuestion}
+                          </div>
+                        )}
+                        {prec.decisionMade &&
+                          prec.decisionMade !== "N/A - System baseline verified." && (
+                            <div className="mt-1 rounded border border-green-500/10 bg-green-500/5 px-2.5 py-1.5 text-xs text-green-700 dark:text-green-400">
+                              <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
+                                Decision Made
+                              </span>
+                              {prec.decisionMade}
+                            </div>
+                          )}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: "type",
+                    header: "Type",
+                    sortValue: (prec) => prec.tags?.[0] || "FAILURE",
+                    accessor: (prec) => {
+                      const precType = prec.tags?.[0] || "FAILURE";
+                      return (
+                        <span
+                          className={cn(
+                            "rounded px-2 py-0.5 font-mono text-[11px] font-semibold tracking-wide",
+                            precType === "FAILURE"
+                              ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400"
+                              : precType === "SUCCESSFUL_DESIGN"
+                                ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400"
+                                : precType === "REGULATORY_PRECEDENT"
+                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400"
+                                  : "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400",
+                          )}
+                        >
+                          {precType.replace("_", " ")}
+                        </span>
+                      );
+                    },
+                  },
+                  {
+                    key: "systems",
+                    header: "Target Systems",
+                    accessor: (prec) => (
+                      <div className="flex flex-wrap gap-1">
+                        {(prec.relatedComponents || []).map((s: string) => (
+                          <span
+                            key={s}
+                            className="bg-muted text-foreground rounded px-1.5 py-0.5 text-[10px] font-medium"
                           >
-                            <td className="max-w-md px-6 py-4">
-                              <div className="flex flex-col gap-1">
-                                <span
-                                  className={cn(
-                                    "text-foreground text-sm font-semibold transition-colors",
-                                    selectedPrecedent?.id === prec.id
-                                      ? "text-amber-500"
-                                      : "group-hover:text-amber-500",
-                                  )}
-                                >
-                                  {prec.title}
-                                </span>
-                                <span className="text-muted-foreground line-clamp-2 text-xs">
-                                  {prec.summary}
-                                </span>
-
-                                {prec.engineeringQuestion && (
-                                  <div className="mt-2 rounded border border-red-500/10 bg-red-500/5 px-2.5 py-1.5 text-xs text-red-700 dark:text-red-400">
-                                    <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
-                                      Engineering Question
-                                    </span>
-                                    {prec.engineeringQuestion}
-                                  </div>
-                                )}
-
-                                {prec.decisionMade &&
-                                  prec.decisionMade !== "N/A - System baseline verified." && (
-                                    <div className="mt-1 rounded border border-green-500/10 bg-green-500/5 px-2.5 py-1.5 text-xs text-green-700 dark:text-green-400">
-                                      <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
-                                        Decision Made
-                                      </span>
-                                      {prec.decisionMade}
-                                    </div>
-                                  )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={cn(
-                                  "rounded px-2 py-0.5 font-mono text-[11px] font-semibold tracking-wide",
-                                  precType === "FAILURE"
-                                    ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400"
-                                    : precType === "SUCCESSFUL_DESIGN"
-                                      ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400"
-                                      : precType === "REGULATORY_PRECEDENT"
-                                        ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400"
-                                        : "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400",
-                                )}
-                              >
-                                {precType.replace("_", " ")}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-wrap gap-1">
-                                {relatedComps.map((s: string) => (
-                                  <span
-                                    key={s}
-                                    className="bg-muted text-foreground rounded px-1.5 py-0.5 text-[10px] font-medium"
-                                  >
-                                    {s}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">
-                              {(prec.confidence * 100).toFixed(0)}%
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={cn(
-                                  "inline-flex items-center gap-1.5 text-xs font-medium",
-                                  outcomeStatus === "RESOLVED"
-                                    ? "text-green-600 dark:text-green-400"
-                                    : outcomeStatus === "MITIGATED"
-                                      ? "text-amber-600 dark:text-amber-400"
-                                      : "text-zinc-600 dark:text-zinc-400",
-                                )}
-                              >
-                                <span
-                                  className={cn(
-                                    "size-1.5 rounded-full",
-                                    outcomeStatus === "RESOLVED"
-                                      ? "bg-green-500"
-                                      : outcomeStatus === "MITIGATED"
-                                        ? "bg-amber-500"
-                                        : "bg-zinc-500",
-                                  )}
-                                />
-                                {outcomeStatus}
-                              </span>
-                            </td>
-                            <td className="text-muted-foreground px-6 py-4 font-mono text-xs whitespace-nowrap">
-                              {new Date(prec.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    ),
+                  },
+                  {
+                    key: "confidence",
+                    header: "Confidence",
+                    sortValue: (prec) => prec.confidence,
+                    align: "right",
+                    accessor: (prec) => (
+                      <span className="font-mono text-xs">
+                        {(prec.confidence * 100).toFixed(0)}%
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "status",
+                    header: "Verification Status",
+                    sortValue: (prec) => prec.outcome || "RESOLVED",
+                    accessor: (prec) => {
+                      const outcomeStatus = prec.outcome || "RESOLVED";
+                      return (
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 text-xs font-medium",
+                            outcomeStatus === "RESOLVED"
+                              ? "text-green-600 dark:text-green-400"
+                              : outcomeStatus === "MITIGATED"
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-zinc-600 dark:text-zinc-400",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              outcomeStatus === "RESOLVED"
+                                ? "bg-green-500"
+                                : outcomeStatus === "MITIGATED"
+                                  ? "bg-amber-500"
+                                  : "bg-zinc-500",
+                            )}
+                          />
+                          {outcomeStatus}
+                        </span>
+                      );
+                    },
+                  },
+                  {
+                    key: "created",
+                    header: "Created At",
+                    sortValue: (prec) => prec.createdAt,
+                    accessor: (prec) => (
+                      <span className="text-muted-foreground font-mono text-xs">
+                        {new Date(prec.createdAt).toLocaleDateString()}
+                      </span>
+                    ),
+                  },
+                ]}
+              />
             </Panel>
 
             {/* Right Column: Precedent Investigation Dashboard Detail Panel */}

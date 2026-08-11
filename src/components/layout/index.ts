@@ -11,3 +11,20 @@ export { SplitLayout } from "./split-layout";
 export { Breadcrumbs } from "./breadcrumbs";
 export { CapabilityHub } from "./capability-hub";
 export type { CapabilityHubProps, CapabilityLink } from "./capability-hub";
+export {
+  WorkspacePreferencesProvider,
+  useWorkspacePreferences,
+  WORKSPACE_PRESETS,
+  DENSITY_LABELS,
+} from "./workspace-preferences";
+export type {
+  WorkspaceDensity,
+  WorkspaceView,
+  WorkspaceViewIcon,
+  WorkspacePreferencesState,
+  WorkspacePreferencesValue,
+  WidgetPrefs,
+} from "./workspace-preferences";
+export { Widget, WidgetGrid, WidgetCustomizeMenu } from "./widget";
+export type { WidgetConfig, WidgetProps, WidgetGridProps, WidgetCustomizeMenuProps } from "./widget";
+export { DensitySwitcher, ViewSwitcher } from "./workspace-controls";

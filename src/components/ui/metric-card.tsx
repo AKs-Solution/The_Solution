@@ -5,10 +5,11 @@ import { cn } from "@/shared/utils";
 
 export interface MetricCardProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
   icon?: React.ReactNode;
+  hint?: React.ReactNode;
 }
 
 const trendStyles = {
@@ -18,7 +19,7 @@ const trendStyles = {
 };
 
 export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
-  ({ className = "", label, value, trend, trendValue, icon, ...props }, ref) => {
+  ({ className = "", label, value, trend, trendValue, icon, hint, ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -32,6 +33,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
           </div>
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </div>
+        {hint && <span className="text-muted-foreground mt-1 block text-[11px]">{hint}</span>}
         {trend && trendValue && (
           <span
             className={cn(

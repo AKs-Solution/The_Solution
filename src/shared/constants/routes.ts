@@ -68,6 +68,8 @@ export const SIDEBAR_NAV: SidebarNavEntry[] = [
     icon: "Brain",
     items: [
       { label: "Executive Dashboard", href: "/executive-dashboard", icon: "BarChart3" },
+      { label: "Decision Sentinel", href: "/sentinel", icon: "Activity" },
+      { label: "Certification Readiness", href: "/certification", icon: "ShieldCheck" },
       { label: "Approval Queue", href: "/reviews", icon: "UserCheck" },
       { label: "Lineage Explorer", href: "/lineage", icon: "GitBranch" },
       { label: "Program Health", href: "/programs", icon: "Activity" },

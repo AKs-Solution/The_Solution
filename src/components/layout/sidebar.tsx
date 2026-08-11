@@ -33,6 +33,7 @@ import {
   Workflow,
   ScanEye,
   ScrollText,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 
@@ -58,6 +59,7 @@ const iconMap: Record<string, LucideIcon> = {
   Workflow,
   ScanEye,
   ScrollText,
+  Activity,
 };
 
 function isItemActive(pathname: string, href: string): boolean {
