@@ -11,6 +11,7 @@ function Probe() {
   return (
     <div>
       <span data-testid="density">{ctx.density}</span>
+      <span data-testid="layout">{ctx.layout}</span>
       <span data-testid="active-view">{ctx.activeView?.name ?? "none"}</span>
       <span data-testid="visible-count">
         {Object.values(ctx.widgetPrefs).filter((w) => w.visible).length}
@@ -20,6 +21,9 @@ function Probe() {
       <span data-testid="views-count">{ctx.views.length}</span>
       <button type="button" onClick={() => ctx.setDensity("compact")}>
         set-compact
+      </button>
+      <button type="button" onClick={() => ctx.setLayout("classic")}>
+        set-classic-layout
       </button>
       <button type="button" onClick={() => ctx.setWidgetVisible("kpi-row", false)}>
         hide-kpi
@@ -78,6 +82,14 @@ describe("WorkspacePreferencesProvider", () => {
     await user.click(screen.getByRole("button", { name: "set-compact" }));
     expect(screen.getByTestId("density")).toHaveTextContent("compact");
     expect(document.documentElement.getAttribute("data-density")).toBe("compact");
+  });
+
+  it("defaults to the tabs layout and setLayout switches it", async () => {
+    const user = userEvent.setup();
+    await renderProbe();
+    expect(screen.getByTestId("layout")).toHaveTextContent("tabs");
+    await user.click(screen.getByRole("button", { name: "set-classic-layout" }));
+    expect(screen.getByTestId("layout")).toHaveTextContent("classic");
   });
 
   it("setWidgetVisible hides a widget", async () => {

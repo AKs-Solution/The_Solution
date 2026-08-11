@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { usePathname } from "next/navigation";
 import { LayoutGroup, motion } from "motion/react";
 import {
   Activity,
@@ -15,7 +16,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { useWorkspaceTabs, type WorkspaceTab, type WorkspaceTabKind } from "./workspace-tabs";
+import { useWorkspaceTabs, type WorkspaceTab, type WorkspaceTabKind, isWorkspaceRoute } from "./workspace-tabs";
+import { useWorkspacePreferences } from "./workspace-preferences";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 const KIND_META: Record<WorkspaceTabKind, { icon: LucideIcon; dot: string }> = {
@@ -106,8 +108,13 @@ function WorkspaceTabItem({ tab, isActive }: { tab: WorkspaceTab; isActive: bool
 }
 
 export function WorkspaceTabBar() {
+  const { layout } = useWorkspacePreferences();
+  const pathname = usePathname();
   const { tabs, activeTabId, openTab, togglePin, closeTabs } = useWorkspaceTabs();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  if (layout === "classic") return null;
+  if (layout === "records" && !isWorkspaceRoute(pathname)) return null;
 
   const pinned = tabs.filter((t) => t.pinned);
   const unpinned = tabs.filter((t) => !t.pinned);

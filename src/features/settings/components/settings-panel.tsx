@@ -12,7 +12,11 @@ import { QueryError } from "@/components/ui/query-error";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DensitySwitcher } from "@/components/layout/workspace-controls";
-import { useWorkspacePreferences } from "@/components/layout/workspace-preferences";
+import {
+  LAYOUT_OPTIONS,
+  useWorkspacePreferences,
+  type WorkspaceLayout,
+} from "@/components/layout/workspace-preferences";
 
 interface CurrentUser {
   id: string;
@@ -103,6 +107,83 @@ function WorkspaceSettingsCard() {
               Reset workspace defaults
             </Button>
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LayoutPreview({ layout }: { layout: WorkspaceLayout }) {
+  const showTabs = layout !== "classic";
+  return (
+    <div className="border-border bg-muted/50 h-20 w-full overflow-hidden rounded-md border p-1.5">
+      <div className="bg-background border-border/50 flex h-full w-full flex-col overflow-hidden rounded-[3px] border">
+        <div className="border-border flex h-2.5 items-center gap-1 border-b px-1">
+          <div className="bg-muted-foreground/40 h-0.5 w-6 rounded-full" />
+          <div className="bg-muted-foreground/40 h-0.5 w-3 rounded-full" />
+          <div className="bg-muted-foreground/30 ml-auto h-0.5 w-4 rounded-full" />
+        </div>
+        {showTabs && (
+          <div className="flex h-2 items-end gap-0.5 border-b border-black/5 px-1">
+            <div className="bg-foreground/70 h-1.5 w-4 rounded-t-[2px]" />
+            <div className="bg-muted-foreground/30 h-1.5 w-3 rounded-t-[2px]" />
+            <div className="bg-muted-foreground/30 h-1.5 w-3 rounded-t-[2px]" />
+          </div>
+        )}
+        <div className="flex flex-1">
+          <div className="bg-muted-foreground/10 w-2 border-r border-black/5" />
+          <div className="flex flex-1 flex-col gap-0.5 p-1">
+            <div className="bg-foreground/10 h-1 w-full rounded-sm" />
+            <div className="bg-foreground/5 h-1 w-3/4 rounded-sm" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualLayoutCard() {
+  const { layout, setLayout } = useWorkspacePreferences();
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <LayoutDashboard className="size-4" aria-hidden="true" />
+          Visual layout
+        </CardTitle>
+        <CardDescription>
+          Pick how the workspace shell is arranged. Applies instantly and persists across devices.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {LAYOUT_OPTIONS.map((option) => {
+            const isActive = layout === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setLayout(option.id)}
+                aria-pressed={isActive}
+                className={[
+                  "border-border hover:bg-surface-hover flex flex-col gap-2 rounded-xl border p-3 text-left transition-colors",
+                  isActive ? "ring-ring bg-surface ring-2" : "",
+                ].join(" ")}
+              >
+                <LayoutPreview layout={option.id} />
+                <span className="text-foreground text-sm font-semibold">{option.name}</span>
+                <span className="text-muted-foreground text-xs leading-relaxed">
+                  {option.description}
+                </span>
+                {isActive && (
+                  <Badge variant="secondary" size="sm" className="w-fit">
+                    Active
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
@@ -271,6 +352,8 @@ export function SettingsPanel() {
           </div>
         </CardContent>
       </Card>
+
+      <VisualLayoutCard />
 
       <WorkspaceSettingsCard />
     </div>

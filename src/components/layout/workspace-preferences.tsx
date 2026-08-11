@@ -13,6 +13,35 @@ import {
 
 export type WorkspaceDensity = "compact" | "comfortable" | "spacious";
 
+export type WorkspaceLayout = "tabs" | "records" | "classic";
+
+export interface LayoutOption {
+  id: WorkspaceLayout;
+  name: string;
+  description: string;
+}
+
+export const LAYOUT_OPTIONS: LayoutOption[] = [
+  {
+    id: "tabs",
+    name: "Command Deck",
+    description:
+      "Always-visible browser-style tab bar with a pinned Home tab and one tab per open record or page.",
+  },
+  {
+    id: "records",
+    name: "Records First",
+    description:
+      "Tab bar appears only on decisions, sentinel, drawings, and failure-graph pages, keeping other areas clean.",
+  },
+  {
+    id: "classic",
+    name: "Classic",
+    description:
+      "The original layout without a workspace tab bar — just the sidebar, header, and page content.",
+  },
+];
+
 export type WorkspaceViewIcon = "layout" | "shield" | "gauge" | "truck" | "brain";
 
 export interface WorkspaceView {
@@ -41,6 +70,7 @@ export type WidgetPrefs = Record<string, { visible: boolean; minimized: boolean 
 
 export interface WorkspacePreferencesState {
   density: WorkspaceDensity;
+  layout: WorkspaceLayout;
   activeViewId: string;
   views: WorkspaceView[];
   widgetPrefs: WidgetPrefs;
@@ -125,6 +155,7 @@ export const WORKSPACE_PRESETS: WorkspaceView[] = [
 function getDefaultState(): WorkspacePreferencesState {
   return {
     density: "comfortable",
+    layout: "tabs",
     activeViewId: "mission-control",
     views: WORKSPACE_PRESETS,
     widgetPrefs: { ...DEFAULT_WIDGET_PREFS },
@@ -164,6 +195,10 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
       r.density === "compact" || r.density === "comfortable" || r.density === "spacious"
         ? r.density
         : fallback.density,
+    layout:
+      r.layout === "tabs" || r.layout === "records" || r.layout === "classic"
+        ? r.layout
+        : fallback.layout,
     activeViewId: activeView.id,
     views,
     widgetPrefs:
@@ -197,6 +232,7 @@ function readLocal(): WorkspacePreferencesState | null {
 export interface WorkspacePreferencesValue extends WorkspacePreferencesState {
   activeView: WorkspaceView | null;
   setDensity: (density: WorkspaceDensity) => void;
+  setLayout: (layout: WorkspaceLayout) => void;
   applyView: (viewId: string) => void;
   saveCurrentView: (name: string, icon?: WorkspaceViewIcon) => WorkspaceView | null;
   deleteView: (viewId: string) => void;
@@ -269,6 +305,10 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
 
   const setDensity = useCallback((density: WorkspaceDensity) => {
     setState((prev) => ({ ...prev, density }));
+  }, []);
+
+  const setLayout = useCallback((layout: WorkspaceLayout) => {
+    setState((prev) => ({ ...prev, layout }));
   }, []);
 
   const applyView = useCallback((viewId: string) => {
@@ -373,6 +413,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       ...state,
       activeView: state.views.find((v) => v.id === state.activeViewId) ?? null,
       setDensity,
+      setLayout,
       applyView,
       saveCurrentView,
       deleteView,
@@ -385,6 +426,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
     [
       state,
       setDensity,
+      setLayout,
       applyView,
       saveCurrentView,
       deleteView,

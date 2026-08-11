@@ -32,6 +32,28 @@ export function tabIdFor(kind: WorkspaceTabKind, ref: string): string {
   return `${kind}:${ref}`;
 }
 
+export const HOME_TAB: WorkspaceTab = {
+  id: tabIdFor("ledger", "/dashboard"),
+  kind: "ledger",
+  ref: "/dashboard",
+  title: "Home",
+  subtitle: "Workspace",
+  href: "/dashboard",
+  pinned: true,
+  auto: true,
+};
+
+function isHomeTab(id: string): boolean {
+  return id === HOME_TAB.id;
+}
+
+function humanize(value: string): string {
+  return value
+    .split(/[-_]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function isWorkspaceRoute(pathname: string): boolean {
   if (pathname.startsWith("/drawings/comparisons")) return false;
   return (
@@ -62,7 +84,10 @@ const LEDGER_TABS: Array<{ path: string; title: string }> = [
  * legacy comparison jobs, etc.).
  */
 export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
-  if (!isWorkspaceRoute(pathname)) return null;
+  if (pathname === "/") return null;
+
+  // Legacy comparison jobs keep their own inspector route and don't surface a tab.
+  if (pathname.startsWith("/drawings/comparisons")) return null;
 
   const detail = (
     prefix: string,
@@ -100,8 +125,31 @@ export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
         pinned: false,
         auto: true,
       };
-    })()
+    })() ??
+    genericTab(pathname)
   );
+}
+
+/**
+ * Fallback that surfaces a tab for every other authenticated route so the
+ * workspace bar is never empty and always reflects the current page.
+ */
+function genericTab(pathname: string): WorkspaceTab | null {
+  if (pathname === "/") return null;
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return null;
+  const title = humanize(segments[segments.length - 1]);
+  const subtitle = segments.length > 1 ? humanize(segments[segments.length - 2]) : undefined;
+  return {
+    id: tabIdFor("ledger", pathname),
+    kind: "ledger" as const,
+    ref: pathname,
+    title,
+    subtitle,
+    href: pathname,
+    pinned: false,
+    auto: true,
+  };
 }
 
 interface ScopedStore {
@@ -199,7 +247,10 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
   const scopedRef = useRef<ScopedStore>(initialSession?.scoped ?? {});
   const scrollYRef = useRef<Record<string, number>>(initialSession?.scrollY ?? {});
 
-  const [tabs, setTabs] = useState<WorkspaceTab[]>(() => readStoredTabs());
+  const [tabs, setTabs] = useState<WorkspaceTab[]>(() => {
+    const stored = readStoredTabs();
+    return stored.some((t) => t.id === HOME_TAB.id) ? stored : [HOME_TAB, ...stored];
+  });
   const [activeTabId, setActiveTabId] = useState<string | null>(
     initialSession?.activeTabId ?? null,
   );
@@ -343,6 +394,7 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
 
   const closeTab = useCallback(
     (id: string) => {
+      if (isHomeTab(id)) return;
       const index = tabsRef.current.findIndex((t) => t.id === id);
       if (index === -1) return;
       const wasActive = activeTabIdRef.current === id;
@@ -362,7 +414,9 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
 
   const closeTabs = useCallback(
     (ids?: string[]) => {
-      const target = new Set(ids ?? tabsRef.current.map((t) => t.id));
+      const target = new Set(
+        (ids ?? tabsRef.current.map((t) => t.id)).filter((id) => !isHomeTab(id)),
+      );
       const remaining = tabsRef.current.filter((t) => !target.has(t.id));
       setTabs((prev) => prev.filter((t) => !target.has(t.id)));
       const active = activeTabIdRef.current;

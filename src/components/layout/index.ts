@@ -16,9 +16,12 @@ export {
   useWorkspacePreferences,
   WORKSPACE_PRESETS,
   DENSITY_LABELS,
+  LAYOUT_OPTIONS,
 } from "./workspace-preferences";
 export type {
   WorkspaceDensity,
+  WorkspaceLayout,
+  LayoutOption,
   WorkspaceView,
   WorkspaceViewIcon,
   WorkspacePreferencesState,
