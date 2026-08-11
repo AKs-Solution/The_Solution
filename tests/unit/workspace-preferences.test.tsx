@@ -84,10 +84,10 @@ describe("WorkspacePreferencesProvider", () => {
     expect(document.documentElement.getAttribute("data-density")).toBe("compact");
   });
 
-  it("defaults to the tabs layout and setLayout switches it", async () => {
+  it("defaults to the studio layout and setLayout switches it", async () => {
     const user = userEvent.setup();
     await renderProbe();
-    expect(screen.getByTestId("layout")).toHaveTextContent("tabs");
+    expect(screen.getByTestId("layout")).toHaveTextContent("studio");
     await user.click(screen.getByRole("button", { name: "set-classic-layout" }));
     expect(screen.getByTestId("layout")).toHaveTextContent("classic");
   });

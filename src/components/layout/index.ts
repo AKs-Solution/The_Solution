@@ -2,6 +2,7 @@ export { Shell } from "./shell";
 export { Sidebar } from "./sidebar";
 export { Header } from "./header";
 export { Footer } from "./footer";
+export { ActivityRail } from "./activity-rail";
 export { PageContainer } from "./page-container";
 export { Section } from "./section";
 export { Panel } from "./panel";

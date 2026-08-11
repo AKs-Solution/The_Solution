@@ -13,7 +13,7 @@ import {
 
 export type WorkspaceDensity = "compact" | "comfortable" | "spacious";
 
-export type WorkspaceLayout = "tabs" | "records" | "classic";
+export type WorkspaceLayout = "studio" | "tabs" | "records" | "classic";
 
 export interface LayoutOption {
   id: WorkspaceLayout;
@@ -22,6 +22,12 @@ export interface LayoutOption {
 }
 
 export const LAYOUT_OPTIONS: LayoutOption[] = [
+  {
+    id: "studio",
+    name: "Engineering Studio",
+    description:
+      "Full desktop-app shell: activity rail on the left, browser-style tab bar, and an IDE-style status bar. Highest density of controls.",
+  },
   {
     id: "tabs",
     name: "Command Deck",
@@ -155,7 +161,7 @@ export const WORKSPACE_PRESETS: WorkspaceView[] = [
 function getDefaultState(): WorkspacePreferencesState {
   return {
     density: "comfortable",
-    layout: "tabs",
+    layout: "studio",
     activeViewId: "mission-control",
     views: WORKSPACE_PRESETS,
     widgetPrefs: { ...DEFAULT_WIDGET_PREFS },
@@ -196,7 +202,7 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
         ? r.density
         : fallback.density,
     layout:
-      r.layout === "tabs" || r.layout === "records" || r.layout === "classic"
+      r.layout === "studio" || r.layout === "tabs" || r.layout === "records" || r.layout === "classic"
         ? r.layout
         : fallback.layout,
     activeViewId: activeView.id,
