@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useWorkspacePreferences, type WorkspaceViewIcon } from "@/components/layout/workspace-preferences";
+import { useWorkspaceTabs, type WorkspaceTabKind } from "@/components/layout/workspace-tabs";
 
 const VIEW_ICONS: Record<WorkspaceViewIcon, LucideIcon> = {
   layout: LayoutDashboard,
@@ -25,6 +26,14 @@ const VIEW_ICONS: Record<WorkspaceViewIcon, LucideIcon> = {
   gauge: Gauge,
   truck: Truck,
   brain: Brain,
+};
+
+const TAB_ICONS: Record<WorkspaceTabKind, LucideIcon> = {
+  decision: FileText,
+  sentinel: Activity,
+  drawing: Layers,
+  "failure-graph": Gauge,
+  ledger: Monitor,
 };
 
 const QUICK_LINKS: { label: string; href: string; icon: LucideIcon }[] = [
@@ -42,6 +51,7 @@ export function CommandPalette() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { views, applyView } = useWorkspacePreferences();
+  const { tabs, activeTabId, activateTab, closeTabs } = useWorkspaceTabs();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -140,6 +150,71 @@ export function CommandPalette() {
             </div>
           ) : (
             <div className="p-4 text-left text-xs">
+              {tabs.length > 0 && (
+                <>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-muted-foreground font-semibold">Workspace tabs</span>
+                    <button
+                      onClick={() => {
+                        closeTabs();
+                        setOpen(false);
+                      }}
+                      className="text-muted-foreground hover:text-foreground rounded px-1.5 py-0.5 font-medium transition-colors"
+                    >
+                      Close all
+                    </button>
+                  </div>
+                  <div className="mb-4 flex flex-col gap-1">
+                    {tabs.map((tab) => {
+                      const Icon = TAB_ICONS[tab.kind] ?? Monitor;
+                      return (
+                        <div
+                          key={tab.id}
+                          onClick={() => {
+                            activateTab(tab.id);
+                            setOpen(false);
+                          }}
+                          className={[
+                            "hover:bg-surface-hover flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-transparent p-2 text-left transition-colors",
+                            activeTabId === tab.id ? "border-border bg-surface" : "",
+                          ].join(" ")}
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Icon
+                              className={[
+                                "size-3.5 shrink-0",
+                                tab.kind === "decision" && "text-emerald-500",
+                                tab.kind === "sentinel" && "text-rose-500",
+                                tab.kind === "drawing" && "text-indigo-500",
+                                tab.kind === "failure-graph" && "text-amber-500",
+                                tab.kind === "ledger" && "text-zinc-500",
+                              ]
+                                .filter(Boolean)
+                                .join(" ")}
+                            />
+                            <span className="text-foreground truncate font-medium">{tab.title}</span>
+                          </span>
+                          <span className="flex shrink-0 items-center gap-1">
+                            <span className="text-muted-foreground font-mono text-[10px]">
+                              {tab.subtitle}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                closeTabs([tab.id]);
+                              }}
+                              className="text-muted-foreground hover:bg-surface-hover hover:text-foreground rounded p-1"
+                              aria-label={`Close tab ${tab.title}`}
+                            >
+                              <X className="size-3" />
+                            </button>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
               <span className="text-muted-foreground mb-2 block font-semibold">
                 Saved workspace views
               </span>

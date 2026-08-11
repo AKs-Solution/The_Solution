@@ -19,6 +19,7 @@ import {
 } from "@/components/layout";
 import { Badge } from "@/components/ui";
 import { EpistemicBadge } from "@/components/ui/epistemic-badge";
+import { useWorkspaceTabs } from "@/components/layout/workspace-tabs";
 
 const WIDGETS: WidgetConfig[] = [
   {
@@ -55,6 +56,16 @@ export default function SentinelPage() {
   const [dashboard, setDashboard] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
+  const { openTab } = useWorkspaceTabs();
+
+  const openInTab = (alert: any) =>
+    openTab({
+      kind: "sentinel",
+      ref: alert.id,
+      title: alert.title,
+      subtitle: alert.type,
+      href: `/sentinel/${alert.id}`,
+    });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -125,7 +136,10 @@ export default function SentinelPage() {
                             <button
                               key={alert.id}
                               type="button"
-                              onClick={() => setSelected(alert.id)}
+                              onClick={() => {
+                                setSelected(alert.id);
+                                openInTab(alert);
+                              }}
                               className={[
                                 "border-border hover:bg-surface-hover rounded-lg border p-3 text-left transition-colors",
                                 selected === alert.id ? "border-rose-500/40 bg-rose-500/5" : "",

@@ -14,13 +14,15 @@ import {
   Cpu,
   Upload,
 } from "lucide-react";
-import { PageContainer, Stack } from "@/components/layout";
+import { PageContainer, Stack, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
 import { DrawingRiskDashboard } from "@/features/drawings/components/drawing-risk-dashboard";
 import { FusedDrawingRiskResult } from "@/server/drawings/rules/types";
 
 export default function DrawingsDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"RISK_ASSESSMENT" | "REVISION_COMPARE">(
+  const { openTab } = useWorkspaceTabs();
+  const [activeTab, setActiveTab] = useScopedTabState<"RISK_ASSESSMENT" | "REVISION_COMPARE">(
+    "drawings.activeTab",
     "RISK_ASSESSMENT",
   );
   const [projects, setProjects] = useState<any[]>([]);
@@ -34,14 +36,14 @@ export default function DrawingsDashboardPage() {
   const [assessFile, setAssessFile] = useState<File | null>(null);
 
   // New Project form state
-  const [newProjectName, setNewProjectName] = useState("");
-  const [newProjectDesc, setNewProjectDesc] = useState("");
+  const [newProjectName, setNewProjectName] = useScopedTabState("drawings.newProjectName", "");
+  const [newProjectDesc, setNewProjectDesc] = useScopedTabState("drawings.newProjectDesc", "");
   const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   // New Comparison form state
-  const [drawingName, setDrawingName] = useState("");
-  const [revALabel, setRevALabel] = useState("Rev A");
-  const [revBLabel, setRevBLabel] = useState("Rev B");
+  const [drawingName, setDrawingName] = useScopedTabState("drawings.drawingName", "");
+  const [revALabel, setRevALabel] = useScopedTabState("drawings.revALabel", "Rev A");
+  const [revBLabel, setRevBLabel] = useScopedTabState("drawings.revBLabel", "Rev B");
   const [fileA, setFileA] = useState<File | null>(null);
   const [fileB, setFileB] = useState<File | null>(null);
 
@@ -385,7 +387,16 @@ export default function DrawingsDashboardPage() {
                   {comparisons.map((c) => (
                     <Link
                       key={c.id}
-                      href={`/drawings/comparisons/${c.id}`}
+                      href={`/drawings/${c.id}`}
+                      onClick={() =>
+                        openTab({
+                          kind: "drawing",
+                          ref: c.id,
+                          title: `Drawing Inspection ${c.id.substring(0, 8)}`,
+                          subtitle: c.status ?? "READY",
+                          href: `/drawings/${c.id}`,
+                        })
+                      }
                       className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-900/25 p-5 text-left transition-all hover:border-zinc-700 hover:bg-zinc-900/50"
                     >
                       <div className="flex items-center gap-4">

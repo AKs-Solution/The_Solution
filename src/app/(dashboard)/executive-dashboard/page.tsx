@@ -385,7 +385,18 @@ export default function ExecutiveDashboardPage() {
 
                 case "industry-failure-graph":
                   return (
-                    <Widget key={config.id} config={config}>
+                    <Widget
+                      key={config.id}
+                      config={config}
+                      actions={
+                        <Link
+                          href="/failure-graph"
+                          className="text-muted-foreground hover:text-foreground text-xs font-medium"
+                        >
+                          Open graph workspace
+                        </Link>
+                      }
+                    >
                       <div className="flex max-h-72 flex-col gap-3 overflow-y-auto">
                         {failurePrecedents.length === 0 ? (
                           <p className="text-muted-foreground py-8 text-center text-xs">

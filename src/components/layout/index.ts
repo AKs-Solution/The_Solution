@@ -28,3 +28,11 @@ export type {
 export { Widget, WidgetGrid, WidgetCustomizeMenu } from "./widget";
 export type { WidgetConfig, WidgetProps, WidgetGridProps, WidgetCustomizeMenuProps } from "./widget";
 export { DensitySwitcher, ViewSwitcher } from "./workspace-controls";
+export { WorkspaceTabsProvider, useWorkspaceTabs, useScopedTabState, tabIdFor, deriveTabFromPathname, isWorkspaceRoute } from "./workspace-tabs";
+export type { WorkspaceTab, WorkspaceTabKind, WorkspaceTabsValue, OpenTabOptions } from "./workspace-tabs";
+export { WorkspaceTabBar } from "./workspace-tab-bar";
+export { RecordTabs } from "./record-tabs";
+export type { RecordTabItem, RecordTabsProps } from "./record-tabs";
+export { RecordInspector } from "./record-inspector";
+export type { RecordInspectorProps } from "./record-inspector";
+export { useRecordScroll } from "./workspace-tabs";

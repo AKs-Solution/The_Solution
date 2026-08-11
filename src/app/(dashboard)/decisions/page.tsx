@@ -6,18 +6,31 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { GitCommit, RefreshCw, FileText, ChevronRight } from "lucide-react";
-import { PageContainer, Stack } from "@/components/layout";
+import { PageContainer, Stack, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
 
 export default function DecisionAuditTrailPage() {
   const [decisions, setDecisions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { openTab } = useWorkspaceTabs();
 
-  // Form state
-  const [decisionType, setDecisionType] = useState("TOLERANCE_CHANGE");
-  const [description, setDescription] = useState("");
-  const [rationale, setRationale] = useState("");
+  // Form state (scoped per workspace tab so switching tabs preserves drafts)
+  const [decisionType, setDecisionType] = useScopedTabState(
+    "decisions.decisionType",
+    "TOLERANCE_CHANGE",
+  );
+  const [description, setDescription] = useScopedTabState("decisions.description", "");
+  const [rationale, setRationale] = useScopedTabState("decisions.rationale", "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openInTab = (d: any) =>
+    openTab({
+      kind: "decision",
+      ref: d.id,
+      title: d.description,
+      subtitle: d.decisionType,
+      href: `/decisions/${d.id}`,
+    });
 
   const fetchDecisions = useCallback(async () => {
     setIsLoading(true);
@@ -180,6 +193,7 @@ export default function DecisionAuditTrailPage() {
                 <Link
                   key={d.id}
                   href={`/decisions/${d.id}`}
+                  onClick={() => openInTab(d)}
                   className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-900/25 p-5 transition-all hover:border-zinc-700 hover:bg-zinc-900/50"
                 >
                   <div className="flex items-center gap-4">
