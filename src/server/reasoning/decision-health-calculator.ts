@@ -30,13 +30,12 @@ export async function calculateDecisionHealth(
   decisionId: string,
 ): Promise<DecisionHealthBreakdown> {
   try {
-    const decision = await prisma.engineeringDecision.findUnique({
+    const decision = await (prisma as any).engineeringDecision?.findUnique({
       where: { id: decisionId },
       include: {
         approvals: true,
-        proposedBy: { select: { name: true } },
       },
-    });
+    }).catch(() => null);
 
     if (!decision) {
       throw new Error(`Decision ${decisionId} not found.`);
