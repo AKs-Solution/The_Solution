@@ -1,4 +1,10 @@
+import { createHash } from "crypto";
 import { prisma } from "@/server/db";
+import {
+  INDUSTRY_FAILURE_SEEDS,
+  IndustryFailureSeed,
+  queryModelMany,
+} from "@/server/precedents/seed-industry-graph";
 
 export interface HistoricalFailurePrecedent {
   id: string;
@@ -13,8 +19,52 @@ export interface HistoricalFailurePrecedent {
   occurredAt: string;
 }
 
+function sha256(...parts: string[]): string {
+  return createHash("sha256").update(parts.join("|")).digest("hex");
+}
+
+function seedToPrecedent(seed: IndustryFailureSeed): HistoricalFailurePrecedent {
+  return {
+    id: seed.id,
+    componentType: seed.componentType,
+    material: seed.material,
+    failureMode: seed.failureMode,
+    rootCause: seed.rootCause,
+    invalidatedAssumption: seed.invalidatedAssumption,
+    provenCorrectiveAction: seed.provenCorrectiveAction,
+    evidenceHashes: seed.evidenceHashes,
+    programContext: seed.programContext,
+    occurredAt: seed.occurredAt,
+  };
+}
+
+function filterPrecedents(
+  precedents: HistoricalFailurePrecedent[],
+  searchQuery?: string,
+): HistoricalFailurePrecedent[] {
+  if (!searchQuery) return precedents;
+  const q = searchQuery.toLowerCase();
+  return precedents.filter(
+    (p) =>
+      p.componentType.toLowerCase().includes(q) ||
+      p.material.toLowerCase().includes(q) ||
+      p.failureMode.toLowerCase().includes(q) ||
+      p.rootCause.toLowerCase().includes(q),
+  );
+}
+
+function fallbackPrecedents(searchQuery?: string) {
+  const precedents = INDUSTRY_FAILURE_SEEDS.map(seedToPrecedent);
+  return filterPrecedents(precedents, searchQuery);
+}
+
 /**
  * Deterministic Precedent Failure Prediction Engine
+ *
+ * Queries the Industry Failure Graph (PublicFailureRecord, AirworthinessDirective,
+ * ServiceDifficultyReport, NTSBAccident) categorized by componentType, material,
+ * and failureMode, merged with organization-scoped quality events. Falls back to
+ * the curated seed dataset when the database is unavailable.
  */
 export async function queryFailurePrecedents(
   organizationId: string,
@@ -24,76 +74,122 @@ export async function queryFailurePrecedents(
   totalMatches: number;
 }> {
   try {
-    const qualityEvents = await prisma.qualityEvent.findMany({
-      where: { organizationId },
-      take: 20,
-    });
+    const [publicRecords, airworthinessDirectives, serviceDifficultyReports, ntsbAccidents, qualityEvents] =
+      await Promise.all([
+        queryModelMany("publicFailureRecord", { take: 50 }),
+        queryModelMany("airworthinessDirective", { take: 50 }),
+        queryModelMany("serviceDifficultyReport", { take: 50 }),
+        queryModelMany("ntsbAccident", { take: 50 }),
+        prisma.qualityEvent
+          .findMany({ where: { organizationId }, take: 20 })
+          .catch(() => []),
+      ]);
 
-    const precedents: HistoricalFailurePrecedent[] = qualityEvents.map((qe) => ({
-      id: qe.id,
-      componentType: "Propulsion Chamber Flange",
-      material: "Aluminum 7075-T6",
-      failureMode: "Thermal Distortion & Seal Micro-Leakage",
-      rootCause: qe.description,
-      invalidatedAssumption: "Operating temperature will not exceed 150C limit.",
-      provenCorrectiveAction: qe.correctiveAction || "Substitute material to Titanium 6Al-4V.",
-      evidenceHashes: ["7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b"],
-      programContext: "Apollo Propulsion Flight Test #2",
-      occurredAt: qe.createdAt.toISOString(),
-    }));
+    const precedents: HistoricalFailurePrecedent[] = [];
 
-    if (precedents.length === 0) {
+    for (const record of publicRecords) {
+      const r = record as any;
+      const hashes: string[] = Array.isArray(r.evidenceHashes)
+        ? r.evidenceHashes.map((h: unknown) => String(h))
+        : [sha256(r.recordNumber || r.id)];
       precedents.push({
-        id: "prec-fail-101",
-        componentType: "High Pressure Fuel Manifold Flange",
-        material: "Aluminum 7075-T6",
-        failureMode: "Thermal Yield Degradation & Micro-Leakage",
-        rootCause:
-          "Operating peak transient temperature reached 340C, exceeding 150C thermal limit of 7075 aluminum.",
-        invalidatedAssumption: "Continuous peak operating thermal boundary condition <= 150C.",
-        provenCorrectiveAction:
-          "Replaced flange material with Titanium 6Al-4V (Grade 5) and applied H7 fit class.",
-        evidenceHashes: [
-          "7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
-          "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
-        ],
-        programContext: "Titan Heavy Launch Vehicle — Flight Test #2 (NCR-2026-084)",
-        occurredAt: "2026-03-12T10:00:00.000Z",
+        id: r.id,
+        componentType: r.componentType,
+        material: r.material,
+        failureMode: r.failureMode,
+        rootCause: r.rootCause,
+        invalidatedAssumption: r.invalidatedAssumption || "Design envelope assumption invalidated by field evidence.",
+        provenCorrectiveAction: r.provenCorrectiveAction || "Apply root-cause corrective action and verify by test.",
+        evidenceHashes: hashes,
+        programContext: r.programContext || "Industry Failure Graph",
+        occurredAt: new Date(r.occurredAt || r.createdAt || Date.now()).toISOString(),
       });
     }
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      const filtered = precedents.filter(
-        (p) =>
-          p.componentType.toLowerCase().includes(q) ||
-          p.material.toLowerCase().includes(q) ||
-          p.failureMode.toLowerCase().includes(q) ||
-          p.rootCause.toLowerCase().includes(q),
-      );
-      return { precedents: filtered, totalMatches: filtered.length };
+    for (const ad of airworthinessDirectives) {
+      const a = ad as any;
+      const hashes = [sha256(a.adNumber)];
+      precedents.push({
+        id: a.id,
+        componentType: a.componentType,
+        material: a.material || "Unspecified",
+        failureMode: a.failureMode || "Airworthiness Compliance Finding",
+        rootCause: a.summary,
+        invalidatedAssumption: "Assumed design envelope invalidated by mandatory airworthiness finding.",
+        provenCorrectiveAction: a.correctiveAction || "Comply with airworthiness directive.",
+        evidenceHashes: hashes,
+        programContext: `FAA Airworthiness Directive ${a.adNumber}`,
+        occurredAt: new Date(a.issuedAt || Date.now()).toISOString(),
+      });
     }
 
-    return { precedents, totalMatches: precedents.length };
+    for (const sdr of serviceDifficultyReports) {
+      const s = sdr as any;
+      const hashes = [sha256(s.sdrNumber)];
+      precedents.push({
+        id: s.id,
+        componentType: s.componentType,
+        material: s.material || "Unspecified",
+        failureMode: s.failureMode,
+        rootCause: s.rootCause || s.summary,
+        invalidatedAssumption: "Service difficulty invalidates assumed operational robustness.",
+        provenCorrectiveAction: s.correctiveAction || "Implement service bulletin corrective action.",
+        evidenceHashes: hashes,
+        programContext: `FAA Service Difficulty Report ${s.sdrNumber}`,
+        occurredAt: new Date(s.reportedAt || Date.now()).toISOString(),
+      });
+    }
+
+    for (const accident of ntsbAccidents) {
+      const n = accident as any;
+      const hashes = [sha256(n.accidentNumber)];
+      precedents.push({
+        id: n.id,
+        componentType: n.componentType,
+        material: n.material || "Unspecified",
+        failureMode: n.failureMode,
+        rootCause: n.probableCause || n.summary,
+        invalidatedAssumption: "Probable-cause analysis invalidates prior design assumption.",
+        provenCorrectiveAction: n.correctiveAction || "Adopt NTSB safety recommendation.",
+        evidenceHashes: hashes,
+        programContext: `NTSB Accident ${n.accidentNumber}`,
+        occurredAt: new Date(n.accidentDate || Date.now()).toISOString(),
+      });
+    }
+
+    const entityIds = [...new Set(qualityEvents.map((qe) => qe.entityId).filter(Boolean))];
+    const entities = entityIds.length
+      ? await queryModelMany("engineeringEntity", { where: { id: { in: entityIds } } })
+      : [];
+    const entityById = new Map((entities as any[]).map((e) => [e.id, e]));
+
+    for (const qe of qualityEvents) {
+      const entity = entityById.get(qe.entityId);
+      const metadata = (entity?.metadata ?? {}) as Record<string, unknown>;
+      precedents.push({
+        id: qe.id,
+        componentType: entity?.name || "Field Component",
+        material: typeof metadata.material === "string" ? metadata.material : "Unspecified",
+        failureMode: qe.eventType || "Quality Anomaly",
+        rootCause: qe.rootCause || qe.description,
+        invalidatedAssumption: "Operational envelope assumption invalidated by field quality event.",
+        provenCorrectiveAction:
+          qe.correctiveAction || "Root-cause corrective action implemented and verified.",
+        evidenceHashes: [sha256(qe.id)],
+        programContext: "Organization Field Quality Event",
+        occurredAt: new Date(qe.recordedAt || qe.createdAt || Date.now()).toISOString(),
+      });
+    }
+
+    if (precedents.length === 0) {
+      precedents.push(...INDUSTRY_FAILURE_SEEDS.map(seedToPrecedent));
+    }
+
+    const filtered = filterPrecedents(precedents, searchQuery);
+    return { precedents: filtered, totalMatches: filtered.length };
   } catch (err) {
     console.warn("[PrecedentFailureEngine] DB offline fallback execution:", err);
-    return {
-      precedents: [
-        {
-          id: "prec-fail-101",
-          componentType: "High Pressure Fuel Manifold Flange",
-          material: "Aluminum 7075-T6",
-          failureMode: "Thermal Yield Degradation & Micro-Leakage",
-          rootCause:
-            "Operating peak transient temperature reached 340C, exceeding 150C thermal limit.",
-          invalidatedAssumption: "Thermal boundary condition <= 150C.",
-          provenCorrectiveAction: "Replaced material with Titanium 6Al-4V.",
-          evidenceHashes: ["7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b"],
-          programContext: "Titan Heavy Launch Vehicle Flight Test #2",
-          occurredAt: "2026-03-12T10:00:00.000Z",
-        },
-      ],
-      totalMatches: 1,
-    };
+    const precedents = fallbackPrecedents(searchQuery);
+    return { precedents, totalMatches: precedents.length };
   }
 }

@@ -1,6 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
 
+function countEvidenceRecords(summary: unknown): number {
+  if (summary == null) return 0;
+  if (Array.isArray(summary)) return summary.length;
+  if (typeof summary === "object") {
+    const values = Object.values(summary as Record<string, unknown>);
+    const arrayValues = values.filter((v) => Array.isArray(v)) as unknown[][];
+    if (arrayValues.length > 0) return arrayValues.reduce((total, arr) => total + arr.length, 0);
+    return values.length;
+  }
+  return 0;
+}
+
 export async function detectAnomalies(workspaceId: string) {
   const alerts: any[] = [];
 
@@ -10,8 +22,8 @@ export async function detectAnomalies(workspaceId: string) {
   }).catch(() => []) ?? [];
 
   for (const a of assessments) {
-    const evidenceList = Array.isArray((a as any).evidenceSummary) ? (a as any).evidenceSummary : [];
-    if (evidenceList.length < 3) {
+    const evidenceCount = countEvidenceRecords((a as any).evidenceSummary);
+    if (evidenceCount < 3) {
       const existing = await (prisma as any).anomalyAlert?.findFirst({
         where: { workspaceId, recordId: a.id, alertType: "sparse_data", isDismissed: false },
       }).catch(() => null);
@@ -23,7 +35,7 @@ export async function detectAnomalies(workspaceId: string) {
             recordId: a.id,
             alertType: "sparse_data",
             severity: "warning",
-            description: `Assessment '${a.title || a.fileName}' is based on sparse evidence (${evidenceList.length} records).`,
+            description: `Assessment '${a.title || a.fileName}' is based on sparse evidence (${evidenceCount} records).`,
           },
         }).catch(() => null);
         if (created) alerts.push(created);

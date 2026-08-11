@@ -23,6 +23,124 @@ import {
 } from "./stages";
 import { logger } from "@/shared/logging";
 
+/**
+ * Snapshots the stage entry parameters and evidence references for durable
+ * ReasoningStep persistence (input side of the derivation trace).
+ */
+function stepInputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext): Record<string, unknown> {
+  const raw = ctx.rawInputContext ?? {};
+  return {
+    stageName,
+    subjectEntityId: raw.subjectEntityId ?? raw.subjectEntity ?? null,
+    material: raw.material ?? null,
+    yieldStrengthMpa: raw.yieldStrengthMpa ?? null,
+    preferredPrinciples: Array.isArray(raw.preferredPrinciples) ? raw.preferredPrinciples : [],
+    customConstraintCount: Array.isArray(raw.customConstraints) ? raw.customConstraints.length : 0,
+    relatedEvidenceCount: Array.isArray(raw.relatedEvidence) ? raw.relatedEvidence.length : 0,
+    rawEvidenceCount: ctx.rawEvidence.length,
+    rawEvidenceIds: ctx.rawEvidence.map((e) => e.id),
+    constraintCountAtEntry: ctx.constraints.length,
+    assumptionCountAtEntry: ctx.assumptions.length,
+    alternativeCountAtEntry: ctx.alternatives.length,
+    principleCodeCountAtEntry: ctx.principles.length,
+    tradeoffCountAtEntry: ctx.tradeoffs.length,
+    confidenceScoreAtEntry: ctx.confidenceScore,
+  };
+}
+
+/**
+ * Snapshots the stage rule outputs (output side of the derivation trace).
+ */
+function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext): Record<string, unknown> {
+  switch (stageName) {
+    case "EVIDENCE_COLLECTION":
+      return {
+        evidence: ctx.rawEvidence.map((e) => ({
+          id: e.id,
+          title: e.title,
+          type: e.type,
+          verificationLevel: e.verificationLevel,
+        })),
+      };
+    case "EVIDENCE_VALIDATION":
+      return { retainedEvidenceIds: ctx.rawEvidence.map((e) => e.id) };
+    case "EVIDENCE_WEIGHTING":
+      return {
+        evidenceWeights: ctx.evidenceWeights.map((w) => ({
+          evidenceId: w.evidenceId,
+          finalWeight: w.finalWeight,
+          engineeringConfidence: w.engineeringConfidence,
+        })),
+      };
+    case "CONSTRAINT_IDENTIFICATION":
+      return {
+        constraints: ctx.constraints.map((c) => ({
+          name: c.name,
+          category: c.category,
+          limitValue: c.limitValue,
+          unit: c.unit,
+          isHardConstraint: c.isHardConstraint,
+          isViolated: c.isViolated,
+        })),
+        assumptions: ctx.assumptions.map((a) => ({
+          statement: a.statement,
+          riskLevel: a.riskLevel,
+          isVerified: a.isVerified,
+        })),
+      };
+    case "PRINCIPLE_SELECTION":
+      return { principles: ctx.principles.map((p) => ({ code: p.code, name: p.name })) };
+    case "RELATIONSHIP_ANALYSIS":
+      return { relationshipCount: ctx.relationshipMap.length };
+    case "TRADEOFF_EVALUATION":
+      return {
+        tradeoffs: ctx.tradeoffs.map((t) => ({ criterion: t.criterion, selectedOption: t.selectedOption })),
+      };
+    case "ALTERNATIVE_GENERATION":
+      return {
+        alternatives: ctx.alternatives.map((a) => ({ name: a.name, score: a.score, status: a.status })),
+      };
+    case "CONFLICT_DETECTION":
+      return {
+        conflicts: ctx.conflicts.map((c) => ({
+          conflictType: c.conflictType,
+          severity: c.severity,
+          isResolved: c.isResolved,
+        })),
+      };
+    case "MISSING_EVIDENCE_DETECTION":
+      return {
+        missingEvidence: ctx.missingEvidence.map((m) => ({ missingItem: m.missingItem, category: m.category })),
+      };
+    case "CAUSAL_REASONING":
+      return {
+        causalReasoning: ctx.causalReasoning.map((c) => ({
+          sourceEntityId: c.sourceEntityId,
+          targetEntityId: c.targetEntityId,
+          probability: c.probability,
+        })),
+      };
+    case "REASONING_CHAIN_CONSTRUCTION":
+      return {
+        reasoningChains: ctx.reasoningChains.map((c) => ({ stepIndex: c.stepIndex, title: c.title })),
+      };
+    case "CONFIDENCE_CALCULATION":
+      return {
+        confidenceScore: ctx.confidenceScore,
+        isSupportedByEvidence: ctx.isSupportedByEvidence,
+        unresolvedUncertainties: ctx.unresolvedUncertainties,
+      };
+    case "CONCLUSION_GENERATION":
+      return { conclusion: ctx.conclusion };
+    case "EVIDENCE_CITATION":
+      return { citationCount: ctx.citations.length };
+    case "RECOMMENDATION_GENERATION":
+      return { recommendations: ctx.recommendations };
+    default:
+      return {};
+  }
+}
+
 export async function runReasoningPipeline(sessionId: string): Promise<PipelineContext> {
   const session = await (prisma as any).reasoningSession?.findUnique({
     where: { id: sessionId },
@@ -109,6 +227,7 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
           stageIndex: i + 1,
           stageName,
           status: "RUNNING",
+          inputData: stepInputSnapshot(stageName, ctx),
           startedAt: new Date(),
         },
       }).catch(() => null);
@@ -125,6 +244,7 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
             where: { id: stepRecord.id },
             data: {
               status: "COMPLETED",
+              outputData: stepOutputSnapshot(stageName, ctx),
               durationMs,
               completedAt: new Date(),
             },

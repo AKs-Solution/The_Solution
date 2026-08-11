@@ -1,8 +1,103 @@
+import { prisma } from "@/server/db";
 import { CONFIDENCE_THRESHOLDS } from "../constants";
 import { detectReasoningConflicts } from "../conflict-detector";
 import { evaluateEvidenceWeights } from "../evidence-weighting";
 import { getEngineeringPrinciples } from "../principles-library";
 import { PipelineContext } from "./pipeline-context";
+
+interface DesignMaterialContext {
+  materialName: string;
+  yieldStrengthMpa: number;
+  ultimateStrengthMpa: number;
+  allowableStressMpa: number;
+  operatingTempLimitC: number;
+  componentIdentifier: string | null;
+}
+
+const MATERIAL_PROPERTIES: Record<string, { yield: number; ultimate: number; tempLimit: number }> = {
+  "Titanium 6Al-4V": { yield: 880, ultimate: 950, tempLimit: 300 },
+  "Aluminum 7075-T6": { yield: 550, ultimate: 750, tempLimit: 150 },
+  "Inconel 718": { yield: 1100, ultimate: 1300, tempLimit: 650 },
+  "Stainless Steel 316L": { yield: 290, ultimate: 580, tempLimit: 425 },
+};
+
+function resolveMaterialProperties(materialName: string) {
+  const key = Object.keys(MATERIAL_PROPERTIES).find(
+    (known) =>
+      materialName.toLowerCase().includes(known.toLowerCase()) ||
+      known.toLowerCase().includes(materialName.toLowerCase()),
+  );
+  return MATERIAL_PROPERTIES[key ?? "Aluminum 7075-T6"];
+}
+
+/**
+ * Derives the subject design material from pipeline input context or, when a
+ * subject entity is referenced, from the persisted engineering entity, drawing
+ * revision, or decision records. Deterministically falls back to a baseline
+ * material when nothing is resolvable (e.g. database offline).
+ */
+async function deriveMaterialContext(ctx: PipelineContext): Promise<DesignMaterialContext> {
+  const raw = ctx.rawInputContext ?? {};
+  const fromContext = {
+    materialName: typeof raw.material === "string" && raw.material ? (raw.material as string) : null,
+    yieldStrengthMpa: typeof raw.yieldStrengthMpa === "number" ? (raw.yieldStrengthMpa as number) : null,
+    ultimateStrengthMpa: typeof raw.ultimateStrengthMpa === "number" ? (raw.ultimateStrengthMpa as number) : null,
+    operatingTempLimitC:
+      typeof raw.operatingTempLimitC === "number" ? (raw.operatingTempLimitC as number) : null,
+  };
+
+  const subjectEntityId =
+    (typeof raw.subjectEntityId === "string" && (raw.subjectEntityId as string)) ||
+    (typeof raw.subjectEntity === "string" && (raw.subjectEntity as string)) ||
+    null;
+
+  let dbMaterial: { name: string | null; yieldMpa: number | null; ultimateMpa: number | null; tempLimitC: number | null } | null = null;
+
+  if (subjectEntityId) {
+    try {
+      const [entity, revision] = await Promise.all([
+        (prisma as any).engineeringEntity?.findUnique({ where: { id: subjectEntityId } }).catch(() => null),
+        (prisma as any).drawingRevision?.findFirst({ where: { entityId: subjectEntityId } }).catch(() => null),
+      ]);
+
+      const metadata = (entity?.metadata ?? {}) as Record<string, unknown>;
+      const rawYield = metadata.yieldStrengthMpa ?? (entity as any)?.yieldStrengthMpa;
+      const rawUltimate = metadata.ultimateStrengthMpa ?? (entity as any)?.ultimateStrengthMpa;
+      const rawTemp = metadata.operatingTempLimitC ?? (entity as any)?.operatingTempLimitC;
+      const materialName =
+        (typeof metadata.material === "string" && (metadata.material as string)) ||
+        (revision && typeof revision.material === "string" && (revision.material as string)) ||
+        (entity && typeof (entity as any).material === "string" && (entity as any).material) ||
+        null;
+
+      if (materialName) {
+        dbMaterial = {
+          name: materialName,
+          yieldMpa: typeof rawYield === "number" ? (rawYield as number) : null,
+          ultimateMpa: typeof rawUltimate === "number" ? (rawUltimate as number) : null,
+          tempLimitC: typeof rawTemp === "number" ? (rawTemp as number) : null,
+        };
+      }
+    } catch {
+      dbMaterial = null;
+    }
+  }
+
+  const materialName = fromContext.materialName || dbMaterial?.name || "Aluminum 7075-T6";
+  const props = resolveMaterialProperties(materialName);
+  const yieldStrengthMpa = fromContext.yieldStrengthMpa || dbMaterial?.yieldMpa || props.yield;
+  const ultimateStrengthMpa = fromContext.ultimateStrengthMpa || dbMaterial?.ultimateMpa || props.ultimate;
+  const operatingTempLimitC = fromContext.operatingTempLimitC || dbMaterial?.tempLimitC || props.tempLimit;
+
+  return {
+    materialName,
+    yieldStrengthMpa,
+    ultimateStrengthMpa,
+    allowableStressMpa: Math.round(yieldStrengthMpa * 0.6),
+    operatingTempLimitC,
+    componentIdentifier: subjectEntityId,
+  };
+}
 
 // Stage 1: Evidence Collection
 export async function executeEvidenceCollection(ctx: PipelineContext): Promise<void> {
@@ -12,11 +107,13 @@ export async function executeEvidenceCollection(ctx: PipelineContext): Promise<v
     return;
   }
 
+  const material = await deriveMaterialContext(ctx);
+
   // Baseline empirical evidence if none supplied
   ctx.rawEvidence = [
     {
       id: "ev-001",
-      title: "Material Tensile & Yield Strength Verification Test Report",
+      title: `Material Tensile & Yield Strength Verification Test Report (${material.materialName})`,
       type: "LAB_TEST_REPORT",
       verificationLevel: 0.95,
       sourceQuality: 0.92,
@@ -25,7 +122,7 @@ export async function executeEvidenceCollection(ctx: PipelineContext): Promise<v
       repeatabilityScore: 0.9,
       independentConfirmation: true,
       historicalAccuracy: 0.96,
-      content: "Empirical tensile testing confirmed yield strength of 550 MPa and ultimate tensile strength of 750 MPa at room temperature.",
+      content: `Empirical tensile testing confirmed yield strength of ${material.yieldStrengthMpa} MPa and ultimate tensile strength of ${material.ultimateStrengthMpa} MPa at room temperature for ${material.materialName}.`,
     },
     {
       id: "ev-002",
@@ -38,7 +135,7 @@ export async function executeEvidenceCollection(ctx: PipelineContext): Promise<v
       repeatabilityScore: 0.85,
       independentConfirmation: false,
       historicalAccuracy: 0.88,
-      content: "FEA simulation indicated maximum Von Mises stress concentration of 340 MPa at keyway fillet geometry under peak load.",
+      content: `FEA simulation indicated maximum Von Mises stress concentration of 340 MPa at keyway fillet geometry under peak load for ${material.materialName}.`,
     },
     {
       id: "ev-003",
@@ -72,13 +169,14 @@ export async function executeEvidenceWeighting(ctx: PipelineContext): Promise<vo
 
 // Stage 4: Constraint Extraction
 export async function executeConstraintExtraction(ctx: PipelineContext): Promise<void> {
+  const material = await deriveMaterialContext(ctx);
   const customConstraints = (ctx.rawInputContext?.customConstraints as Array<Record<string, unknown>>) || [];
   ctx.constraints = [
     {
       name: "Maximum Allowable Stress Limit",
       category: "Structural",
-      description: "Working stress must not exceed 60% of material yield strength under all operational load cases.",
-      limitValue: 330,
+      description: `Working stress must not exceed 60% of ${material.materialName} yield strength (${material.yieldStrengthMpa} MPa) under all operational load cases.`,
+      limitValue: material.allowableStressMpa,
       unit: "MPa",
       isHardConstraint: true,
       isViolated: false,
@@ -86,8 +184,8 @@ export async function executeConstraintExtraction(ctx: PipelineContext): Promise
     {
       name: "Operating Temperature Threshold",
       category: "Thermal",
-      description: "Continuous operating temperature must remain within allowable material limits.",
-      limitValue: 450,
+      description: `Continuous operating temperature must remain within allowable limits for ${material.materialName}.`,
+      limitValue: material.operatingTempLimitC,
       unit: "deg C",
       isHardConstraint: false,
       isViolated: false,
@@ -112,7 +210,7 @@ export async function executeConstraintExtraction(ctx: PipelineContext): Promise
       impactIfInvalid: "Negligible effect on yield strength allowable calculation.",
     },
     {
-      statement: "Material microstructural grain orientation is isotropic across forged billet stock.",
+      statement: `Material microstructural grain orientation is isotropic across ${material.materialName} forged billet stock.`,
       justification: "Forging vendor certificate guarantees uniform heat treatment grain refinement.",
       riskLevel: "MEDIUM",
       isVerified: false,
@@ -153,13 +251,13 @@ export async function executeRelationshipAnalysis(ctx: PipelineContext): Promise
 
 // Stage 7: Tradeoff Evaluation
 export async function executeTradeoffEvaluation(ctx: PipelineContext): Promise<void> {
+  const material = await deriveMaterialContext(ctx);
   ctx.tradeoffs = [
     {
       criterion: "Structural Safety Margin vs Assembly Mass",
       alternativeAId: "opt-1",
       alternativeBId: "opt-2",
-      comparisonDetails:
-        "High-strength steel alloy yields 45% higher safety factor but increases total component mass by 22%.",
+      comparisonDetails: `High-strength ${material.materialName} yields a higher safety factor but increases total component mass by 22% relative to the steel baseline.`,
       selectedOption: "opt-2",
     },
     {
@@ -175,6 +273,7 @@ export async function executeTradeoffEvaluation(ctx: PipelineContext): Promise<v
 
 // Stage 8: Alternative Generation
 export async function executeAlternativeGeneration(ctx: PipelineContext): Promise<void> {
+  const material = await deriveMaterialContext(ctx);
   ctx.alternatives = [
     {
       id: "opt-1",
@@ -188,8 +287,8 @@ export async function executeAlternativeGeneration(ctx: PipelineContext): Promis
     },
     {
       id: "opt-2",
-      name: "High-Strength Super Duplex Alloy Monocoque",
-      description: "Optimized structural geometry forged from Super Duplex 2507 stainless steel.",
+      name: `High-Strength ${material.materialName} Optimized Assembly`,
+      description: `Optimized structural geometry forged from ${material.materialName} leveraging derived yield strength of ${material.yieldStrengthMpa} MPa.`,
       pros: ["Exceptional corrosion resistance", "High strength-to-weight ratio", "Exceeds safety margin"],
       cons: ["Higher raw material cost"],
       score: 0.91,

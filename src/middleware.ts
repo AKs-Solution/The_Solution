@@ -10,8 +10,6 @@ const NONCE_HEADER = "x-nonce";
 
 const publicPaths = [
   "/api/auth/",
-  "/api/sentinel/",
-  "/api/compliance/",
   "/api/copilot/",
   "/api/enterprise/",
   "/api/health",
@@ -84,7 +82,6 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
   if (!token) {
-    // If accessing dashboard/API without token, allow seamless guest fallback in dev/demo or set redirect
     if (pathname.startsWith("/api/")) {
       const response = NextResponse.json(
         { error: "Not authenticated", code: "UNAUTHORIZED" },
@@ -93,10 +90,11 @@ export async function middleware(request: NextRequest) {
       applySecurityHeaders(response, nonce, isProd);
       return response;
     }
-    
-    // Auto-allow access to dashboard for demo preview if token is missing
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    response.headers.set(REQUEST_ID_HEADER, requestId);
+
+    // Redirect unauthenticated page requests to login, preserving the intended destination
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    const response = NextResponse.redirect(loginUrl);
     applySecurityHeaders(response, nonce, isProd);
     return response;
   }

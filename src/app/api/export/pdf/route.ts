@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/server/auth/session-service";
+import { generatePdfBuffer, PdfReportInput } from "@/server/reporting/pdf-generator";
 
 export async function POST(request: Request) {
   try {
@@ -8,15 +9,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { title, content } = body;
 
-    // Return structured print payload ready for client window printing / PDF saving
-    return NextResponse.json({
-      success: true,
+    const sections: PdfReportInput["sections"] = Array.isArray(content?.sections)
+      ? content.sections.map((section: { title?: string; content?: string }) => ({
+          title: section?.title ?? "Section",
+          content: section?.content ?? "",
+        }))
+      : [
+          {
+            title: "Report",
+            content: typeof content === "string" ? content : "",
+          },
+        ];
+
+    const pdf = generatePdfBuffer({
       title: title || "AKSCI Engineering Intelligence Report",
+      subtitle: "Consecuencia Engineering Intelligence System",
       generatedAt: new Date().toISOString(),
-      content,
+      sections,
+    });
+
+    return new NextResponse(new Uint8Array(pdf), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="report-${Date.now()}.pdf"`,
+        "Content-Length": String(pdf.length),
+        "Cache-Control": "no-store",
+      },
     });
   } catch (error) {
     return NextResponse.json(

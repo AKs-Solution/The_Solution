@@ -1469,6 +1469,90 @@ model QualityEvent {
   @@index([status])
 }
 
+// ---------------------------------------------------------------------------
+// Industry Failure Graph (Public Safety Intelligence)
+// Shared, organization-independent records of NTSB accidents, FAA
+// Airworthiness Directives, FAA Service Difficulty Reports, and synthesized
+// industry findings used by the Precedent Failure Prediction Engine.
+// ---------------------------------------------------------------------------
+
+model PublicFailureRecord {
+  id                     String    @id @default(cuid())
+  sourceType             String // "NTSB" | "SDR" | "AD" | "INDUSTRY"
+  recordNumber           String?
+  componentType          String
+  material               String
+  failureMode            String
+  rootCause              String
+  invalidatedAssumption  String?
+  provenCorrectiveAction String?
+  evidenceHashes         Json? // Array of SHA-256 hex hashes
+  programContext         String?
+  occurredAt             DateTime  @default(now())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([sourceType])
+  @@index([componentType])
+  @@index([material])
+  @@index([failureMode])
+  @@index([recordNumber])
+}
+
+model AirworthinessDirective {
+  id               String    @id @default(cuid())
+  adNumber         String    @unique
+  title            String
+  componentType    String
+  material         String?
+  failureMode      String?
+  summary          String
+  correctiveAction String?
+  issuedAt         DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([componentType])
+  @@index([material])
+  @@index([failureMode])
+}
+
+model ServiceDifficultyReport {
+  id               String    @id @default(cuid())
+  sdrNumber        String    @unique
+  componentType    String
+  material         String?
+  failureMode      String
+  summary          String
+  rootCause        String?
+  correctiveAction String?
+  reportedAt       DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([componentType])
+  @@index([material])
+  @@index([failureMode])
+}
+
+model NTSBAccident {
+  id               String    @id @default(cuid())
+  accidentNumber   String    @unique
+  componentType    String
+  material         String?
+  failureMode      String
+  summary          String
+  probableCause    String?
+  correctiveAction String?
+  accidentDate     DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([componentType])
+  @@index([material])
+  @@index([failureMode])
+}
+
 model EngineeringChange {
   id              String    @id @default(cuid())
   organizationId  String

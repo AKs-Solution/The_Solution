@@ -12,7 +12,11 @@ export async function GET() {
     const member = await import("@/server/db").then((m) =>
       m.prisma.organizationMember.findFirst({ where: { userId: session.userId } }),
     );
-    orgId = member?.organizationId || "";
+    orgId = member?.organizationId ?? null;
+  }
+
+  if (!orgId) {
+    return NextResponse.json({ error: "No active organization" }, { status: 403 });
   }
 
   const anomalies = await getActiveAnomalies(orgId);

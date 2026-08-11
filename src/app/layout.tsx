@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     "Engineering Reality Platform — verifying engineering truth through deterministic, evidence-based reasoning",
 };
 
+// Next.js 16.2.x fails to statically prerender pages because its prerender
+// machinery reads the request workStore before it is initialized
+// (InvariantError E1068 "Expected workStore to be initialized"). Every page
+// in this platform is an authenticated, data-driven segment, so all routes
+// render on-demand instead of being statically prerendered.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{

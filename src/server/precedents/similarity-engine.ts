@@ -1,4 +1,5 @@
 import { Precedent, PrecedentMatchContext, MatchedPrecedent } from "@/features/precedents/types";
+import { INDUSTRY_FAILURE_SEEDS, queryModelMany } from "@/server/precedents/seed-industry-graph";
 
 interface MatchResult {
   score: number;
@@ -212,4 +213,171 @@ export function matchPrecedents(
     .slice(0, limit);
 
   return results;
+}
+
+export interface IndustryFailureMatch {
+  id: string;
+  componentType: string;
+  material: string;
+  failureMode: string;
+  rootCause: string;
+  invalidatedAssumption: string;
+  provenCorrectiveAction: string;
+  evidenceHashes: string[];
+  programContext: string;
+  occurredAt: string;
+  score: number;
+  reasons: string[];
+}
+
+export interface IndustryFailureQuery {
+  componentType?: string;
+  material?: string;
+  failureMode?: string;
+}
+
+type RawIndustryFailureMatch = Omit<IndustryFailureMatch, "score" | "reasons">;
+
+function categoryTokens(text?: string | null): string[] {
+  return (text ?? "")
+    .toLowerCase()
+    .split(/[\s,&/()-]+/)
+    .filter((t) => t.length > 2);
+}
+
+function categorySimilarity(a: string, b: string): number {
+  const tokensA = categoryTokens(a);
+  const tokensB = categoryTokens(b);
+  if (tokensA.length === 0 || tokensB.length === 0) return 0;
+  const shared = tokensA.filter((t) => tokensB.includes(t));
+  const jaccard = shared.length / Math.max(tokensA.length, tokensB.length);
+  const containment =
+    a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase()) ? 0.6 : 0;
+  return Math.max(jaccard, containment);
+}
+
+function seedIndustryMatches(
+  context: IndustryFailureQuery,
+  limit: number,
+): IndustryFailureMatch[] {
+  const records: RawIndustryFailureMatch[] = INDUSTRY_FAILURE_SEEDS.map((seed) => ({
+    id: seed.id,
+    componentType: seed.componentType,
+    material: seed.material,
+    failureMode: seed.failureMode,
+    rootCause: seed.rootCause,
+    invalidatedAssumption: seed.invalidatedAssumption,
+    provenCorrectiveAction: seed.provenCorrectiveAction,
+    evidenceHashes: seed.evidenceHashes,
+    programContext: seed.programContext,
+    occurredAt: seed.occurredAt,
+  }));
+  return scoreIndustryMatches(records, context, limit);
+}
+
+function scoreIndustryMatches(
+  records: RawIndustryFailureMatch[],
+  context: IndustryFailureQuery,
+  limit: number,
+): IndustryFailureMatch[] {
+  const weights = { component: 0.45, material: 0.35, failureMode: 0.2 };
+  return records
+    .map((record) => {
+      const reasons: string[] = [];
+      let totalScore = 0;
+
+      if (context.componentType) {
+        const score = categorySimilarity(context.componentType, record.componentType);
+        if (score > 0) {
+          totalScore += score * weights.component;
+          reasons.push(`Component overlap: ${context.componentType}`);
+        }
+      }
+      if (context.material) {
+        const score = categorySimilarity(context.material, record.material);
+        if (score > 0) {
+          totalScore += score * weights.material;
+          reasons.push(`Material overlap: ${context.material}`);
+        }
+      }
+      if (context.failureMode) {
+        const score = categorySimilarity(context.failureMode, record.failureMode);
+        if (score > 0) {
+          totalScore += score * weights.failureMode;
+          reasons.push(`Failure mode overlap: ${context.failureMode}`);
+        }
+      }
+
+      return {
+        ...record,
+        score: Math.round(totalScore * 100) / 100,
+        reasons,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+/**
+ * Queries real Industry Failure Graph records (PublicFailureRecord, AD, SDR,
+ * NTSB) categorized by componentType, material, and failureMode, then scores
+ * them against the provided context using the shared token-overlap matcher.
+ * Falls back to the curated seed dataset when the database is unavailable.
+ */
+export async function queryIndustryFailureRecords(
+  _organizationId: string,
+  context: IndustryFailureQuery,
+  limit: number = 10,
+): Promise<IndustryFailureMatch[]> {
+  try {
+    const [publicRecords, airworthinessDirectives, serviceDifficultyReports, ntsbAccidents] =
+      await Promise.all([
+        queryModelMany("publicFailureRecord", { take: 100 }),
+        queryModelMany("airworthinessDirective", { take: 100 }),
+        queryModelMany("serviceDifficultyReport", { take: 100 }),
+        queryModelMany("ntsbAccident", { take: 100 }),
+      ]);
+
+    const toMatch = (
+      record: Record<string, unknown>,
+      hashKey: string,
+      fallbackMaterial: string,
+    ): RawIndustryFailureMatch => ({
+      id: String(record.id),
+      componentType: String(record.componentType || "Unknown Component"),
+      material: String(record.material || fallbackMaterial),
+      failureMode: String(record.failureMode || "Unknown Failure Mode"),
+      rootCause: String(record.rootCause || record.summary || ""),
+      invalidatedAssumption: String(
+        record.invalidatedAssumption || "Design envelope assumption invalidated by field evidence.",
+      ),
+      provenCorrectiveAction: String(
+        record.correctiveAction || "Apply root-cause corrective action and verify by test.",
+      ),
+      evidenceHashes: Array.isArray(record.evidenceHashes)
+        ? record.evidenceHashes.map((h) => String(h))
+        : [hashKey],
+      programContext: String(record.programContext || "Industry Failure Graph"),
+      occurredAt: new Date(
+        Number(record.occurredAt || record.issuedAt || record.reportedAt || record.accidentDate) || Date.now(),
+      ).toISOString(),
+    });
+
+    const records: RawIndustryFailureMatch[] = [
+      ...publicRecords.map((r) => toMatch(r as any, `pub:${(r as any).id}`, "Unspecified")),
+      ...airworthinessDirectives.map((r) => toMatch(r as any, `ad:${(r as any).adNumber}`, "Unspecified")),
+      ...serviceDifficultyReports.map((r) => toMatch(r as any, `sdr:${(r as any).sdrNumber}`, "Unspecified")),
+      ...ntsbAccidents.map((r) => toMatch(r as any, `ntsb:${(r as any).accidentNumber}`, "Unspecified")),
+    ];
+
+    if (records.length === 0) {
+      return seedIndustryMatches(context, limit);
+    }
+
+    const scored = scoreIndustryMatches(records, context, limit);
+    return scored.length > 0 ? scored : seedIndustryMatches(context, limit);
+  } catch (err) {
+    console.warn("[SimilarityEngine] DB offline fallback execution:", err);
+    return seedIndustryMatches(context, limit);
+  }
 }
