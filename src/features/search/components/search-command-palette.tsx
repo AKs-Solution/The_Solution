@@ -12,7 +12,7 @@ import {
   Activity,
   GitBranch,
   Layers,
-  ShieldCheck,
+  FileCheck,
   Brain,
   ScrollText,
   Command,
@@ -26,7 +26,7 @@ interface SearchResult {
   label: string;
   subtitle: string;
   href: string;
-  icon: "Tags" | "FileText" | "Building2" | "Hash" | "LayoutDashboard" | "Activity" | "GitBranch" | "Layers" | "ShieldCheck" | "Brain" | "ScrollText";
+  icon: "Tags" | "FileText" | "Building2" | "Hash" | "LayoutDashboard" | "Activity" | "GitBranch" | "Layers" | "FileCheck" | "Brain" | "ScrollText";
 }
 
 const ICONS = {
@@ -38,7 +38,7 @@ const ICONS = {
   Activity,
   GitBranch,
   Layers,
-  ShieldCheck,
+  FileCheck,
   Brain,
   ScrollText,
 } as const;
@@ -88,7 +88,7 @@ const QUICK_ACTIONS: SearchResult[] = [
     label: "Autonomous Compliance Dossier",
     subtitle: "FAR Part 25 & AS9100 Rev D digital thread certification",
     href: "/compliance",
-    icon: "ShieldCheck",
+    icon: "FileCheck",
   },
   {
     id: "qa-copilot",

@@ -10,12 +10,12 @@ import {
 import { cn } from "@/shared/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AerospaceLogo } from "@/components/ui/aerospace-logo";
 import {
   LayoutDashboard,
   FileText,
   UploadCloud,
   GitBranch,
-  ShieldCheck,
   Tags,
   BookCheck,
   AlertTriangle,
@@ -43,7 +43,6 @@ const iconMap: Record<string, LucideIcon> = {
   FileText,
   UploadCloud,
   GitBranch,
-  ShieldCheck,
   Tags,
   BookCheck,
   AlertTriangle,
@@ -82,7 +81,7 @@ function NavItem({
   isCollapsed?: boolean;
   onNavigate?: () => void;
 }) {
-  const Icon = iconMap[item.icon];
+  const Icon = iconMap[item.icon] ?? FileText;
 
   if (isCollapsed) {
     return (
@@ -92,25 +91,18 @@ function NavItem({
         title={item.label}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "group relative flex size-10 items-center justify-center rounded-xl transition-all duration-150 select-none mx-auto mb-1",
+          "group relative flex size-9 items-center justify-center rounded-lg transition-all duration-150 select-none mx-auto mb-1",
           isActive
-            ? "bg-sky-500/15 text-sky-400 border border-sky-500/40 shadow-[0_0_15px_-2px_rgba(14,165,233,0.4)]"
-            : "text-muted-foreground/80 hover:bg-surface-hover hover:text-foreground border border-transparent",
+            ? "bg-sky-500/15 text-sky-400 border border-sky-500/40 shadow-[0_0_12px_rgba(14,165,233,0.3)]"
+            : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent",
         )}
       >
         {isActive && (
-          <span className="absolute -left-1 top-2 bottom-2 w-1 rounded-r-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+          <span className="absolute -left-1.5 top-2 bottom-2 w-1 rounded-r-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.8)]" />
         )}
-        {Icon && (
-          <Icon
-            className={cn(
-              "size-4.5 shrink-0 transition-transform group-hover:scale-110",
-              isActive ? "text-sky-400" : "text-muted-foreground group-hover:text-foreground",
-            )}
-          />
-        )}
+        <Icon className={cn("size-4 shrink-0 transition-transform group-hover:scale-105", isActive ? "text-sky-400" : "text-slate-400 group-hover:text-slate-200")} />
         {item.badge && (
-          <span className="absolute top-1 right-1 size-2 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.8)]" />
+          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-sky-400" />
         )}
       </Link>
     );
@@ -122,31 +114,29 @@ function NavItem({
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-150 select-none",
+        "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-150 select-none",
         isActive
-          ? "bg-sky-500/10 text-sky-400 border border-sky-500/25 shadow-[inset_0_1px_0_0_rgba(56,189,248,0.2),0_0_15px_-4px_rgba(14,165,233,0.3)] font-semibold"
-          : "text-muted-foreground/90 hover:bg-surface-hover hover:text-foreground border border-transparent",
+          ? "bg-sky-500/10 text-sky-400 border border-sky-500/30 font-semibold shadow-[0_0_12px_-3px_rgba(14,165,233,0.25)]"
+          : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent",
       )}
     >
       {isActive && (
-        <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full bg-sky-400" />
       )}
-      {Icon && (
-        <Icon
-          className={cn(
-            "size-4 shrink-0 transition-transform group-hover:scale-105",
-            isActive ? "text-sky-400" : "text-muted-foreground group-hover:text-foreground",
-          )}
-        />
-      )}
+      <Icon
+        className={cn(
+          "size-4 shrink-0 transition-transform group-hover:scale-105",
+          isActive ? "text-sky-400" : "text-slate-400 group-hover:text-slate-200",
+        )}
+      />
       <span className="flex-1 truncate tracking-tight">{item.label}</span>
       {item.badge && (
         <span
           className={cn(
-            "ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold border",
+            "ml-auto rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold border",
             isActive
-              ? "bg-sky-500/20 text-sky-300 border-sky-500/30"
-              : "bg-surface/80 text-muted-foreground border-border/50",
+              ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
+              : "bg-slate-800/80 text-slate-400 border-slate-700/60",
           )}
         >
           {item.badge}
@@ -171,13 +161,13 @@ function NavGroup({
   toggleGroup: (label: string) => void;
   onNavigate?: () => void;
 }) {
-  const Icon = iconMap[group.icon];
+  const Icon = iconMap[group.icon] ?? FileText;
   const isExpanded = expandedGroups.has(group.label);
   const hasActiveChild = groupHasActiveChild(pathname, group.items);
 
   if (isCollapsed) {
     return (
-      <div className="flex flex-col gap-1 py-1 border-t border-border/30 first:border-t-0">
+      <div className="flex flex-col gap-0.5 my-0.5">
         {group.items.map((item) => (
           <NavItem
             key={item.href}
@@ -194,33 +184,32 @@ function NavGroup({
   return (
     <div className="mb-0.5">
       <button
+        type="button"
         onClick={() => toggleGroup(group.label)}
         aria-expanded={isExpanded}
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold tracking-tight transition-colors cursor-pointer select-none",
+          "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold tracking-tight transition-colors cursor-pointer select-none",
           hasActiveChild
-            ? "text-foreground font-semibold"
-            : "text-muted-foreground/80 hover:bg-surface-hover hover:text-foreground",
+            ? "text-slate-200 font-semibold"
+            : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-200",
         )}
       >
-        {Icon && (
-          <Icon
-            className={cn(
-              "size-4 shrink-0",
-              hasActiveChild ? "text-sky-400" : "text-muted-foreground",
-            )}
-          />
-        )}
+        <Icon
+          className={cn(
+            "size-4 shrink-0",
+            hasActiveChild ? "text-sky-400" : "text-slate-400",
+          )}
+        />
         <span className="flex-1 truncate text-left">{group.label}</span>
         <ChevronRight
           className={cn(
-            "size-3.5 shrink-0 text-muted-foreground/60 transition-transform duration-200",
-            isExpanded && "rotate-90 text-foreground",
+            "size-3.5 shrink-0 text-slate-500 transition-transform duration-200",
+            isExpanded && "rotate-90 text-slate-200",
           )}
         />
       </button>
       {isExpanded && (
-        <nav className="mt-0.5 flex flex-col gap-0.5 pl-3 border-l border-border/40 ml-4 my-1" aria-label={group.label}>
+        <nav className="mt-0.5 flex flex-col gap-0.5 pl-2.5 border-l border-slate-800/80 ml-3.5 my-0.5" aria-label={group.label}>
           {group.items.map((item) => (
             <NavItem
               key={item.href}
@@ -343,32 +332,32 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside
       className={cn(
-        "border-border/80 bg-sidebar/95 hidden shrink-0 flex-col border-r backdrop-blur-xl transition-all duration-200 ease-in-out lg:flex select-none z-30 h-screen max-h-screen overflow-hidden",
-        isCollapsed ? "w-18" : "w-64",
+        "border-slate-800/80 bg-[#080c14] hidden shrink-0 flex-col border-r transition-all duration-200 ease-in-out lg:flex select-none z-30 h-screen max-h-screen overflow-hidden",
+        isCollapsed ? "w-16" : "w-60",
       )}
     >
-      <div className="flex h-full flex-col justify-between overflow-y-auto p-2.5 min-h-0">
+      <div className="flex h-full flex-col justify-between overflow-y-auto p-2 min-h-0">
         <div>
           {/* Aerospace Brand Header */}
-          <div className="mb-3 flex items-center justify-between gap-1">
+          <div className="mb-2.5 flex items-center justify-between gap-1">
             <Link
               href="/"
               title="Consecuencia Aerospace Intelligence"
               className={cn(
-                "group flex items-center gap-2.5 rounded-xl border border-border/50 bg-surface/50 p-2 transition-all hover:border-sky-500/30 hover:bg-surface/80 hover:shadow-[0_0_15px_-4px_rgba(14,165,233,0.2)]",
-                isCollapsed ? "mx-auto justify-center" : "flex-1",
+                "group flex items-center gap-2.5 rounded-lg border border-slate-800 bg-slate-900/60 p-1.5 transition-all hover:border-sky-500/40 hover:bg-slate-900",
+                isCollapsed ? "mx-auto justify-center size-9 p-0" : "flex-1",
               )}
             >
-              <div className="flex size-7.5 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 shadow-[0_0_12px_rgba(14,165,233,0.4)] shrink-0">
-                <ShieldCheck className="size-4.5 text-white" />
+              <div className="flex size-6.5 items-center justify-center rounded-md bg-slate-800 border border-slate-700 text-sky-400 shrink-0">
+                <AerospaceLogo className="size-4" />
               </div>
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold tracking-wider text-foreground uppercase truncate">
+                  <span className="text-[11px] font-bold tracking-wider text-slate-100 uppercase truncate">
                     Consecuencia
                   </span>
-                  <span className="text-[10px] font-medium tracking-tight text-muted-foreground truncate font-mono">
-                    AEROSPACE TRUTH
+                  <span className="text-[9px] font-mono text-slate-400 truncate">
+                    AEROSPACE INTEL
                   </span>
                 </div>
               )}
@@ -379,26 +368,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 type="button"
                 onClick={toggleCollapse}
                 title="Collapse sidebar (Ctrl+B)"
-                className="flex size-7 items-center justify-center rounded-lg border border-border/60 bg-surface/40 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-sky-400 transition-all cursor-pointer shrink-0"
+                className="flex size-7 items-center justify-center rounded-md border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-sky-500/40 hover:text-sky-400 transition-all cursor-pointer shrink-0"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft className="size-3.5" />
               </button>
             )}
           </div>
-
-          {/* Quick Expand Button when collapsed */}
-          {isCollapsed && (
-            <div className="mb-2 flex justify-center">
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                title="Expand sidebar (Ctrl+B)"
-                className="flex size-8 items-center justify-center rounded-lg border border-border/60 bg-surface/40 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-sky-400 transition-all cursor-pointer"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          )}
 
           {/* Navigation Items */}
           <div ref={navRef} onKeyDown={handleKeyDown} className="flex flex-col gap-0.5">
@@ -429,26 +404,26 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {/* Telemetry Footer */}
         <div
           className={cn(
-            "mt-4 rounded-xl border border-border/40 bg-surface/40 p-2.5 text-[11px] text-muted-foreground",
-            isCollapsed && "p-2 text-center",
+            "mt-3 rounded-lg border border-slate-800/80 bg-slate-900/40 p-2 text-[10px] text-slate-400 font-mono",
+            isCollapsed && "p-1.5 text-center",
           )}
         >
           {isCollapsed ? (
-            <div className="flex flex-col items-center gap-1.5 font-mono text-[9px]">
-              <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.9)] animate-pulse" />
+            <div className="flex flex-col items-center gap-1 font-mono text-[8px]">
+              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[8px] text-sky-400 font-semibold">FAR25</span>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between font-mono text-[10px]">
-                <span className="text-muted-foreground/70">VERIFICATION:</span>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">VERIFICATION:</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="size-1 rounded-full bg-emerald-400 animate-pulse" />
                   DETERMINISTIC
                 </span>
               </div>
-              <div className="mt-1 flex items-center justify-between font-mono text-[10px]">
-                <span className="text-muted-foreground/70">COMPLIANCE:</span>
+              <div className="mt-1 flex items-center justify-between">
+                <span className="text-slate-500">COMPLIANCE:</span>
                 <span className="text-sky-400 font-semibold">AS9100 / FAR 25</span>
               </div>
             </>
@@ -458,5 +433,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     </aside>
   );
 }
+
 
 

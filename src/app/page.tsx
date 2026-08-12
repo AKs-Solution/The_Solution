@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { AerospaceLogo } from "@/components/ui/aerospace-logo";
 import {
-  ShieldCheck,
   GitBranch,
   BookCheck,
   AlertTriangle,
@@ -10,6 +10,7 @@ import {
   Database,
   Lock,
   Layers,
+  Cpu,
 } from "lucide-react";
 import { DemoLoginButton } from "@/components/DemoLoginButton";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ export default function Home() {
     {
       title: "Reality Engine",
       description: "Reinterprets rules, contradiction lifecycles, and ingestion completeness.",
-      icon: ShieldCheck,
+      icon: Cpu,
       color: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
     },
     {
@@ -67,8 +68,8 @@ export default function Home() {
       <header className="relative z-10 border-b border-slate-800/80 bg-[#06090e]/80 px-6 py-3.5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 via-sky-600 to-indigo-600 shadow-[0_0_15px_rgba(14,165,233,0.5)]">
-              <ShieldCheck className="h-5 w-5 text-white" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+              <AerospaceLogo className="size-5.5" />
             </div>
             <div className="flex flex-col">
               <span className="text-base font-extrabold tracking-wider text-white uppercase">

@@ -113,27 +113,28 @@ export function Header() {
   }
 
   return (
-    <header className="border-border/80 bg-surface/80 shrink-0 flex h-13 flex-col justify-center gap-0 border-b px-4 backdrop-blur-xl transition-colors sm:px-6 select-none">
+    <header className="border-slate-800/80 bg-[#080c14] shrink-0 flex h-12 flex-col justify-center gap-0 border-b px-3 transition-colors sm:px-4 select-none">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5 md:gap-4">
+        <div className="flex min-w-0 items-center gap-2 md:gap-3">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("consecuencia:toggle-sidebar"))}
             title="Toggle Sidebar (Ctrl+B)"
-            className="flex size-8 items-center justify-center rounded-lg border border-border/60 bg-surface/40 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-foreground transition-all cursor-pointer shrink-0"
+            className="flex size-7.5 items-center justify-center rounded-md border border-slate-800 bg-slate-900/50 text-slate-400 hover:border-sky-500/40 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer shrink-0"
           >
-            <PanelLeft className="size-4" />
+            <PanelLeft className="size-3.5" />
           </button>
           <OrganizationSelector />
-          <div className="border-border/40 hidden items-center md:flex pl-2 border-l">
+          <div className="border-slate-800/80 hidden items-center md:flex pl-2 border-l">
             <Breadcrumbs items={breadcrumbs} />
           </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Live Operational Status Beacon */}
-          <div className="hidden items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 xl:flex">
-            <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.9)] animate-pulse" />
-            <span className="font-mono tracking-wider">SYSTEM NOMINAL</span>
+          <div className="hidden items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/60 px-2.5 py-1 text-[10px] font-semibold text-slate-300 xl:flex font-mono">
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-400">STATUS:</span>
+            <span className="text-emerald-400">NOMINAL</span>
           </div>
 
           {/* Density Mode Switcher */}
@@ -143,12 +144,12 @@ export function Header() {
           <button
             type="button"
             onClick={openSearchPalette}
-            className="border-border/70 bg-surface/60 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-foreground flex h-8.5 w-10 cursor-pointer items-center justify-center gap-2 rounded-lg border px-2 text-xs transition-all sm:w-52 sm:justify-start sm:px-3 lg:w-60 shadow-xs"
+            className="border-slate-800 bg-slate-900/50 text-slate-400 hover:border-sky-500/40 hover:bg-slate-800 hover:text-slate-200 flex h-7.5 w-9 cursor-pointer items-center justify-center gap-2 rounded-md border px-2 text-xs transition-all sm:w-48 sm:justify-start sm:px-2.5 lg:w-56 shadow-xs"
             aria-label="Open search (Control or Command K)"
           >
             <Search className="size-3.5 shrink-0 text-sky-400" aria-hidden="true" />
-            <span className="hidden flex-1 text-left tracking-tight sm:inline">Search artifacts, nodes...</span>
-            <kbd className="text-muted-foreground/70 hidden rounded border border-border/80 bg-surface/80 px-1.5 py-0.5 font-mono text-[10px] sm:inline">
+            <span className="hidden flex-1 text-left tracking-tight text-[11px] sm:inline">Search artifacts, nodes...</span>
+            <kbd className="text-slate-400 hidden rounded border border-slate-700/80 bg-slate-800/80 px-1 py-0.5 font-mono text-[9px] sm:inline">
               ⌘K
             </kbd>
           </button>
