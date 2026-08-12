@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Award, RefreshCw, Layers, ShieldCheck, FileCheck2 } from "lucide-react";
-import { PageContainer, Panel, Stack } from "@/components/layout";
+import { PageContainer, Panel, Stack, SubTabInspector } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider } from "@/components/ui";
 
 export default function CompliancePage() {
@@ -102,6 +102,8 @@ export default function CompliancePage() {
             attestations linked to physical metrology assets.
           </p>
         </div>
+
+        <SubTabInspector activeTab="evidence" className="rounded-xl border border-zinc-800" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* COMPONENT LEDGER VIEW */}

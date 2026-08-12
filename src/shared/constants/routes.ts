@@ -26,7 +26,7 @@ export interface SidebarNavItem {
   label: string;
   href: string;
   icon: string;
-  badge?: number;
+  badge?: string | number;
 }
 
 export interface SidebarNavGroup {
@@ -45,66 +45,41 @@ export { isGroup };
 
 export const SIDEBAR_NAV: SidebarNavEntry[] = [
   {
-    label: "Workspace",
+    label: "Mission Console",
     href: ROUTES.dashboard,
     icon: "LayoutDashboard",
   },
   {
-    label: "Engineering Data",
-    icon: "Layers",
-    items: [
-      { label: "Documents", href: ROUTES.documents, icon: "FileText" },
-      { label: "Suppliers", href: ROUTES.suppliers, icon: "Truck" },
-      { label: "Drawings Compare", href: "/drawings", icon: "Layers" },
-      { label: "Evidence Search", href: "/copilot", icon: "Brain" },
-      { label: "IP & ZK Sourcing", href: "/marketplace", icon: "Tags" },
-      { label: "Metrology Registry", href: "/telemetry", icon: "Cog" },
-      { label: "Attest Compliance", href: "/compliance", icon: "ShieldCheck" },
-      { label: "Program Risks", href: "/reports/risk", icon: "BarChart3" },
-    ],
-  },
-  {
-    label: "Intelligence & Platform",
+    label: "Core Decision Intelligence",
     icon: "Brain",
     items: [
-      { label: "Executive Dashboard", href: "/executive-dashboard", icon: "BarChart3" },
-      { label: "Decision Sentinel", href: "/sentinel", icon: "Activity" },
-      { label: "Certification Readiness", href: "/certification", icon: "ShieldCheck" },
-      { label: "Approval Queue", href: "/reviews", icon: "UserCheck" },
-      { label: "Lineage Explorer", href: "/lineage", icon: "GitBranch" },
-      { label: "Program Health", href: "/programs", icon: "Activity" },
-      { label: "Decision Audit Trail", href: "/decisions", icon: "GitCommit" },
-      {
-        label: "Supplier Risk Predictor",
-        href: "/intelligence/supplier-risk",
-        icon: "AlertTriangle",
-      },
-      { label: "Design Pattern Library", href: "/patterns", icon: "Layers" },
-      { label: "Cross-Program Insights", href: "/intelligence/cross-program", icon: "TrendingUp" },
-      {
-        label: "Certification Predictor",
-        href: "/intelligence/certification-risk",
-        icon: "ShieldCheck",
-      },
+      { label: "Executive Overview", href: "/executive-dashboard", icon: "BarChart3", badge: "HQ" },
+      { label: "Decision Sentinel", href: "/sentinel", icon: "Activity", badge: "LIVE" },
+      { label: "Historical Precedents", href: "/precedents", icon: "BookCheck", badge: "510+" },
+      { label: "Failure Graph & Contagion", href: "/failure-graph", icon: "GitBranch", badge: "GRAPH" },
+      { label: "Decision Ledger", href: "/decisions", icon: "Workflow" },
+      { label: "Reasoning & Contradictions", href: "/contradictions", icon: "AlertTriangle", badge: "ALERTS" },
     ],
   },
   {
-    label: "Evidence & Governance",
+    label: "Engineering & Validation",
+    icon: "Layers",
+    items: [
+      { label: "Drawings & Rules", href: "/drawings", icon: "Layers", badge: "CAD" },
+      { label: "Compliance Dossier", href: "/compliance", icon: "ShieldCheck", badge: "AS9100" },
+      { label: "Engineering Copilot", href: "/copilot", icon: "Brain" },
+      { label: "Certification Readiness", href: "/certification", icon: "ShieldCheck" },
+      { label: "Documents & Evidence", href: ROUTES.documents, icon: "FileText" },
+      { label: "Suppliers & Parts", href: ROUTES.suppliers, icon: "Truck" },
+    ],
+  },
+  {
+    label: "Platform Governance",
     icon: "ShieldCheck",
     items: [
-      { label: "Validation Timeline", href: "/worldmodel", icon: "ScrollText" },
-      { label: "Expertise Ledger", href: "/tribal", icon: "FileText" },
-      { label: "Supplier Attestation", href: "/negotiation", icon: "Workflow" },
-      { label: "Lifecycle Twin", href: "/twin", icon: "Layers" },
-      { label: "Recovery Router", href: "/selfheal", icon: "Cog" },
-    ],
-  },
-  {
-    label: "Administration",
-    icon: "Settings",
-    items: [
+      { label: "Audit Log (SHA-256)", href: ROUTES.audit, icon: "ScrollText" },
+      { label: "Program Health", href: "/programs", icon: "Activity" },
       { label: "Settings", href: ROUTES.settings, icon: "Settings" },
-      { label: "Audit Log", href: ROUTES.audit, icon: "ScrollText" },
       { label: "Notifications", href: ROUTES.notifications, icon: "Bell" },
     ],
   },

@@ -6,6 +6,7 @@ import { OrganizationSelector } from "@/features/organizations/components/organi
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import type { BreadcrumbItem } from "@/components/ui/breadcrumb";
 import { Avatar } from "@/components/ui/avatar";
+import { DensityToggle } from "@/components/layout/density-toggle";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -126,6 +127,9 @@ export function Header() {
             <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.9)] animate-pulse" />
             <span className="font-mono tracking-wider">SYSTEM NOMINAL</span>
           </div>
+
+          {/* Density Mode Switcher */}
+          <DensityToggle />
 
           {/* Quick Search Palette Trigger */}
           <button

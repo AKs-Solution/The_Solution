@@ -14,7 +14,7 @@ import {
   Cpu,
   Upload,
 } from "lucide-react";
-import { PageContainer, Stack, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
+import { PageContainer, Stack, SubTabInspector, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
 import { DrawingRiskDashboard } from "@/features/drawings/components/drawing-risk-dashboard";
 import { FusedDrawingRiskResult } from "@/server/drawings/rules/types";
@@ -50,7 +50,6 @@ export default function DrawingsDashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Load sample risk assessment on mount
   const runDefaultAssessment = useCallback(async () => {
     setIsAssessing(true);
     try {
@@ -110,16 +109,17 @@ export default function DrawingsDashboardPage() {
     fetchData();
   }, [fetchData]);
 
-  // Handle custom drawing file upload for 3-layer risk assessment
   const handleAssessFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!assessFile) return;
+    if (!assessFile) {
+      setErrorMessage("Please select a technical drawing file to assess.");
+      return;
+    }
     setIsAssessing(true);
     setErrorMessage("");
-    const formData = new FormData();
-    formData.append("file", assessFile);
-
     try {
+      const formData = new FormData();
+      formData.append("file", assessFile);
       const res = await fetch("/api/drawings/assess", {
         method: "POST",
         body: formData,
@@ -184,24 +184,32 @@ export default function DrawingsDashboardPage() {
     formData.append("fileB", fileB);
 
     try {
-      const res = await fetch("/api/drawings/upload", {
+      const res = await fetch("/api/drawings/comparisons", {
         method: "POST",
         body: formData,
       });
       if (res.ok) {
+        const data = await res.json();
         setDrawingName("");
-        setRevALabel("Rev A");
-        setRevBLabel("Rev B");
         setFileA(null);
         setFileB(null);
-        await fetchComparisons(selectedProjectId);
+        await fetchData();
+        if (data.data?.id) {
+          openTab({
+            kind: "drawing",
+            ref: data.data.id,
+            title: drawingName || "Drawing Comparison",
+            subtitle: "Revision Compare",
+            href: `/drawings/comparisons/${data.data.id}`,
+          });
+        }
       } else {
-        const errJson = await res.json();
-        setErrorMessage(errJson.error || "OCR Comparison failed.");
+        const errData = await res.json();
+        setErrorMessage(errData.error || "Upload failed");
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage("Network error uploading files.");
+      setErrorMessage("Upload failed due to network error");
     } finally {
       setIsSubmitting(false);
     }
@@ -253,11 +261,13 @@ export default function DrawingsDashboardPage() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Layers className="size-4" /> Revision Compare
+                <Layers className="size-4" /> CAD Revision Compare
               </button>
             </div>
           </div>
         </div>
+
+        <SubTabInspector activeTab="overview" className="rounded-xl border border-zinc-800" />
 
         {/* ERROR BOX */}
         {errorMessage && (
@@ -471,6 +481,20 @@ export default function DrawingsDashboardPage() {
                           placeholder="Drawing Name"
                           className="h-10 border-zinc-800 bg-zinc-950 text-sm"
                         />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            value={revALabel}
+                            onChange={(e) => setRevALabel(e.target.value)}
+                            placeholder="Rev A Label"
+                            className="h-8 border-zinc-800 bg-zinc-950 text-xs"
+                          />
+                          <Input
+                            value={revBLabel}
+                            onChange={(e) => setRevBLabel(e.target.value)}
+                            placeholder="Rev B Label"
+                            className="h-8 border-zinc-800 bg-zinc-950 text-xs"
+                          />
+                        </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-xs text-zinc-400">Upload Revision A</label>
                           <input

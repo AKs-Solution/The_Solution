@@ -18,7 +18,7 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
-import { PageContainer, Section, Panel, GridLayout, Stack } from "@/components/layout";
+import { PageContainer, Section, Panel, GridLayout, Stack, SubTabInspector } from "@/components/layout";
 import { MetricCard, EmptyState, Button, DataTable } from "@/components/ui";
 import { cn } from "@/shared/utils";
 import { EngineeringPrecedent, PrecedentType } from "@/features/precedents/types";
@@ -275,6 +275,8 @@ export default function PrecedentEnginePage() {
             <span>Record Precedent</span>
           </Button>
         </div>
+
+        <SubTabInspector activeTab="precedents" className="rounded-xl border border-zinc-800" />
 
         {/* KPI Panel */}
         <GridLayout columns={4} gap={4}>

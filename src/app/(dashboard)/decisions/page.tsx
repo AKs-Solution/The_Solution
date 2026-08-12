@@ -6,8 +6,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { GitCommit, RefreshCw, FileText, ChevronRight } from "lucide-react";
-import { PageContainer, Stack, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
+import { PageContainer, Stack, SubTabInspector, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
+import { EpistemicBadge } from "@/components/ui/epistemic-badge";
 
 export default function DecisionAuditTrailPage() {
   const [decisions, setDecisions] = useState<any[]>([]);
@@ -103,6 +104,8 @@ export default function DecisionAuditTrailPage() {
             <RefreshCw className="mr-2 size-3.5" /> Refresh Audit Trail
           </Button>
         </div>
+
+        <SubTabInspector activeTab="overview" className="rounded-xl border border-zinc-800" />
 
         {/* WORKSPACE LAYOUT */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -201,9 +204,12 @@ export default function DecisionAuditTrailPage() {
                       <GitCommit className="size-5" />
                     </div>
                     <div className="flex flex-col">
-                      <h4 className="text-sm font-bold text-zinc-100 transition-colors group-hover:text-emerald-400">
-                        {d.description}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-zinc-100 transition-colors group-hover:text-emerald-400">
+                          {d.description}
+                        </h4>
+                        <EpistemicBadge status={d.epistemicStatus || "RECORDED"} size="sm" />
+                      </div>
                       <span className="mt-1 text-[10px] text-zinc-500">
                         Type: {d.decisionType} · Status: {d.status} · Proposed by{" "}
                         {d.proposedBy?.name || "Engineer"}

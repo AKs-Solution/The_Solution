@@ -39,3 +39,7 @@ export type { RecordTabItem, RecordTabsProps } from "./record-tabs";
 export { RecordInspector } from "./record-inspector";
 export type { RecordInspectorProps } from "./record-inspector";
 export { useRecordScroll } from "./workspace-tabs";
+export { DensityToggle } from "./density-toggle";
+export { SubTabInspector } from "./sub-tab-inspector";
+export type { SubTabId, SubTabOption } from "./sub-tab-inspector";
+

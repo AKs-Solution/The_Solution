@@ -25,6 +25,7 @@ import {
   Widget,
   WidgetGrid,
   WidgetCustomizeMenu,
+  SubTabInspector,
   type WidgetConfig,
 } from "@/components/layout";
 import { MetricCard, Badge } from "@/components/ui";
@@ -185,6 +186,8 @@ export default function ExecutiveDashboardPage() {
           </div>
           <WidgetCustomizeMenu widgets={WIDGETS} />
         </div>
+
+        <SubTabInspector activeTab="overview" className="rounded-xl border" />
 
         {isLoading ? (
           <div className="border-border bg-background flex items-center justify-center rounded-lg border py-24 text-sm text-muted-foreground">
