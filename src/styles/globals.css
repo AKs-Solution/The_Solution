@@ -226,6 +226,12 @@
     box-shadow: 0 0 20px -3px rgba(14, 165, 233, 0.35);
   }
 
+  .hud-grid {
+    background-image: linear-gradient(to right, rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+    background-size: 2.5rem 2.5rem;
+  }
+
   .scroll-edge-right {
     mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
     -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
@@ -235,6 +241,21 @@
     mask-image: linear-gradient(to left, black calc(100% - 24px), transparent);
     -webkit-mask-image: linear-gradient(to left, black calc(100% - 24px), transparent);
   }
+}
+
+/* Density overrides */
+[data-density="compact"] {
+  --density-space: 0.5rem;
+  --density-pad: 0.75rem;
+  --density-font: 0.75rem;
+  --density-row: 2.25rem;
+}
+
+[data-density="comfortable"] {
+  --density-space: 1.25rem;
+  --density-pad: 1.75rem;
+  --density-font: 0.9375rem;
+  --density-row: 3.25rem;
 }
 
 body {
@@ -260,4 +281,5 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.4);
 }
+
 

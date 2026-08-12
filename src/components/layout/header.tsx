@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Search, Settings, User } from "lucide-react";
+import { LogOut, Search, Settings, User, PanelLeft } from "lucide-react";
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -115,7 +115,15 @@ export function Header() {
   return (
     <header className="border-border/80 bg-surface/80 sticky top-0 z-30 flex h-14 flex-col justify-center gap-0 border-b px-4 backdrop-blur-xl transition-colors sm:px-6 select-none">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3 md:gap-4">
+        <div className="flex min-w-0 items-center gap-2.5 md:gap-4">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("consecuencia:toggle-sidebar"))}
+            title="Toggle Sidebar (Ctrl+B)"
+            className="flex size-8 items-center justify-center rounded-lg border border-border/60 bg-surface/40 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-foreground transition-all cursor-pointer shrink-0"
+          >
+            <PanelLeft className="size-4" />
+          </button>
           <OrganizationSelector />
           <div className="border-border/40 hidden items-center md:flex pl-2 border-l">
             <Breadcrumbs items={breadcrumbs} />

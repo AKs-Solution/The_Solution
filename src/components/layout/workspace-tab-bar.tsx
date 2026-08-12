@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Activity,
   FolderOpen,
@@ -16,6 +16,10 @@ import {
   LayoutDashboard,
   ShieldAlert,
   FileCheck,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  Layers2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -37,6 +41,8 @@ export function WorkspaceTabBar() {
   const router = useRouter();
   const { tabs, openTab, closeTab, setActiveTab, pinTab } = useWorkspaceTabs();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Sync active route with open tabs
   useEffect(() => {
@@ -49,6 +55,19 @@ export function WorkspaceTabBar() {
     }
   }, [pathname, tabs, setActiveTab]);
 
+  // Click outside to close menu
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMenu]);
+
   const handleTabClick = (tab: WorkspaceTabItem) => {
     setActiveTab(tab.id);
     router.push(tab.path);
@@ -58,7 +77,7 @@ export function WorkspaceTabBar() {
     const newId = `new-tab-${Date.now()}`;
     openTab({
       id: newId,
-      title: "Explore Console",
+      title: "Executive Console",
       path: "/dashboard",
       icon: "LayoutDashboard",
       isActive: true,
@@ -66,8 +85,51 @@ export function WorkspaceTabBar() {
     router.push("/dashboard");
   };
 
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
+
+  const closeOthers = () => {
+    const active = tabs.find((t) => t.isActive);
+    if (!active) return;
+    for (const t of tabs) {
+      if (t.id !== active.id && !t.isPinned) {
+        closeTab(t.id);
+      }
+    }
+    setShowMenu(false);
+  };
+
+  const closeUnpinned = () => {
+    for (const t of tabs) {
+      if (!t.isPinned) {
+        closeTab(t.id);
+      }
+    }
+    setShowMenu(false);
+  };
+
   return (
-    <div className="border-border/80 bg-surface/90 sticky top-14 z-20 flex h-10 w-full items-center border-b px-3 backdrop-blur-md select-none">
+    <div className="border-border/80 bg-surface/90 sticky top-14 z-20 flex h-10 w-full items-center border-b px-2 backdrop-blur-md select-none gap-1">
+      {/* Scroll Left */}
+      <button
+        type="button"
+        onClick={scrollLeft}
+        title="Scroll tabs left"
+        className="hidden sm:flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-surface-hover hover:text-foreground transition-colors cursor-pointer shrink-0"
+      >
+        <ChevronLeft className="size-3.5" />
+      </button>
+
+      {/* Tabs Container */}
       <div
         ref={scrollRef}
         className="flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar py-1"
@@ -136,6 +198,7 @@ export function WorkspaceTabBar() {
           );
         })}
 
+        {/* Add Tab Button */}
         <button
           type="button"
           onClick={handleNewTab}
@@ -145,6 +208,58 @@ export function WorkspaceTabBar() {
           <Plus className="size-3.5" />
         </button>
       </div>
+
+      {/* Scroll Right */}
+      <button
+        type="button"
+        onClick={scrollRight}
+        title="Scroll tabs right"
+        className="hidden sm:flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-surface-hover hover:text-foreground transition-colors cursor-pointer shrink-0"
+      >
+        <ChevronRight className="size-3.5" />
+      </button>
+
+      {/* Tab Context Actions Dropdown */}
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setShowMenu(!showMenu)}
+          title="Tab Management Options"
+          className="flex size-7 items-center justify-center rounded-lg border border-border/50 bg-surface/40 text-muted-foreground hover:border-sky-500/40 hover:bg-surface-hover hover:text-sky-400 transition-all cursor-pointer"
+        >
+          <MoreVertical className="size-3.5" />
+        </button>
+
+        <AnimatePresence>
+          {showMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -4, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-8 z-50 w-48 rounded-xl border border-slate-800 bg-[#06090e]/95 p-1.5 shadow-2xl backdrop-blur-xl text-xs"
+            >
+              <button
+                type="button"
+                onClick={closeOthers}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+              >
+                <Layers2 className="size-3.5 text-sky-400" />
+                <span>Close Other Tabs</span>
+              </button>
+              <button
+                type="button"
+                onClick={closeUnpinned}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="size-3.5 text-rose-400" />
+                <span>Close Unpinned Tabs</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
+

@@ -22,24 +22,24 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(
       <nav
         ref={ref}
         aria-label="Breadcrumb"
-        className={cn("flex items-center gap-1 text-sm", className)}
+        className={cn("flex items-center gap-1.5 text-xs font-medium", className)}
         {...props}
       >
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <span key={item.label} className="flex items-center gap-1">
+            <span key={`${item.label}-${index}`} className="flex items-center gap-1.5">
               {index > 0 &&
-                (separator ?? <ChevronRight className="text-muted-foreground size-3.5" />)}
+                (separator ?? <ChevronRight className="text-muted-foreground/50 size-3 shrink-0" />)}
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-sky-400 transition-colors tracking-tight"
                 >
                   {item.label}
                 </Link>
               ) : (
-                <span className={isLast ? "text-foreground" : "text-muted-foreground"}>
+                <span className={cn("tracking-tight", isLast ? "text-foreground font-semibold" : "text-muted-foreground")}>
                   {item.label}
                 </span>
               )}
