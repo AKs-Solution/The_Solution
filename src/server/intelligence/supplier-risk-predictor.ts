@@ -102,50 +102,10 @@ export async function getSuppliersAtRisk(organizationId: string) {
   }).catch(() => []) ?? [];
 
   if (suppliers.length === 0) {
-    // Return sample predictive structured response if DB empty
     return {
-      suppliersAtRisk: [
-        {
-          supplierId: "sup-demo-1",
-          supplierName: "TechMach Industries",
-          riskLevel: "CRITICAL" as const,
-          riskProbability: 0.82,
-          predictedEvent: "60% of bore work late by 2+ weeks due to tool order backlog",
-          timeframe: "Within 4 weeks",
-          historicalPrecedents: 5,
-          recommendedMitigation: [
-            { action: "Add 2-week schedule buffer", successRate: 0.9, cost: 2000, timeImpact: -14 },
-            {
-              action: "Qualify secondary CNC vendor",
-              successRate: 0.85,
-              cost: 12000,
-              timeImpact: -21,
-            },
-          ],
-        },
-        {
-          supplierId: "sup-demo-2",
-          supplierName: "AeroPrecision Ltd",
-          riskLevel: "HIGH" as const,
-          riskProbability: 0.64,
-          predictedEvent: "Scrap rate deviation (+3.2%) expected on aluminum wing fittings",
-          timeframe: "Within 8 weeks",
-          historicalPrecedents: 3,
-          recommendedMitigation: [
-            {
-              action: "Require SPC verification before first article",
-              successRate: 0.88,
-              cost: 3000,
-              timeImpact: -7,
-            },
-          ],
-        },
-      ],
-      supplyChainHealth: 74,
-      recommendations: [
-        "Reallocate bore machining load from TechMach to pre-qualified backup suppliers.",
-        "Enforce SPC Cpk > 1.67 inspection checks for AeroPrecision wing fittings.",
-      ],
+      suppliersAtRisk: [],
+      supplyChainHealth: 100,
+      recommendations: [],
     };
   }
 

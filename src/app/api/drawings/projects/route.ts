@@ -44,12 +44,11 @@ export async function POST(request: Request) {
         description: description?.trim() || null,
         ownerId: session.userId,
       },
-    }).catch(() => ({
-      id: "demo-project-1",
-      name: name.trim(),
-      description: description?.trim() || null,
-      ownerId: session.userId,
-    }));
+    }).catch(() => null);
+
+    if (!project) {
+      return NextResponse.json({ error: "Failed to create drawing project" }, { status: 500 });
+    }
 
     return NextResponse.json({ data: project }, { status: 201 });
   } catch (error) {

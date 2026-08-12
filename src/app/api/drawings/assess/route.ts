@@ -26,37 +26,21 @@ export async function POST(req: NextRequest) {
     } else {
       const body = await req.json();
       const rawText: string = body.text || "";
-      const filename: string = body.filename || "AFT_BRACKET_1032_REV_B.pdf";
+      const filename: string = body.filename || "DRAWING_ASSESSMENT.pdf";
       const organizationId: string | undefined = body.organizationId;
 
-      // Sample mock drawing text if empty body text is passed for testing
-      const sampleText =
-        rawText ||
-        `
-        TITLE: AFT ACTUATOR BRACKET
-        DWG NO: AFT_BRACKET_1032
-        REV: B
-        MATERIAL: Titanium Ti-6Al-4V
-        FINISH: Hard Anodize Type III
-        UNLESS OTHERWISE SPECIFIED DIMENSIONS ARE IN MM
-        DRAWING STANDARD: ASME Y14.5-2018
-        [A] [B] [C] DATUMS
-        
-        DIMENSIONS & CALLOUTS:
-        1. Flatness < 0.03 mm on Datum Surface A
-        2. Position Ø0.08 MMC relative to A|B|C
-        3. Bore Ø12 H7 (+0.018/-0.000)
-        4. Surface finish Ra 0.8 µm on sealing surface
-        5. Deep Pocket depth 35mm cutter 6mm (aspect ratio >5x)
-        6. Thin Wall 1.5mm between pocket and outer mounting lug
-        7. Threads M6x1.0 STI Helicoil Inserts
-      `;
+      if (!rawText.trim()) {
+        return NextResponse.json(
+          { error: "Missing technical drawing file or text content to assess" },
+          { status: 400 },
+        );
+      }
 
-      const lines = sampleText
+      const lines = rawText
         .split("\n")
         .map((l) => l.trim())
         .filter(Boolean);
-      const pdfData = await parseDrawingPdf(Buffer.from(sampleText), filename);
+      const pdfData = await parseDrawingPdf(Buffer.from(rawText), filename);
       const callouts = parseGDTCallouts(lines);
 
       const fusedResult = await computeFusedDrawingRisk(pdfData.metadata, callouts, organizationId);

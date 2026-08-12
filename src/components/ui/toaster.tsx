@@ -43,7 +43,7 @@ const BORDER: Record<ToastVariant, string> = {
   error: "border-rose-500/30",
 };
 
-const VIEWPORT_ID = "morningstar-toast-viewport";
+const VIEWPORT_ID = "consecuencia-toast-viewport";
 
 export function Toaster() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);

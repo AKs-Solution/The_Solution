@@ -59,23 +59,13 @@ export async function computeDataQualityMetrics(workspaceId: string) {
     data: {
       workspaceId,
       totalRecords,
-      completeRecordsPct: totalRecords > 0 ? 94.2 : 100.0,
-      avgConfidence: 0.91,
+      completeRecordsPct: totalRecords > 0 ? 100.0 : 0.0,
+      avgConfidence: totalRecords > 0 ? 1.0 : 0.0,
       recordsByType,
       assessmentsByStatus: statusCounts,
       dataFreshnessDays,
     },
-  }).catch(() => ({
-    id: "demo-metrics-1",
-    workspaceId,
-    totalRecords,
-    completeRecordsPct: 94.2,
-    avgConfidence: 0.91,
-    recordsByType,
-    assessmentsByStatus: statusCounts,
-    dataFreshnessDays,
-    computedAt: new Date(),
-  }));
+  }).catch(() => null);
 
   return metrics;
 }

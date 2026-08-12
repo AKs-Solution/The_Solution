@@ -5,7 +5,7 @@ import { prisma } from "@/server/db";
 import { validateSession } from "@/server/auth/session-service";
 import { ForbiddenError } from "@/shared/errors";
 
-const ACTIVE_ORG_COOKIE = "morningstar_org";
+const ACTIVE_ORG_COOKIE = "consecuencia_org";
 
 export async function getActiveOrganizationId(): Promise<string | null> {
   const cookieStore = await cookies();

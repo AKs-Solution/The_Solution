@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/server/db";
 
-const COOKIE_NAME = "morningstar_session";
+const COOKIE_NAME = "consecuencia_session";
 const SESSION_EXPIRY_HOURS = 24;
 const REMEMBER_ME_EXPIRY_DAYS = 30;
 
@@ -38,7 +38,7 @@ export async function createSession(
       },
     });
   } catch (err) {
-    console.warn("[SessionService] DB offline fallback session creation:", err);
+    console.warn("[SessionService] DB offline session creation error:", err);
   }
 
   const cookieStore = await cookies();
@@ -69,11 +69,10 @@ export async function validateSession(): Promise<SessionPayload | null> {
       return { userId: session.userId, sessionId: session.id };
     }
   } catch (err) {
-    console.warn("[SessionService] DB offline fallback session validation:", err);
+    console.warn("[SessionService] DB error during session validation:", err);
   }
 
-  // Guest fallback session
-  return { userId: "demo-guest-user-1", sessionId: "demo-guest-session-1" };
+  return null;
 }
 
 export async function renewSession(): Promise<void> {

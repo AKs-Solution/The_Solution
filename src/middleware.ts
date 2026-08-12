@@ -4,7 +4,7 @@ import { buildContentSecurityPolicy, generateNonce } from "@/server/security/csp
 import { isSameOriginRequest } from "@/server/security/csrf";
 import { logger } from "@/shared/logging";
 
-const COOKIE_NAME = "morningstar_session";
+const COOKIE_NAME = "consecuencia_session";
 const REQUEST_ID_HEADER = "x-request-id";
 const NONCE_HEADER = "x-nonce";
 

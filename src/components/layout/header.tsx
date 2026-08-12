@@ -53,7 +53,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
 }
 
 function openSearchPalette() {
-  window.dispatchEvent(new CustomEvent("morningstar:open-search"));
+  window.dispatchEvent(new CustomEvent("consecuencia:open-search"));
 }
 
 function initialsFrom(name?: string | null, email?: string | null): string {

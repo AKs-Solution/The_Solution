@@ -53,44 +53,23 @@ function auditNode(log: Record<string, any>): AuditLineageNode {
   };
 }
 
-function fallbackView(targetEntityId: string): AuditExplorerView {
+function emptyAuditView(targetEntityId: string): AuditExplorerView {
   return {
-    auditSessionId: "AUDIT-SESS-FALLBACK-101",
+    auditSessionId: `AUDIT-SESS-${Date.now()}`,
     targetEntityId,
-    targetEntityName: "Main Propulsion Chamber Flange (FLG-840)",
+    targetEntityName: "Unspecified Entity",
     lineageTree: {
       id: targetEntityId,
       type: "COMPONENT",
-      name: "Main Propulsion Chamber Flange (FLG-840)",
+      name: "No entity lineage found",
       timestamp: new Date().toISOString(),
-      author: "Marcus Vance (Chief Systems Architect)",
-      evidenceHash: "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
+      author: "System",
+      evidenceHash: "",
       verificationStatus: "VALID",
-      children: [
-        {
-          id: "req-therm-402",
-          type: "REQUIREMENT",
-          name: "REQ-THERM-402: Operating Temp <= 300C",
-          timestamp: new Date(Date.now() - 86400000 * 30).toISOString(),
-          author: "Systems Engineering Review Board",
-          evidenceHash: "7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
-          verificationStatus: "VALID",
-          children: [
-            {
-              id: "dec-prop-102",
-              type: "DECISION",
-              name: "DEC-PROP-102: Material Sub to Titanium 6Al-4V",
-              timestamp: new Date(Date.now() - 86400000 * 15).toISOString(),
-              author: "Lead Materials Engineer",
-              evidenceHash: "3f4e5d6c7b8a90123456789abcdef0123456789abcdef0123456789abcdef012",
-              verificationStatus: "VALID",
-            },
-          ],
-        },
-      ],
+      children: [],
     },
-    decisionReplayCount: 4,
-    assumptionsEvaluated: 6,
+    decisionReplayCount: 0,
+    assumptionsEvaluated: 0,
     evidenceIntegrityVerified: true,
     auditedAt: new Date().toISOString(),
   };
@@ -118,7 +97,7 @@ export async function getAuditExplorerView(
     ]);
 
     if (!entity) {
-      return fallbackView(targetEntityId);
+      return emptyAuditView(targetEntityId);
     }
 
     const entityById = new Map((entities as any[]).map((e) => [e.id, e]));
@@ -226,7 +205,7 @@ export async function getAuditExplorerView(
       auditedAt: new Date().toISOString(),
     };
   } catch (err) {
-    console.warn("[AuditExplorerEngine] DB offline fallback execution:", err);
-    return fallbackView(targetEntityId);
+    console.warn("[AuditExplorerEngine] DB query error:", err);
+    return emptyAuditView(targetEntityId);
   }
 }

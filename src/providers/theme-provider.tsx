@@ -10,7 +10,7 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const STORAGE_KEY = "morningstar-theme";
+const STORAGE_KEY = "consecuencia-theme";
 
 function getStoredTheme(): Theme {
   if (typeof window === "undefined") return "system";

@@ -5,7 +5,14 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const orgId = searchParams.get("orgId") || "default-org";
-    const decisionId = searchParams.get("decisionId") || "sample-decision-1";
+    const decisionId = searchParams.get("decisionId");
+
+    if (!decisionId) {
+      return NextResponse.json(
+        { success: false, error: "Missing required decisionId query parameter" },
+        { status: 400 },
+      );
+    }
 
     const health = await calculateDecisionHealth(orgId, decisionId);
 

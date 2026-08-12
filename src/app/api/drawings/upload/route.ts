@@ -31,7 +31,11 @@ export async function POST(request: Request) {
     if (!drawing) {
       drawing = await (prisma as any).drawing?.create({
         data: { projectId, name: drawingName },
-      }).catch(() => ({ id: "demo-drawing-1", projectId, name: drawingName }));
+      }).catch(() => null);
+    }
+
+    if (!drawing) {
+      return NextResponse.json({ error: "Failed to initialize drawing record" }, { status: 500 });
     }
 
     // 2. Read file buffers
@@ -82,7 +86,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fetch the completed comparison job to return
     const completedJob = await (prisma as any).drawingComparisonJob?.findFirst({
       where: { projectId, revAId: revA.id, revBId: revB.id },
       include: {
@@ -90,12 +93,7 @@ export async function POST(request: Request) {
         revB: true,
         changes: true,
       },
-    }).catch(() => ({
-      id: "demo-job-1",
-      projectId,
-      status: "COMPLETED",
-      changes: [],
-    }));
+    }).catch(() => null);
 
     return NextResponse.json({ data: completedJob }, { status: 201 });
   } catch (error) {

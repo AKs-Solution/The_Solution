@@ -123,8 +123,8 @@ export function SearchCommandPalette() {
 
   useEffect(() => {
     const handler = () => setIsOpen(true);
-    window.addEventListener("morningstar:open-search", handler);
-    return () => window.removeEventListener("morningstar:open-search", handler);
+    window.addEventListener("consecuencia:open-search", handler);
+    return () => window.removeEventListener("consecuencia:open-search", handler);
   }, []);
 
   useEffect(() => {

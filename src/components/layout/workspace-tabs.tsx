@@ -25,8 +25,8 @@ export interface WorkspaceTab {
   auto: boolean;
 }
 
-const TABS_KEY = "morningstar.tabs.v1";
-const SESSION_KEY = "morningstar.tabs.session.v1";
+const TABS_KEY = "consecuencia.tabs.v1";
+const SESSION_KEY = "consecuencia.tabs.session.v1";
 
 export function tabIdFor(kind: WorkspaceTabKind, ref: string): string {
   return `${kind}:${ref}`;

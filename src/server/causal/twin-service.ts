@@ -7,35 +7,7 @@ export async function getCausalTwins(organizationId: string) {
     orderBy: { updatedAt: "desc" },
   }).catch(() => []) ?? [];
 
-  if (existing.length > 0) return existing;
-
-  // Find an engineering entity
-  const entity = await (prisma as any).engineeringEntity?.findFirst({
-    where: { organizationId, deletedAt: null },
-  }).catch(() => null);
-
-  const componentId = entity ? entity.id : "default-component-id";
-
-  const defaultTwin = {
-    id: "demo-twin-1",
-    organizationId,
-    componentId,
-    flightHours: 1240.5,
-    metrologyAnomalyMM: 0.038,
-    predictedLifeHrs: 8000.0,
-  };
-
-  const createdItem = await (prisma as any).causalFlightTwin?.create({
-    data: {
-      organizationId,
-      componentId,
-      flightHours: 1240.5,
-      metrologyAnomalyMM: 0.038,
-      predictedLifeHrs: 8000.0,
-    },
-  }).catch(() => defaultTwin);
-
-  return [createdItem || defaultTwin];
+  return existing;
 }
 
 export async function simulateFlightTwinWear(organizationId: string, twinId: string) {
@@ -44,11 +16,7 @@ export async function simulateFlightTwinWear(organizationId: string, twinId: str
   }).catch(() => null);
 
   if (!twin) {
-    return {
-      id: twinId,
-      flightHours: 1490.5,
-      predictedLifeHrs: 7600.0,
-    };
+    return null;
   }
 
   return (prisma as any).causalFlightTwin?.update({
@@ -59,3 +27,4 @@ export async function simulateFlightTwinWear(organizationId: string, twinId: str
     },
   }).catch(() => twin);
 }
+

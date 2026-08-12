@@ -79,7 +79,7 @@ export interface WorkspacePreferencesState {
   lastUpdated: string;
 }
 
-const STORAGE_KEY = "morningstar.workspace.v1";
+const STORAGE_KEY = "consecuencia.workspace.v1";
 
 export const DENSITY_LABELS: Record<WorkspaceDensity, string> = {
   compact: "Compact",

@@ -128,22 +128,28 @@ export async function getRecordLineage(
     });
   }
 
-  // Add dummy failure node for evidence chain demo
-  const failureNodeId = `failure-${recordId.slice(0, 6)}`;
-  addNode({
-    id: failureNodeId,
-    type: "failure",
-    label: "Bore Concentricity Runout Out-of-Spec",
-    metadata: { severity: "HIGH", frequency: "2/100" },
-  });
+  // Fetch real quality events/anomalies for the organization if any exist
+  const qualityEvents: any[] = await (prisma as any).qualityEvent?.findMany({
+    where: { organizationId },
+    take: 3,
+  }).catch(() => []) ?? [];
 
-  if (firstPart) {
-    edges.push({
-      source: failureNodeId,
-      target: firstPart.id,
-      relationship: "caused_by",
-      confidence: 0.89,
+  for (const qe of qualityEvents) {
+    addNode({
+      id: qe.id,
+      type: "failure",
+      label: qe.description || qe.title || "Non-Conformance Event",
+      metadata: { severity: qe.severity || "MEDIUM" },
     });
+
+    if (firstPart) {
+      edges.push({
+        source: qe.id,
+        target: firstPart.id,
+        relationship: "caused_by",
+        confidence: 0.9,
+      });
+    }
   }
 
   return { nodes, edges };

@@ -70,14 +70,7 @@ export async function createDecision(input: CreateDecisionInput) {
       approvals: true,
       milestones: true,
     },
-  }).catch(() => ({
-    id: "demo-decision-1",
-    organizationId: input.organizationId,
-    decisionType: input.decisionType || "DESIGN_CHOICE",
-    description: input.description || input.question || "",
-    rationale: input.rationale || input.context || "",
-    status: "PROPOSED",
-  }));
+  }).catch(() => null);
 }
 
 export async function updateDecision(
@@ -200,12 +193,7 @@ export async function approveDecision(input: ApproveDecisionInput) {
       comment: input.comment,
       conditions: input.conditions || [],
     },
-  }).catch(() => ({
-    id: "demo-approval-1",
-    decisionId: input.decisionId,
-    approverId: input.approverId,
-    approvalType: input.approvalType,
-  }));
+  }).catch(() => null);
 
   const newStatus =
     input.approvalType === "APPROVED" || input.approvalType === "APPROVED_WITH_CONDITIONS"
@@ -232,11 +220,7 @@ export async function addDecisionMilestone(input: DecisionMilestoneInput) {
       metrics: (input.metrics as any) || {},
       completedAt: input.status === "COMPLETE" ? new Date() : null,
     },
-  }).catch(() => ({
-    id: "demo-milestone-1",
-    decisionId: input.decisionId,
-    status: input.status,
-  }));
+  }).catch(() => null);
 }
 
 export async function getDecisions(organizationId: string) {

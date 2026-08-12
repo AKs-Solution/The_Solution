@@ -147,7 +147,7 @@ export function SearchExperience() {
           action={
             <Button
               variant="secondary"
-              onClick={() => window.dispatchEvent(new CustomEvent("morningstar:open-search"))}
+              onClick={() => window.dispatchEvent(new CustomEvent("consecuencia:open-search"))}
             >
               Open command palette
             </Button>

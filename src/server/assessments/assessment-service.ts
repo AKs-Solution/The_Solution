@@ -33,15 +33,7 @@ export async function createAssessment(input: CreateAssessmentInput) {
       submittedBy: { select: { id: true, name: true, email: true } },
       approvedBy: { select: { id: true, name: true, email: true } },
     },
-  }).catch(() => ({
-    id: "demo-assessment-1",
-    organizationId: input.organizationId,
-    title: input.title,
-    description: input.description,
-    status: "draft",
-    version: 1,
-    severity: input.severity || "MEDIUM",
-  }));
+  }).catch(() => null);
 }
 
 export async function updateAssessment(
@@ -201,11 +193,5 @@ export async function addComment(assessmentId: string, userId: string, commentTe
       userId,
       commentText,
     },
-  }).catch(() => ({
-    id: "demo-comment-1",
-    assessmentId,
-    userId,
-    commentText,
-    createdAt: new Date(),
-  }));
+  }).catch(() => null);
 }

@@ -27,7 +27,7 @@ interface CurrentUser {
 
 type ThemePreference = "light" | "dark" | "system";
 
-const THEME_STORAGE_KEY = "morningstar-theme";
+const THEME_STORAGE_KEY = "consecuencia-theme";
 
 function readTheme(): ThemePreference {
   if (typeof window === "undefined") return "system";

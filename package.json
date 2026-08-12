@@ -1,8 +1,8 @@
 {
-  "name": "the-morningstar-solution",
+  "name": "consecuencia-by-ak",
   "version": "0.1.0",
   "private": true,
-  "description": "Engineering Reality Platform - Verifying engineering truth through deterministic, evidence-based reasoning",
+  "description": "Consecuencia by AK — Engineering Reality Platform verifying engineering truth through deterministic, evidence-based reasoning",
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "prisma generate && next build",

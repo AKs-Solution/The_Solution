@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Morningstar Solution",
+  title: "Consecuencia by AK",
   description:
     "Engineering Reality Platform — verifying engineering truth through deterministic, evidence-based reasoning",
 };
@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="h-full w-full overflow-hidden bg-[#06090e] text-slate-100 flex flex-col">
+      <body className="h-screen w-screen overflow-hidden bg-[#06090e] text-slate-100 flex flex-col m-0 p-0">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

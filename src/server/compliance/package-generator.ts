@@ -79,44 +79,19 @@ function buildPackage(
   };
 }
 
-function fallbackPackage(organizationId: string, programName: string): CertificationPackage {
+function emptyPackage(organizationId: string, programName: string): CertificationPackage {
   return buildPackage(organizationId, programName, {
-    requirementsCount: 12,
-    decisionsCount: 8,
-    evidenceHashesCount: 14,
+    requirementsCount: 0,
+    decisionsCount: 0,
+    evidenceHashesCount: 0,
     sections: [
       {
         sectionTitle: "1. Executive Summary & Design Rationale",
-        content: "Material substitution to Titanium 6Al-4V satisfying 300C thermal limits.",
-        evidenceHashes: [
-          "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
-          "7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
-        ],
-      },
-      {
-        sectionTitle: "2. Verification & Compliance Proof",
-        content:
-          "Empirical proof datasets combining shaker table vibration tests, CFD thermal boundary simulations, and full-duration hot-fire engine test telemetry.",
-        evidenceHashes: [
-          "3f4e5d6c7b8a90123456789abcdef0123456789abcdef0123456789abcdef012",
-          "8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c",
-        ],
+        content: "No active certification requirements or decisions recorded.",
+        evidenceHashes: [],
       },
     ],
-    traceabilityMatrix: [
-      {
-        requirement: "REQ-THERM-402 (Operating Temp <= 300C)",
-        decision: "DEC-PROP-102 (Titanium 6Al-4V)",
-        verification: "TEST-CFD-301 & TEST-HOTFIRE-101",
-        evidenceHash: "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
-      },
-      {
-        requirement: "REQ-VIB-108 (Random Vib <= 12g RMS)",
-        decision: "DEC-FIT-204 (H7 Fit Bore Class)",
-        verification: "TEST-VIB-804",
-        evidenceHash: "8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c",
-      },
-    ],
+    traceabilityMatrix: [],
   });
 }
 
@@ -240,14 +215,14 @@ export async function generateCertificationPackage(
     ];
 
     return buildPackage(organizationId, programName, {
-      requirementsCount: requirements.length || 12,
-      decisionsCount: decisions.length || 8,
-      evidenceHashesCount: collectedHashes.size || 14,
+      requirementsCount: requirements.length,
+      decisionsCount: decisions.length,
+      evidenceHashesCount: collectedHashes.size,
       sections,
       traceabilityMatrix,
     });
   } catch (err) {
-    console.warn("[PackageGenerator] DB offline fallback execution:", err);
-    return fallbackPackage(organizationId, programName);
+    console.warn("[PackageGenerator] DB query error:", err);
+    return emptyPackage(organizationId, programName);
   }
 }

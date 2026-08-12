@@ -76,16 +76,7 @@ export async function generateCertificationProof(
       metrologyHash,
       proofToken,
     },
-  }).catch(() => ({
-    id: "demo-proof-1",
-    organizationId,
-    componentId,
-    requirementId: requirementId || null,
-    gcodeHash,
-    metrologyHash,
-    proofToken,
-    verifiedAt: new Date(),
-  }));
+  }).catch(() => null);
 
   return proof;
 }

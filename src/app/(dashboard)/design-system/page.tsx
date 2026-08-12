@@ -82,7 +82,7 @@ export default function DesignSystemPage() {
       <Stack gap={8}>
         <Section
           title="Design System"
-          description="Enterprise UI component library for The Morningstar Solution. All components support light and dark mode, keyboard navigation, and screen readers."
+          description="Enterprise UI component library for Consecuencia by AK. All components support light and dark mode, keyboard navigation, and screen readers."
         >
           <Breadcrumb items={breadcrumbItems} />
         </Section>
@@ -239,9 +239,9 @@ export default function DesignSystemPage() {
         <Section title="Accordion" description="Expandable content sections.">
           <Accordion type="single" defaultValue={["item-1"]}>
             <AccordionItem value="item-1">
-              <AccordionTrigger>What is The Morningstar Solution?</AccordionTrigger>
+              <AccordionTrigger>What is Consecuencia by AK?</AccordionTrigger>
               <AccordionContent>
-                An Engineering Reality Platform that verifies engineering truth through
+                An Aerospace Decision Intelligence & Engineering Reality Platform that verifies engineering truth through
                 deterministic, evidence-based reasoning.
               </AccordionContent>
             </AccordionItem>
@@ -395,9 +395,9 @@ export default function DesignSystemPage() {
               <KeyValue
                 direction="column"
                 pairs={[
-                  { key: "Project", value: "The Morningstar Solution" },
+                  { key: "Project", value: "Consecuencia by AK" },
                   { key: "Version", value: "0.1.0" },
-                  { key: "Status", value: "Development" },
+                  { key: "Status", value: "Production Certified" },
                   { key: "Last Deployed", value: "2026-07-13" },
                 ]}
               />

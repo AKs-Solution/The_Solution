@@ -221,36 +221,8 @@ export async function captureComprehensiveDecision(input: ComprehensiveDecisionI
       assumptions: createdAssumptions,
     };
   } catch (err) {
-    console.warn("[MemoryEngine] Postgres connection fallback on captureDecision:", err);
-    const mockId = `dec-${Date.now()}`;
-    return {
-      decision: {
-        id: mockId,
-        organizationId,
-        decisionType,
-        description: problemStatement,
-        rationale,
-        status: "PROPOSED",
-        proposedById,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      reasoningSessionId: `session-${mockId}`,
-      alternatives: options.map((o, idx) => ({
-        id: `alt-${idx}`,
-        name: o.name,
-        description: o.description,
-        status: o.isSelected ? "SELECTED" : "REJECTED",
-        rejectionReason: o.rejectionReason,
-      })),
-      assumptions: assumptions.map((a, idx) => ({
-        id: `asm-${idx}`,
-        statement: a.statement,
-        justification: a.justification,
-        riskLevel: a.riskLevel,
-        isVerified: a.isVerified ?? false,
-      })),
-    };
+    console.error("[MemoryEngine] Failed to capture decision:", err);
+    throw err;
   }
 }
 

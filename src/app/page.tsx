@@ -146,7 +146,7 @@ export default function Home() {
             </Button>
           </Link>
           <a
-            href="https://github.com/AKSCI-Morningstar/The_Solution.git"
+            href="https://github.com/AKSCI/Consecuencia"
             target="_blank"
             rel="noopener noreferrer"
             className="no-underline"
@@ -224,7 +224,7 @@ export default function Home() {
           <span>&copy; {new Date().getFullYear()} AKSCI // CONSECUENCIA AEROSPACE. ALL RIGHTS RESERVED.</span>
           <div className="flex gap-4 text-[11px]">
             <a
-              href="https://github.com/AKSCI-Morningstar/The_Solution"
+              href="https://github.com/AKSCI/Consecuencia"
               className="text-slate-400 hover:text-sky-400 transition-colors"
             >
               REPOSITORY

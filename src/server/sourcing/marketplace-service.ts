@@ -19,6 +19,7 @@ export async function matchSuppliersToVariant(organizationId: string, variantId:
       capabilities: true,
       facilities: true,
       qualityEvents: true,
+      certifications: true,
     },
   }).catch(() => []) ?? [];
 
@@ -30,6 +31,7 @@ export async function matchSuppliersToVariant(organizationId: string, variantId:
         capabilities: true,
         facilities: true,
         qualityEvents: true,
+        certifications: true,
       },
       take: 3,
     }).catch(() => []) ?? [];
@@ -67,7 +69,7 @@ export async function matchSuppliersToVariant(organizationId: string, variantId:
       leadTimeDays: adjustedLeadTime,
       activeNcrCount: ncrs,
       capabilities: (s.capabilities || []).map((c: any) => c.capabilityName),
-      certifications: ["AS9100D", "ITAR Registered", "ISO 9001"], // Mocked dynamic certs
+      certifications: (s.certifications || []).map((c: any) => c.name || c.certificationType || "Certified"),
       riskLevel: ncrs > 2 ? "HIGH" : ncrs > 0 ? "MEDIUM" : "LOW",
     };
   });

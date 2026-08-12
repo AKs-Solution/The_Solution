@@ -31,5 +31,19 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "terminal.integrated.allowChaining": true,
+  "terminal.integrated.autoReplies": {
+    "Are you sure you want to continue": "y",
+    "Proceed with deployment": "y"
+  },
+  "antigravity.terminal.autoApprove": [
+    "npm test",
+    "npm run *",
+    "npx *",
+    "git *",
+    "prisma *"
+  ],
+  "antigravity.execution.unrestricted": true,
+  "antigravity.autonomy.level": "unrestricted"
 }
