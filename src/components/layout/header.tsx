@@ -113,7 +113,7 @@ export function Header() {
   }
 
   return (
-    <header className="border-border/80 bg-surface/80 sticky top-0 z-30 flex h-14 flex-col justify-center gap-0 border-b px-4 backdrop-blur-xl transition-colors sm:px-6 select-none">
+    <header className="border-border/80 bg-surface/80 shrink-0 flex h-13 flex-col justify-center gap-0 border-b px-4 backdrop-blur-xl transition-colors sm:px-6 select-none">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5 md:gap-4">
           <button

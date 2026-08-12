@@ -57,7 +57,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-[#06090e] font-sans text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
+    <div className="relative flex h-screen w-full flex-col overflow-x-hidden overflow-y-auto bg-[#06090e] font-sans text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
       {/* Dynamic Aerospace Background Meshes */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#0e1626_1px,transparent_1px),linear-gradient(to_bottom,#0e1626_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] bg-[size:3.5rem_3.5rem] opacity-70" />
       <div className="pointer-events-none absolute top-0 left-1/2 h-[600px] w-[1100px] -translate-x-1/2 rounded-full bg-gradient-to-b from-sky-500/15 via-indigo-600/10 to-transparent blur-3xl" />

@@ -18,7 +18,7 @@ export const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(
     return (
       <div
         ref={ref}
-        className={cn("mx-auto w-full px-6 py-8", maxWidths[maxWidth], className)}
+        className={cn("mx-auto w-full px-3 py-3 md:px-5 md:py-4", maxWidths[maxWidth], className)}
         {...props}
       />
     );

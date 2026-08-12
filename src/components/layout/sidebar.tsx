@@ -343,11 +343,11 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside
       className={cn(
-        "border-border/80 bg-sidebar/95 hidden shrink-0 flex-col border-r backdrop-blur-xl transition-all duration-200 ease-in-out lg:flex select-none z-30",
+        "border-border/80 bg-sidebar/95 hidden shrink-0 flex-col border-r backdrop-blur-xl transition-all duration-200 ease-in-out lg:flex select-none z-30 h-screen max-h-screen overflow-hidden",
         isCollapsed ? "w-18" : "w-64",
       )}
     >
-      <div className="flex h-full flex-col justify-between overflow-y-auto p-2.5">
+      <div className="flex h-full flex-col justify-between overflow-y-auto p-2.5 min-h-0">
         <div>
           {/* Aerospace Brand Header */}
           <div className="mb-3 flex items-center justify-between gap-1">

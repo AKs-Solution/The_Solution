@@ -11,15 +11,20 @@ interface ShellProps {
 
 export function Shell({ children }: ShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#06090e] text-slate-100">
+    <div className="flex h-screen w-full overflow-hidden bg-[#06090e] text-slate-100 antialiased">
       <Sidebar />
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col h-screen min-w-0 overflow-hidden">
         <Header />
         <WorkspaceTabBar />
-        <main className="flex-1 bg-[#06090e] text-slate-100 overflow-y-auto">{children}</main>
-        <Footer />
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-[#06090e] text-slate-100 flex flex-col justify-between">
+          <div className="flex-1 min-w-0">
+            {children}
+          </div>
+          <Footer />
+        </main>
       </div>
       <SearchCommandPalette />
     </div>
   );
 }
+

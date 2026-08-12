@@ -118,7 +118,7 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="border-border/80 bg-surface/90 sticky top-14 z-20 flex h-10 w-full items-center border-b px-2 backdrop-blur-md select-none gap-1">
+    <div className="border-border/80 bg-surface/90 shrink-0 flex h-9 w-full items-center border-b px-2 backdrop-blur-md select-none gap-1">
       {/* Scroll Left */}
       <button
         type="button"
