@@ -10,16 +10,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "bg-foreground text-background hover:bg-foreground/80 dark:bg-white dark:text-black dark:hover:bg-white/80",
-  secondary: "border border-border bg-background hover:bg-surface-hover",
-  ghost: "hover:bg-surface-hover",
-  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80",
+    "bg-foreground text-background hover:bg-foreground/90 dark:bg-sky-600 dark:text-white dark:hover:bg-sky-500 shadow-[0_0_15px_-3px_rgba(2,132,199,0.4)] hover:shadow-[0_0_20px_-2px_rgba(14,165,233,0.6)] border border-sky-400/30 active:scale-[0.98]",
+  secondary:
+    "border border-border/80 bg-surface/60 text-foreground hover:bg-surface-hover hover:border-sky-500/40 backdrop-blur-sm shadow-xs active:scale-[0.98]",
+  ghost:
+    "text-muted-foreground hover:text-foreground hover:bg-surface-hover active:scale-[0.98]",
+  destructive:
+    "bg-rose-600 text-white hover:bg-rose-500 shadow-[0_0_15px_-3px_rgba(244,63,94,0.4)] border border-rose-400/30 active:scale-[0.98]",
 };
 
 const sizeStyles: Record<NonNullable<ButtonProps["size"]>, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-8 px-3 text-xs tracking-tight rounded-md",
+  md: "h-9.5 px-4 text-sm font-medium rounded-lg",
+  lg: "h-11 px-5 text-base font-medium rounded-lg",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -28,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "focus-visible:ring-ring inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+          "focus-visible:ring-ring inline-flex cursor-pointer items-center justify-center font-medium transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 select-none",
           variantStyles[variant],
           sizeStyles[size],
           className,
@@ -40,3 +43,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = "Button";
+

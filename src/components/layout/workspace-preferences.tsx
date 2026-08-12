@@ -13,7 +13,7 @@ import {
 
 export type WorkspaceDensity = "compact" | "comfortable" | "spacious";
 
-export type WorkspaceLayout = "studio" | "tabs" | "records" | "classic";
+export type WorkspaceLayout = "studio" | "records" | "classic";
 
 export interface LayoutOption {
   id: WorkspaceLayout;
@@ -26,19 +26,13 @@ export const LAYOUT_OPTIONS: LayoutOption[] = [
     id: "studio",
     name: "Engineering Studio",
     description:
-      "Full desktop-app shell: activity rail on the left, browser-style tab bar, and an IDE-style status bar. Highest density of controls.",
-  },
-  {
-    id: "tabs",
-    name: "Command Deck",
-    description:
-      "Always-visible browser-style tab bar with a pinned Home tab and one tab per open record or page.",
+      "Workspace shell with a tab bar for open records (decisions, drawings, sentinel alerts) and a clean sidebar. Best for working across several records.",
   },
   {
     id: "records",
     name: "Records First",
     description:
-      "Tab bar appears only on decisions, sentinel, drawings, and failure-graph pages, keeping other areas clean.",
+      "The tab bar appears only on decisions, sentinel, drawings, and failure-graph pages, keeping every other area clean.",
   },
   {
     id: "classic",
@@ -202,7 +196,7 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
         ? r.density
         : fallback.density,
     layout:
-      r.layout === "studio" || r.layout === "tabs" || r.layout === "records" || r.layout === "classic"
+      r.layout === "studio" || r.layout === "records" || r.layout === "classic"
         ? r.layout
         : fallback.layout,
     activeViewId: activeView.id,
@@ -267,6 +261,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
   useEffect(() => {
     let cancelled = false;
     if (readLocal()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHydrated(true);
       return;
     }

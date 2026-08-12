@@ -47,13 +47,6 @@ function isHomeTab(id: string): boolean {
   return id === HOME_TAB.id;
 }
 
-function humanize(value: string): string {
-  return value
-    .split(/[-_]+/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 export function isWorkspaceRoute(pathname: string): boolean {
   if (pathname.startsWith("/drawings/comparisons")) return false;
   return (
@@ -126,30 +119,8 @@ export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
         auto: true,
       };
     })() ??
-    genericTab(pathname)
+    null
   );
-}
-
-/**
- * Fallback that surfaces a tab for every other authenticated route so the
- * workspace bar is never empty and always reflects the current page.
- */
-function genericTab(pathname: string): WorkspaceTab | null {
-  if (pathname === "/") return null;
-  const segments = pathname.split("/").filter(Boolean);
-  if (segments.length === 0) return null;
-  const title = humanize(segments[segments.length - 1]);
-  const subtitle = segments.length > 1 ? humanize(segments[segments.length - 2]) : undefined;
-  return {
-    id: tabIdFor("ledger", pathname),
-    kind: "ledger" as const,
-    ref: pathname,
-    title,
-    subtitle,
-    href: pathname,
-    pinned: false,
-    auto: true,
-  };
 }
 
 interface ScopedStore {
@@ -247,10 +218,7 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
   const scopedRef = useRef<ScopedStore>(initialSession?.scoped ?? {});
   const scrollYRef = useRef<Record<string, number>>(initialSession?.scrollY ?? {});
 
-  const [tabs, setTabs] = useState<WorkspaceTab[]>(() => {
-    const stored = readStoredTabs();
-    return stored.some((t) => t.id === HOME_TAB.id) ? stored : [HOME_TAB, ...stored];
-  });
+  const [tabs, setTabs] = useState<WorkspaceTab[]>(() => readStoredTabs());
   const [activeTabId, setActiveTabId] = useState<string | null>(
     initialSession?.activeTabId ?? null,
   );

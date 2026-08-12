@@ -115,8 +115,6 @@ function WorkspaceSettingsCard() {
 
 function LayoutPreview({ layout }: { layout: WorkspaceLayout }) {
   const showTabs = layout !== "classic";
-  const showRail = layout === "studio";
-  const showStatus = layout === "studio";
   return (
     <div className="border-border bg-muted/50 h-20 w-full overflow-hidden rounded-md border p-1.5">
       <div className="bg-background border-border/50 flex h-full w-full flex-col overflow-hidden rounded-[3px] border">
@@ -133,20 +131,16 @@ function LayoutPreview({ layout }: { layout: WorkspaceLayout }) {
           </div>
         )}
         <div className="flex flex-1">
-          {showRail && <div className="bg-muted-foreground/15 w-1.5 border-r border-black/5" />}
           <div className="bg-muted-foreground/10 w-2 border-r border-black/5" />
           <div className="flex flex-1 flex-col gap-0.5 p-1">
             <div className="bg-foreground/10 h-1 w-full rounded-sm" />
             <div className="bg-foreground/5 h-1 w-3/4 rounded-sm" />
           </div>
         </div>
-        {showStatus && (
-          <div className="bg-muted-foreground/10 flex h-1.5 items-center gap-1 border-t border-black/5 px-1">
-            <div className="bg-emerald-500/70 size-0.5 rounded-full" />
-            <div className="bg-muted-foreground/40 h-0.5 w-5 rounded-full" />
-            <div className="bg-muted-foreground/30 ml-auto h-0.5 w-4 rounded-full" />
-          </div>
-        )}
+        <div className="bg-muted-foreground/10 flex h-1.5 items-center gap-1 border-t border-black/5 px-1">
+          <div className="bg-muted-foreground/40 h-0.5 w-5 rounded-full" />
+          <div className="bg-muted-foreground/30 ml-auto h-0.5 w-4 rounded-full" />
+        </div>
       </div>
     </div>
   );
@@ -167,7 +161,7 @@ function VisualLayoutCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {LAYOUT_OPTIONS.map((option) => {
             const isActive = layout === option.id;
             return (

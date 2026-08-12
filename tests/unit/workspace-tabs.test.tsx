@@ -147,40 +147,36 @@ describe("workspace tabs engine", () => {
       expect(tab!.href).toBe("/decisions/dec-1");
     });
 
-    it("deriveTabFromPathname falls back to a generic tab for other routes", () => {
-      const tab = deriveTabFromPathname("/rules");
-      expect(tab!.id).toBe("ledger:/rules");
-      expect(tab!.title).toBe("Rules");
+    it("deriveTabFromPathname returns null for non-workspace routes", () => {
+      expect(deriveTabFromPathname("/rules")).toBeNull();
+      expect(deriveTabFromPathname("/")).toBeNull();
     });
   });
 
-  it("renders a persistent Home tab even on a non-workspace route", async () => {
+  it("renders no tabs on a non-workspace route", async () => {
     await renderProbe("/");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
-    expect(screen.getByTestId("ids")).toHaveTextContent("ledger:/dashboard");
-    expect(screen.getByTestId("pins")).toHaveTextContent("ledger:/dashboard");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("0");
     expect(screen.getByTestId("active")).toHaveTextContent("none");
   });
 
-  it("home tab survives close-all", async () => {
+  it("close-all empties the tab list", async () => {
     const user = userEvent.setup();
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "close-all" }));
-    expect(screen.getByTestId("ids")).toHaveTextContent("ledger:/dashboard");
-    expect(screen.getByTestId("ids")).not.toHaveTextContent("decision:dec-1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("0");
   });
 
   it("derives a ledger tab from the current pathname on mount", async () => {
     await renderProbe("/decisions");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
     expect(screen.getByTestId("active")).toHaveTextContent("ledger:/decisions");
     expect(screen.getByTestId("active-title")).toHaveTextContent("Decision Audit Trail");
   });
 
   it("derives a record detail tab and marks it as auto-created", async () => {
     await renderProbe("/decisions/dec-1");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(decisionTabIsAuto()).toBe(true);
   });
@@ -189,7 +185,7 @@ describe("workspace tabs engine", () => {
     const user = userEvent.setup();
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(pushMock.value).toHaveBeenCalledWith("/decisions/dec-1", { scroll: false });
   });
@@ -199,7 +195,7 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-dec-updated" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
     expect(screen.getByTestId("ids")).toHaveTextContent("decision:dec-1");
     expect(screen.getByTestId("active-title")).toHaveTextContent("Updated title");
   });
@@ -209,7 +205,7 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-drawing" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("3");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
     await user.click(screen.getByRole("button", { name: "activate-dec" }));
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(pushMock.value).toHaveBeenCalledWith("/decisions/dec-1", { scroll: false });
@@ -221,7 +217,7 @@ describe("workspace tabs engine", () => {
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-drawing" }));
     await user.click(screen.getByRole("button", { name: "close-drawing" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(screen.getByTestId("ids")).not.toHaveTextContent("drawing:drw-1");
   });
@@ -231,9 +227,9 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "pin-dec" }));
-    expect(screen.getByTestId("pins")).toHaveTextContent("ledger:/dashboard,decision:dec-1");
+    expect(screen.getByTestId("pins")).toHaveTextContent("decision:dec-1");
     await user.click(screen.getByRole("button", { name: "pin-dec" }));
-    expect(screen.getByTestId("pins")).toHaveTextContent("ledger:/dashboard");
+    expect(screen.getByTestId("pins")).toHaveTextContent("");
   });
 
   it("scoped values are isolated per active tab", async () => {
@@ -271,7 +267,6 @@ describe("workspace tabs engine", () => {
       const parsed: Array<{ id: string; auto?: boolean }> = JSON.parse(raw!);
       const ids = parsed.map((t) => t.id);
       expect(ids).toContain("decision:dec-1");
-      expect(ids).toContain("ledger:/dashboard");
     });
   });
 });

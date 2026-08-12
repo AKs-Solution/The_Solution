@@ -59,31 +59,26 @@ function WorkspaceTabItem({ tab, isActive }: { tab: WorkspaceTab; isActive: bool
       <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden="true">
         <meta.icon className="size-3.5" />
       </span>
-      <span className="flex max-w-[160px] flex-col leading-none">
-        <span className="truncate text-xs font-semibold">{tab.title}</span>
-        {tab.subtitle && (
-          <span className="text-muted-foreground/80 mt-0.5 truncate font-mono text-[9px]">
-            {tab.subtitle}
-          </span>
-        )}
-      </span>
+      <span className="max-w-[160px] truncate text-xs font-semibold">{tab.title}</span>
       {tab.pinned && (
         <span className="text-muted-foreground/70 flex size-3.5 shrink-0 items-center justify-center" title="Pinned">
           <Pin className="size-3" aria-hidden="true" />
         </span>
       )}
       <span className="flex shrink-0 items-center">
-        <button
-          type="button"
-          aria-label={tab.pinned ? `Unpin ${tab.title}` : `Pin ${tab.title}`}
-          className="text-muted-foreground/50 hover:text-foreground flex size-4 items-center justify-center rounded opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-          onClick={(e) => {
-            e.stopPropagation();
-            togglePin(tab.id);
-          }}
-        >
-          {tab.pinned ? <PinOff className="size-3" aria-hidden="true" /> : <Pin className="size-3" aria-hidden="true" />}
-        </button>
+        {tab.pinned && (
+          <button
+            type="button"
+            aria-label={`Unpin ${tab.title}`}
+            className="text-muted-foreground/50 hover:text-foreground flex size-4 items-center justify-center rounded transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePin(tab.id);
+            }}
+          >
+            <PinOff className="size-3" aria-hidden="true" />
+          </button>
+        )}
         <button
           type="button"
           aria-label={`Close ${tab.title}`}
@@ -120,6 +115,8 @@ export function WorkspaceTabBar() {
   const unpinned = tabs.filter((t) => !t.pinned);
   const ordered = [...pinned, ...unpinned];
 
+  if (ordered.length === 0) return null;
+
   return (
     <div className="border-border bg-surface sticky top-14 z-20 border-b">
       <div className="flex h-9 items-end gap-1.5 px-2 sm:px-3">
@@ -130,16 +127,9 @@ export function WorkspaceTabBar() {
           className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <LayoutGroup id="workspace-tab-bar">
-            {ordered.length === 0 ? (
-              <div className="text-muted-foreground/70 flex h-9 items-center gap-2 px-1 text-[11px]">
-                <span className="size-1.5 rounded-full bg-zinc-400/60" aria-hidden="true" />
-                Open decisions, drawing inspections, sentinel alerts, or failure graph queries here.
-              </div>
-            ) : (
-              ordered.map((tab) => (
-                <WorkspaceTabItem key={tab.id} tab={tab} isActive={tab.id === activeTabId} />
-              ))
-            )}
+            {ordered.map((tab) => (
+              <WorkspaceTabItem key={tab.id} tab={tab} isActive={tab.id === activeTabId} />
+            ))}
           </LayoutGroup>
         </div>
 
