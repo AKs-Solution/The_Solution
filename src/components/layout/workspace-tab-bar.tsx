@@ -1,37 +1,35 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
 import {
+  FileText,
   Activity,
-  GitBranch,
   Layers,
-  Pin,
-  PinOff,
+  Gauge,
+  Monitor,
   Plus,
   X,
-  LayoutDashboard,
-  FileText,
-  Workflow,
+  Pin,
+  PinOff,
   ChevronLeft,
   ChevronRight,
   MoreVertical,
-  Layers2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useWorkspaceTabs, type WorkspaceTabKind } from "./workspace-tabs";
 
 const KIND_ICON_MAP: Record<WorkspaceTabKind, LucideIcon> = {
-  ledger: LayoutDashboard,
-  decision: GitBranch,
+  decision: FileText,
   sentinel: Activity,
   drawing: Layers,
-  "failure-graph": Workflow,
+  "failure-graph": Gauge,
+  ledger: Monitor,
 };
 
 export function WorkspaceTabBar() {
+  const router = useRouter();
   const pathname = usePathname();
   const {
     tabs,
@@ -47,18 +45,35 @@ export function WorkspaceTabBar() {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Click outside to close menu
+  // Click outside to close menu & Alt+N shortcut
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowMenu(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        openTab({
+          kind: "ledger",
+          ref: "/dashboard",
+          title: "Mission Console",
+          href: "/dashboard",
+        });
+        router.push("/dashboard");
+      }
+    };
+
     if (showMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showMenu]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showMenu, openTab, router]);
 
   const handleTabClick = (tabId: string) => {
     activateTab(tabId);
@@ -71,6 +86,7 @@ export function WorkspaceTabBar() {
       title: "Mission Console",
       href: "/dashboard",
     });
+    router.push("/dashboard");
   };
 
   const scrollLeft = () => {
@@ -100,13 +116,13 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="border-slate-800/80 bg-[#080c14] shrink-0 flex h-8.5 w-full items-center border-b px-2 select-none gap-1">
+    <div className="w-full h-10 border-b border-[#1F2D44] bg-[#0E1420]/95 backdrop-blur-md flex-shrink-0 z-20 px-2 sm:px-4 flex items-center select-none gap-2 overflow-x-auto text-slate-200">
       {/* Scroll Left */}
       <button
         type="button"
         onClick={scrollLeft}
         title="Scroll tabs left"
-        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
       >
         <ChevronLeft className="size-3.5" />
       </button>
@@ -127,26 +143,25 @@ export function WorkspaceTabBar() {
               role="tab"
               aria-selected={isActive}
               onClick={() => handleTabClick(tab.id)}
+              onMouseDown={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                  if (!tab.pinned) closeTab(tab.id);
+                }
+              }}
+              title={`${tab.title} (Middle-click to close)`}
               className={cn(
-                "group relative flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-all duration-150 cursor-pointer shrink-0",
+                "group relative px-3.5 py-1.5 text-xs rounded-t-md flex items-center gap-2 flex-shrink-0 cursor-pointer select-none transition-all duration-150 border-t border-x",
                 isActive
-                  ? "border-sky-500/40 bg-sky-500/10 text-sky-400 font-semibold shadow-[0_0_10px_-2px_rgba(14,165,233,0.25)]"
-                  : "border-slate-800/80 bg-slate-900/40 text-slate-400 hover:border-slate-700 hover:bg-slate-800/60 hover:text-slate-200",
+                  ? "bg-[#162032] text-sky-300 border-[#1F2D44] border-b-2 border-b-sky-400 font-semibold shadow-[0_0_12px_rgba(56,189,248,0.2)]"
+                  : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-[#162032]/60 border-transparent border-b-2",
               )}
             >
-              {isActive && (
-                <motion.span
-                  layoutId="active-tab-glow"
-                  className="absolute inset-0 rounded-md border border-sky-400/40 pointer-events-none"
-                  transition={{ duration: 0.15 }}
-                />
-              )}
-
               <Icon className={cn("size-3.5 shrink-0", isActive ? "text-sky-400" : "text-slate-400")} />
-              <span className="max-w-[130px] truncate tracking-tight">{tab.title}</span>
+              <span className="max-w-[140px] truncate tracking-tight">{tab.title}</span>
 
               {tab.pinned && (
-                <Pin className="size-2.5 shrink-0 text-sky-400/70" aria-label="Pinned Tab" />
+                <Pin className="size-2.5 shrink-0 text-sky-400/80 ml-0.5" aria-label="Pinned Tab" />
               )}
 
               <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -157,7 +172,7 @@ export function WorkspaceTabBar() {
                     e.stopPropagation();
                     togglePin(tab.id);
                   }}
-                  className="rounded p-0.5 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+                  className="rounded p-0.5 hover:bg-[#1E2C44] text-slate-400 hover:text-slate-200 transition-colors"
                 >
                   {tab.pinned ? <PinOff className="size-2.5" /> : <Pin className="size-2.5" />}
                 </button>
@@ -184,10 +199,11 @@ export function WorkspaceTabBar() {
         <button
           type="button"
           onClick={handleNewTab}
-          title="Open Mission Console tab"
-          className="flex size-6.5 items-center justify-center rounded-md border border-slate-800 bg-slate-900/40 text-slate-400 hover:border-sky-500/40 hover:bg-slate-800 hover:text-sky-400 transition-all shrink-0 cursor-pointer shadow-xs"
+          title="New Workspace Tab (Alt+N)"
+          className="flex h-7 items-center justify-center rounded border border-[#1F2D44] bg-[#162032] px-2.5 text-xs text-slate-300 hover:border-sky-500/40 hover:bg-[#1E2C44] hover:text-white transition-all cursor-pointer shrink-0 gap-1 font-medium shadow-xs"
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-3 text-sky-400" />
+          <span className="text-[11px] font-mono">NEW TAB</span>
         </button>
       </div>
 
@@ -196,53 +212,41 @@ export function WorkspaceTabBar() {
         type="button"
         onClick={scrollRight}
         title="Scroll tabs right"
-        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
       >
         <ChevronRight className="size-3.5" />
       </button>
 
-      {/* Tab Context Actions Dropdown */}
-      <div className="relative shrink-0" ref={menuRef}>
+      {/* Tab Overflow Menu */}
+      <div className="relative" ref={menuRef}>
         <button
           type="button"
-          onClick={() => setShowMenu(!showMenu)}
-          title="Tab Management Options"
-          className="flex size-6.5 items-center justify-center rounded-md border border-slate-800 bg-slate-900/40 text-slate-400 hover:border-sky-500/40 hover:bg-slate-800 hover:text-sky-400 transition-all cursor-pointer"
+          onClick={() => setShowMenu((prev) => !prev)}
+          title="Tab options"
+          className="flex size-7 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
         >
           <MoreVertical className="size-3.5" />
         </button>
 
-        <AnimatePresence>
-          {showMenu && (
-            <motion.div
-              initial={{ opacity: 0, y: -4, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -4, scale: 0.95 }}
-              transition={{ duration: 0.12 }}
-              className="absolute right-0 top-7 z-50 w-44 rounded-lg border border-slate-800 bg-[#080c14] p-1 shadow-2xl text-xs"
+        {showMenu && (
+          <div className="absolute right-0 top-8 z-50 w-44 rounded-md border border-[#1F2D44] bg-[#0E1420] p-1 shadow-xl text-xs">
+            <button
+              type="button"
+              onClick={closeOthers}
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-slate-300 hover:bg-[#162032] hover:text-white transition-colors cursor-pointer"
             >
-              <button
-                type="button"
-                onClick={closeOthers}
-                className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-              >
-                <Layers2 className="size-3.5 text-sky-400" />
-                <span>Close Other Tabs</span>
-              </button>
-              <button
-                type="button"
-                onClick={closeUnpinned}
-                className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="size-3.5 text-rose-400" />
-                <span>Close Unpinned Tabs</span>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              Close Other Tabs
+            </button>
+            <button
+              type="button"
+              onClick={closeUnpinned}
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-slate-300 hover:bg-[#162032] hover:text-white transition-colors cursor-pointer"
+            >
+              Close Unpinned Tabs
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-

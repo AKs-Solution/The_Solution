@@ -9,6 +9,7 @@ import { useWorkspacePreferences } from "./workspace-preferences";
 import { DropdownMenu, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { IconButton } from "@/components/ui/icon-button";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 export interface WidgetConfig {
   id: string;
@@ -112,7 +113,9 @@ export const Widget = forwardRef<HTMLDivElement, WidgetProps>(
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="density-p-sm">{children}</div>
+              <div className="density-p-sm">
+                <ErrorBoundary name={config.title}>{children}</ErrorBoundary>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

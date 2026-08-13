@@ -83,9 +83,9 @@ export default function Home() {
           <nav className="flex items-center gap-3 sm:gap-4">
             <DemoLoginButton
               variant="secondary"
-              className="border border-sky-500/30 bg-sky-500/10 text-xs font-semibold text-sky-300 hover:bg-sky-500/20 shadow-[0_0_12px_rgba(14,165,233,0.25)] cursor-pointer"
+              className="border border-slate-300 bg-slate-100 text-xs font-semibold text-slate-800 hover:bg-slate-200 cursor-pointer"
             >
-              ⚡ Guest Demo Access
+              Guest Demo Access
             </DemoLoginButton>
             <Link href="/login" className="no-underline">
               <Button variant="ghost" className="text-slate-300 transition-colors hover:text-white text-xs font-medium">
@@ -93,7 +93,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/register" className="no-underline">
-              <Button className="bg-sky-500 hover:bg-sky-400 font-semibold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] text-xs border border-sky-300/30">
+              <Button className="bg-slate-900 hover:bg-slate-800 font-semibold text-white text-xs border border-slate-700">
                 Register
               </Button>
             </Link>
@@ -104,18 +104,18 @@ export default function Home() {
       {/* Hero Section */}
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-6 py-16 text-center lg:py-24">
         {/* Banner Announcement */}
-        <div className="mb-6 flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-1.5 text-xs font-medium text-sky-300 backdrop-blur-md shadow-[0_0_15px_rgba(14,165,233,0.15)]">
-          <span className="flex h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
+        <div className="mb-6 flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-4 py-1.5 text-xs font-medium text-slate-300">
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
           <span>AS9100 Rev D & FAR Part 25 Deterministic Verification Engine</span>
-          <ChevronRight className="h-3 w-3 text-sky-400/80" />
+          <ChevronRight className="h-3 w-3 text-slate-400" />
         </div>
 
         {/* Hero Title */}
-        <h1 className="max-w-4xl bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-4xl leading-tight font-black tracking-tight text-transparent sm:text-6xl lg:text-7xl">
+        <h1 className="max-w-4xl text-4xl leading-tight font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
           Aerospace Decision Intelligence
         </h1>
 
-        <h2 className="mt-4 max-w-2xl text-xl font-medium text-sky-400/90 sm:text-2xl font-mono">
+        <h2 className="mt-4 max-w-2xl text-xl font-medium text-slate-300 sm:text-2xl font-mono">
           Deterministic Verification // Grounded Epistemic Truth
         </h2>
 
@@ -123,7 +123,7 @@ export default function Home() {
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg">
           Consecuencia empowers flight systems engineers and chief architects to validate materials,
           structural tolerances, and multi-hop dependency networks with mathematical certainty.
-          <span className="mt-2 block font-semibold text-sky-400">
+          <span className="mt-2 block font-semibold text-slate-200">
             Traditional AI predicts. We verify.
           </span>
         </p>
@@ -132,9 +132,9 @@ export default function Home() {
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <DemoLoginButton
             variant="primary"
-            className="flex items-center gap-2 border border-sky-300/30 bg-gradient-to-r from-sky-500 to-indigo-600 px-8 py-2.5 text-sm font-semibold text-white shadow-[0_0_25px_rgba(14,165,233,0.5)] hover:from-sky-400 hover:to-indigo-500 cursor-pointer"
+            className="flex items-center gap-2 border border-slate-700 bg-slate-900 px-8 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer"
           >
-            ⚡ Enter Mission Console <ArrowRight className="h-4 w-4" />
+            Enter Mission Console <ArrowRight className="h-4 w-4" />
           </DemoLoginButton>
           <Link href="/login" className="no-underline">
             <Button

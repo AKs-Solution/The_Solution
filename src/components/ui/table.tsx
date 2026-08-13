@@ -8,7 +8,7 @@ export type TableProps = HTMLAttributes<HTMLTableElement>;
 export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ className = "", ...props }, ref) => {
     return (
-      <div className="w-full overflow-auto">
+      <div className="w-full overflow-x-auto rounded-lg border border-[#1F2D44] bg-[#0E1420]">
         <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
       </div>
     );
@@ -21,7 +21,13 @@ export type TableHeaderProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export const TableHeader = forwardRef<HTMLTableSectionElement, TableHeaderProps>(
   ({ className = "", ...props }, ref) => {
-    return <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />;
+    return (
+      <thead
+        ref={ref}
+        className={cn("sticky top-0 z-10 bg-[#0E1420]/95 backdrop-blur-md border-b border-[#1F2D44] [&_tr]:border-b-0", className)}
+        {...props}
+      />
+    );
   },
 );
 
@@ -45,7 +51,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
       <tr
         ref={ref}
         className={cn(
-          "border-border hover:bg-surface-hover data-[state=selected]:bg-muted border-b transition-colors",
+          "border-b border-[#1F2D44]/60 hover:bg-[#162032] transition-colors text-sm text-slate-200",
           className,
         )}
         {...props}
@@ -64,7 +70,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         className={cn(
-          "text-muted-foreground h-10 px-4 text-left align-middle text-xs font-medium",
+          "text-slate-400 text-xs uppercase tracking-wider font-semibold p-3 text-left font-mono",
           className,
         )}
         {...props}
@@ -79,7 +85,7 @@ export type TableCellProps = HTMLAttributes<HTMLTableCellElement>;
 
 export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className = "", ...props }, ref) => {
-    return <td ref={ref} className={cn("p-4 align-middle", className)} {...props} />;
+    return <td ref={ref} className={cn("p-3 align-middle text-sm text-slate-200", className)} {...props} />;
   },
 );
 

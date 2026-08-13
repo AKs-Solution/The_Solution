@@ -118,9 +118,9 @@ export function LoginForm() {
         variant="secondary"
         disabled={isPending}
         onClick={handleDemoLogin}
-        className="w-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200"
+        className="w-full border border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-900"
       >
-        ⚡ Continue as Guest (Demo Mode)
+        Continue as Guest (Demo Mode)
       </Button>
     </form>
   );

@@ -90,21 +90,21 @@ export function SubTabInspector({
               type="button"
               onClick={() => handleSelect(tab)}
               className={cn(
-                "flex h-7 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-all duration-150 shrink-0 select-none",
+                "flex h-7.5 cursor-pointer items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-all duration-150 shrink-0 select-none",
                 isActive
-                  ? "border-sky-500/40 bg-sky-500/10 text-sky-400 font-semibold shadow-[0_0_10px_-2px_rgba(14,165,233,0.25)]"
-                  : "border-transparent text-slate-400 hover:border-slate-700/60 hover:bg-slate-800/50 hover:text-slate-200",
+                  ? "border-sky-400 bg-sky-500 text-white font-semibold shadow-[0_0_12px_rgba(14,165,233,0.35)]"
+                  : "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white",
               )}
             >
-              <Icon className={cn("size-3.5", isActive ? "text-sky-400" : "text-slate-400")} />
+              <Icon className={cn("size-3.5", isActive ? "text-white" : "text-slate-400")} />
               <span>{tab.label}</span>
               {tab.badge && (
                 <span
                   className={cn(
                     "rounded px-1.5 py-0.2 font-mono text-[9px] font-semibold border",
                     isActive
-                      ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
-                      : "bg-slate-800 text-slate-400 border-slate-700/60",
+                      ? "bg-white/20 text-white border-white/30"
+                      : "bg-slate-900/80 text-slate-400 border-slate-700/60",
                   )}
                 >
                   {tab.badge}

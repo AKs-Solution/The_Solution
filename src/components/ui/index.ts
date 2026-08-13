@@ -97,3 +97,4 @@ export { PropertyGrid } from "./property-grid";
 export type { PropertyGridProps } from "./property-grid";
 export { TagCollection } from "./tag-collection";
 export type { TagCollectionProps } from "./tag-collection";
+export { ErrorBoundary } from "./error-boundary";

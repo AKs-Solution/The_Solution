@@ -141,7 +141,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
             <table className="w-full caption-bottom text-sm">
               <thead
                 className={cn(
-                  "border-border bg-muted/60 sticky top-0 z-10 backdrop-blur",
+                  "border-border bg-[#080c14]/95 sticky top-0 z-10 backdrop-blur-md",
                   canScrollLeft && "scroll-edge-left",
                   canScrollRight && "scroll-edge-right",
                 )}

@@ -309,8 +309,8 @@ export function SearchCommandPalette() {
           role="listbox"
         >
           {isLoading && (
-            <div className="text-slate-400 px-4 py-8 text-center text-xs font-mono">
-              ⚡ Querying Knowledge Graph & Truth Pipeline...
+            <div className="text-slate-500 px-4 py-8 text-center text-xs font-mono">
+              Querying Knowledge Graph & Truth Pipeline...
             </div>
           )}
           {!isLoading && error && (

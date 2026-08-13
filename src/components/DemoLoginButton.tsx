@@ -34,7 +34,7 @@ export function DemoLoginButton({
 
   return (
     <Button variant={variant} disabled={isPending} onClick={handleDemoLogin} className={className}>
-      {isPending ? "Entering Demo..." : children || "⚡ Guest Demo Mode"}
+      {isPending ? "Entering Demo..." : children || "Guest Demo Mode"}
     </Button>
   );
 }
