@@ -58,13 +58,13 @@ export function AssumptionTracker({ assumptions, onInvalidate }: AssumptionTrack
   };
 
   return (
-    <div className="w-full rounded-xl border border-slate-800 bg-slate-900 p-6 font-sans text-slate-100 shadow-2xl">
-      <div className="mb-6 flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="w-full rounded-xl border border-zinc-200 bg-white p-6 font-sans text-zinc-900 shadow-2xl">
+      <div className="mb-6 flex items-center justify-between border-b border-zinc-200 pb-4">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-bold text-white">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-zinc-900">
             <Zap className="h-5 w-5 text-amber-400" /> First-Class Engineering Assumptions
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-zinc-500">
             Tracking validation status. Invalidating an assumption automatically propagates warnings
             to dependent decisions.
           </p>
@@ -77,7 +77,7 @@ export function AssumptionTracker({ assumptions, onInvalidate }: AssumptionTrack
             key={asm.id}
             className={`rounded-xl border p-4 transition-all ${
               asm.isVerified
-                ? "border-slate-800 bg-slate-800/40"
+                ? "border-zinc-200 bg-zinc-100"
                 : "border-amber-500/30 bg-amber-950/20 shadow-lg shadow-amber-950/20"
             }`}
           >
@@ -96,11 +96,11 @@ export function AssumptionTracker({ assumptions, onInvalidate }: AssumptionTrack
                   {getRiskBadge(asm.riskLevel)}
                 </div>
 
-                <h3 className="mt-2 text-sm font-semibold text-slate-100">{asm.statement}</h3>
-                <p className="mt-1 text-xs text-slate-400">
-                  <strong className="text-slate-300">Justification:</strong> {asm.justification}
+                <h3 className="mt-2 text-sm font-semibold text-zinc-900">{asm.statement}</h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  <strong className="text-zinc-700">Justification:</strong> {asm.justification}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="mt-0.5 text-xs text-zinc-500">
                   <strong className="text-rose-400">Impact if Invalid:</strong>{" "}
                   {asm.impactIfInvalid}
                 </p>
@@ -117,18 +117,18 @@ export function AssumptionTracker({ assumptions, onInvalidate }: AssumptionTrack
             </div>
 
             {selectedId === asm.id && (
-              <div className="mt-4 space-y-3 border-t border-slate-800 pt-4">
+              <div className="mt-4 space-y-3 border-t border-zinc-200 pt-4">
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Provide explicit engineering reason for invalidating this assumption..."
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 text-xs text-slate-200 focus:border-rose-500 focus:outline-none"
+                  className="w-full rounded-lg border border-zinc-200 bg-white p-2.5 text-xs text-zinc-900 focus:border-rose-500 focus:outline-none"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setSelectedId(null)}
-                    className="px-3 py-1 text-xs text-slate-400 hover:text-slate-200"
+                    className="px-3 py-1 text-xs text-zinc-500 hover:text-zinc-900"
                   >
                     Cancel
                   </button>

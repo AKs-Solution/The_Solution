@@ -8,7 +8,7 @@ export type TableProps = HTMLAttributes<HTMLTableElement>;
 export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ className = "", ...props }, ref) => {
     return (
-      <div className="w-full overflow-x-auto rounded-lg border border-[#1F2D44] bg-[#0E1420]">
+      <div className="w-full overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
         <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
       </div>
     );
@@ -24,7 +24,10 @@ export const TableHeader = forwardRef<HTMLTableSectionElement, TableHeaderProps>
     return (
       <thead
         ref={ref}
-        className={cn("sticky top-0 z-10 bg-[#0E1420]/95 backdrop-blur-md border-b border-[#1F2D44] [&_tr]:border-b-0", className)}
+        className={cn(
+          "sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 [&_tr]:border-b-0",
+          className,
+        )}
         {...props}
       />
     );
@@ -51,7 +54,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
       <tr
         ref={ref}
         className={cn(
-          "border-b border-[#1F2D44]/60 hover:bg-[#162032] transition-colors text-sm text-slate-200",
+          "border-b border-zinc-100 text-sm text-zinc-800 transition-colors hover:bg-zinc-50/80",
           className,
         )}
         {...props}
@@ -70,7 +73,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         className={cn(
-          "text-slate-400 text-xs uppercase tracking-wider font-semibold p-3 text-left font-mono",
+          "border-b border-zinc-200 p-3.5 text-left text-xs font-semibold tracking-wider text-zinc-500 uppercase",
           className,
         )}
         {...props}
@@ -85,7 +88,13 @@ export type TableCellProps = HTMLAttributes<HTMLTableCellElement>;
 
 export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className = "", ...props }, ref) => {
-    return <td ref={ref} className={cn("p-3 align-middle text-sm text-slate-200", className)} {...props} />;
+    return (
+      <td
+        ref={ref}
+        className={cn("p-3.5 align-middle text-sm text-zinc-800", className)}
+        {...props}
+      />
+    );
   },
 );
 

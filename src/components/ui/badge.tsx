@@ -9,12 +9,12 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles = {
-  default: "bg-sky-500/10 text-sky-400 border border-sky-500/30 shadow-[0_0_10px_-3px_rgba(14,165,233,0.3)]",
-  secondary: "bg-muted/80 text-muted-foreground border border-border/60",
-  destructive: "bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-[0_0_10px_-3px_rgba(244,63,94,0.3)]",
-  success: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_-3px_rgba(16,185,129,0.3)]",
-  warning: "bg-amber-500/10 text-amber-400 border border-amber-500/30 shadow-[0_0_10px_-3px_rgba(245,158,11,0.3)]",
-  outline: "border border-border/80 text-foreground bg-surface/40 backdrop-blur-xs",
+  default: "bg-zinc-100 text-zinc-800 border border-zinc-200",
+  secondary: "bg-zinc-50 text-zinc-600 border border-zinc-200",
+  destructive: "bg-rose-50 text-rose-800 border border-rose-200",
+  success: "bg-emerald-50 text-emerald-800 border border-emerald-200",
+  warning: "bg-amber-50 text-amber-800 border border-amber-200",
+  outline: "border border-zinc-200 text-zinc-900 bg-white",
 };
 
 const sizeStyles = {
@@ -40,4 +40,3 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 );
 
 Badge.displayName = "Badge";
-

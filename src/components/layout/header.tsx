@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { OrganizationSelector } from "@/features/organizations/components/organization-selector";
 import { Avatar } from "@/components/ui/avatar";
-import { DensityToggle } from "@/components/layout/density-toggle";
 import { AerospaceLogo } from "@/components/ui/aerospace-logo";
 import { useWorkspaceTabs } from "@/components/layout/workspace-tabs";
 import { useToast } from "@/components/ui/toaster";
@@ -138,7 +137,7 @@ export function Header() {
       await fetch("/api/sentinel/metrics", { method: "GET" }).catch(() => null);
       toast({
         title: "Telemetry Synchronized",
-        description: "Surveillance telemetry updated. All deterministic invariants nominal.",
+        description: "Surveillance telemetry updated.",
         variant: "success",
       });
     } catch {
@@ -153,18 +152,18 @@ export function Header() {
   };
 
   return (
-    <header className="w-full h-14 border-b border-[#1F2D44] bg-[#0E1420] flex-shrink-0 z-30 px-3 sm:px-4 flex items-center justify-between select-none text-slate-100 shadow-sm">
+    <header className="z-30 flex h-14 w-full flex-shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 text-zinc-900 select-none">
       {/* Left: Brand & Organization */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex shrink-0 items-center gap-3">
         <Link
           href="/dashboard"
           title="Consecuencia Aerospace Intelligence"
-          className="flex items-center gap-2 rounded-md border border-[#1F2D44] bg-[#162032] px-2.5 py-1 transition-all hover:border-sky-500/50 hover:bg-[#1E2C44]"
+          className="flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-zinc-100"
         >
-          <div className="flex size-6 items-center justify-center rounded bg-sky-500/20 text-sky-400 border border-sky-500/40 shrink-0">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded bg-zinc-900 text-zinc-50">
             <AerospaceLogo className="size-3.5" />
           </div>
-          <span className="text-xs font-bold tracking-wider text-slate-100 uppercase truncate font-mono">
+          <span className="truncate font-mono text-xs font-bold tracking-wider text-zinc-900 uppercase">
             CONSECUENCIA BY AK
           </span>
         </Link>
@@ -174,9 +173,9 @@ export function Header() {
         </div>
       </div>
 
-      {/* Center: Horizontal Avionics Module Glass Strip */}
+      {/* Center: Horizontal Core Navigation */}
       <nav
-        className="hidden lg:flex items-center gap-1 bg-[#090D14]/80 p-1 rounded-lg border border-[#1F2D44] overflow-x-auto no-scrollbar max-w-[55vw]"
+        className="no-scrollbar hidden max-w-[55vw] items-center gap-0.5 overflow-x-auto lg:flex"
         aria-label="Core Navigation Modules"
       >
         {CORE_MODULES.map((mod) => {
@@ -189,30 +188,30 @@ export function Header() {
               type="button"
               onClick={() => handleModuleClick(mod)}
               className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all duration-150 cursor-pointer shrink-0 select-none",
+                "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors duration-150 select-none",
                 active
-                  ? "bg-[#1E2C44] text-sky-300 border border-sky-500/40 shadow-[0_0_12px_rgba(56,189,248,0.2)]"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-[#162032] border border-transparent",
+                  ? "border-b-2 border-zinc-900 bg-zinc-100 text-zinc-900"
+                  : "border-b-2 border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800",
               )}
             >
-              <Icon className={cn("size-3.5", active ? "text-sky-400" : "text-slate-400")} />
+              <Icon className={cn("size-3.5", active ? "text-zinc-900" : "text-zinc-500")} />
               <span>{mod.label}</span>
             </button>
           );
         })}
       </nav>
 
-      {/* Right: Quick Actions, Search, Density, Status & Profile */}
-      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-        {/* Working Quick Sync Action Button */}
+      {/* Right: Quick Actions, Search, Status & Profile */}
+      <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+        {/* Sync Action Button */}
         <button
           type="button"
           onClick={handleQuickSync}
           disabled={isSyncing}
           title="Synchronize Telemetry & Surveillance Data"
-          className="flex items-center gap-1.5 rounded-md border border-[#1F2D44] bg-[#162032] px-2.5 py-1 text-xs font-medium text-slate-300 hover:border-sky-500/40 hover:bg-[#1E2C44] hover:text-white transition-all cursor-pointer shadow-xs disabled:opacity-50"
+          className="flex cursor-pointer items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50"
         >
-          <RotateCw className={cn("size-3 text-sky-400", isSyncing && "animate-spin")} />
+          <RotateCw className={cn("size-3", isSyncing && "animate-spin")} />
           <span className="hidden sm:inline">Sync</span>
         </button>
 
@@ -221,25 +220,24 @@ export function Header() {
           type="button"
           onClick={openSearchPalette}
           title="Search Command Palette (Ctrl+K)"
-          className="border-[#1F2D44] bg-[#162032] text-slate-400 hover:border-sky-500/40 hover:bg-[#1E2C44] hover:text-slate-200 flex h-7.5 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border px-2 text-xs transition-all sm:w-40 sm:justify-start sm:px-2.5 shadow-xs"
+          className="flex h-7.5 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 sm:w-40 sm:justify-start sm:px-2.5"
           aria-label="Open search palette"
         >
-          <Search className="size-3.5 shrink-0 text-sky-400" aria-hidden="true" />
-          <span className="hidden flex-1 text-left tracking-tight text-[11px] sm:inline">Search...</span>
-          <kbd className="text-slate-400 hidden rounded border border-[#1F2D44] bg-[#090D14] px-1 py-0.5 font-mono text-[9px] sm:inline">
-            ⌘K
+          <Search className="size-3.5 shrink-0 text-zinc-500" aria-hidden="true" />
+          <span className="hidden flex-1 text-left text-[11px] tracking-tight sm:inline">
+            Search...
+          </span>
+          <kbd className="hidden rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 font-mono text-[9px] text-zinc-400 sm:inline">
+            Ctrl K
           </kbd>
         </button>
 
-        {/* Operational Status Beacon */}
-        <div className="hidden items-center gap-1.5 rounded-md border border-[#1F2D44] bg-[#162032] px-2.5 py-1 text-[10px] font-semibold text-slate-300 xl:flex font-mono">
-          <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-slate-400">STATUS:</span>
-          <span className="text-emerald-400 font-semibold">NOMINAL</span>
+        {/* Operational Status */}
+        <div className="hidden items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 font-mono text-[10px] font-semibold text-zinc-600 xl:flex">
+          <span className="size-1.5 rounded-full bg-emerald-500" />
+          <span className="text-zinc-400">STATUS</span>
+          <span className="font-semibold text-zinc-800">NOMINAL</span>
         </div>
-
-        {/* Density Mode Switcher */}
-        <DensityToggle />
 
         {/* User Profile Dropdown */}
         <DropdownMenu
@@ -247,7 +245,7 @@ export function Header() {
           trigger={
             <button
               type="button"
-              className="hover:ring-sky-500/40 focus-visible:ring-ring rounded-full cursor-pointer transition-transform active:scale-95 focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring cursor-pointer rounded-full transition-transform hover:ring-zinc-300 focus-visible:ring-2 focus-visible:outline-none active:scale-95"
               aria-label="Open user menu"
             >
               <Avatar
@@ -260,24 +258,24 @@ export function Header() {
         >
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-slate-100 text-sm font-medium">
+              <span className="text-sm font-medium text-zinc-900">
                 {userName ?? "Flight Engineer"}
               </span>
-              {userEmail && <span className="text-slate-400 text-xs font-mono">{userEmail}</span>}
+              {userEmail && <span className="font-mono text-xs text-zinc-500">{userEmail}</span>}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push("/settings")}>
-            <Settings className="size-4 mr-2" aria-hidden="true" />
+            <Settings className="mr-2 size-4" aria-hidden="true" />
             Settings
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/organizations")}>
-            <User className="size-4 mr-2" aria-hidden="true" />
+            <User className="mr-2 size-4" aria-hidden="true" />
             Organizations
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => void handleLogout()}>
-            <LogOut className="size-4 mr-2" aria-hidden="true" />
+            <LogOut className="mr-2 size-4" aria-hidden="true" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenu>

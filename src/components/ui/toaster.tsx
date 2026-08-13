@@ -30,17 +30,17 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const ICONS: Record<ToastVariant, ReactNode> = {
-  info: <Info className="size-4 text-sky-400" aria-hidden="true" />,
-  success: <CheckCircle2 className="size-4 text-emerald-400" aria-hidden="true" />,
-  warning: <TriangleAlert className="size-4 text-amber-400" aria-hidden="true" />,
-  error: <XCircle className="size-4 text-rose-400" aria-hidden="true" />,
+  info: <Info className="size-4 text-sky-600" aria-hidden="true" />,
+  success: <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />,
+  warning: <TriangleAlert className="size-4 text-amber-600" aria-hidden="true" />,
+  error: <XCircle className="size-4 text-rose-600" aria-hidden="true" />,
 };
 
 const BORDER: Record<ToastVariant, string> = {
-  info: "border-sky-500/40 bg-[#0E1420] text-slate-100",
-  success: "border-emerald-500/40 bg-[#0E1420] text-slate-100",
-  warning: "border-amber-500/40 bg-[#0E1420] text-slate-100",
-  error: "border-rose-500/40 bg-[#0E1420] text-slate-100",
+  info: "border-sky-200 bg-white text-zinc-900",
+  success: "border-emerald-200 bg-white text-zinc-900",
+  warning: "border-amber-200 bg-white text-zinc-900",
+  error: "border-rose-200 bg-white text-zinc-900",
 };
 
 const VIEWPORT_ID = "consecuencia-toast-viewport";
@@ -94,17 +94,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               exit={{ opacity: 0, x: 24, transition: { duration: 0.18 } }}
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
               className={cn(
-                "pointer-events-auto flex items-start gap-3 rounded-lg border p-3.5 shadow-2xl backdrop-blur-md",
+                "pointer-events-auto flex items-start gap-3 rounded-lg border p-3.5 shadow-lg",
                 BORDER[t.variant] ?? BORDER.info,
               )}
             >
               <span className="mt-0.5 shrink-0">{ICONS[t.variant] ?? ICONS.info}</span>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-semibold tracking-tight text-slate-100">
+                <span className="text-sm font-semibold tracking-tight text-zinc-900">
                   {t.title}
                 </span>
                 {t.description && (
-                  <span className="mt-0.5 text-xs leading-relaxed text-slate-400">
+                  <span className="mt-0.5 text-xs leading-relaxed text-zinc-500">
                     {t.description}
                   </span>
                 )}
@@ -112,7 +112,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => dismiss(t.id)}
-                className="cursor-pointer rounded p-0.5 text-slate-400 transition-colors hover:text-slate-200"
+                className="cursor-pointer rounded p-0.5 text-zinc-400 transition-colors hover:text-zinc-900"
                 aria-label="Dismiss notification"
               >
                 <X className="size-3.5" aria-hidden="true" />

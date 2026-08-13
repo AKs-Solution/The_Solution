@@ -678,11 +678,9 @@ export default function WorkspacePage() {
   };
 
   const getStatusBadgeColor = (status: string) => {
-    if (status === "FINALIZED")
-      return "border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]";
-    if (status === "EVIDENCE_REVIEW")
-      return "border-amber-500/40 bg-amber-500/15 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.15)]";
-    return "border-sky-500/40 bg-sky-500/15 text-sky-300";
+    if (status === "FINALIZED") return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    if (status === "EVIDENCE_REVIEW") return "border-amber-200 bg-amber-50 text-amber-800";
+    return "border-zinc-200 bg-zinc-100 text-zinc-700";
   };
 
   return (
@@ -703,7 +701,7 @@ export default function WorkspacePage() {
             <Button
               onClick={handleBackToHistory}
               variant="secondary"
-              className="flex items-center gap-2 border-zinc-200 bg-zinc-100 hover:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+              className="flex items-center gap-2"
             >
               <ArrowLeft className="size-4" />
               <span>Back to History</span>
@@ -713,10 +711,7 @@ export default function WorkspacePage() {
 
         {/* --- QUESTION INPUT SECTION (Hide when viewing active/finalized decisions) --- */}
         {!activeDecision && (
-          <Panel
-            padding="lg"
-            className="border border-zinc-200 bg-zinc-950/20 dark:border-zinc-800"
-          >
+          <Panel padding="lg" className="border border-zinc-200 bg-white">
             <Stack gap={4}>
               <div className="flex flex-col gap-2">
                 <label htmlFor="question-input" className="text-foreground text-sm font-medium">
@@ -731,11 +726,11 @@ export default function WorkspacePage() {
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && searchTargets(question)}
-                      className="h-11 border-zinc-200 pl-10 dark:border-zinc-800"
+                      className="h-11 border-zinc-200 pl-10"
                     />
                   </div>
                   <Button
-                    className="h-11 shrink-0 bg-zinc-900 px-6 font-medium text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                    className="h-11 shrink-0 bg-zinc-900 px-6 font-medium text-zinc-50 hover:bg-zinc-800"
                     onClick={() => searchTargets(question)}
                     disabled={isSearching}
                   >
@@ -746,7 +741,7 @@ export default function WorkspacePage() {
 
               {/* Quick Suggestions */}
               <div className="flex flex-col gap-2">
-                <span className="text-slate-400 text-xs font-semibold tracking-wider uppercase font-mono">
+                <span className="font-mono text-xs font-semibold tracking-wider text-zinc-500 uppercase">
                   Suggested Verification Inquiries
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -754,7 +749,7 @@ export default function WorkspacePage() {
                     <button
                       key={idx}
                       onClick={() => handlePresetClick(preset.question)}
-                      className="rounded-lg border border-[#1F2D44] bg-[#162032] px-3 py-1.5 text-left text-xs font-medium text-slate-200 transition-all hover:border-sky-500/50 hover:bg-[#1E2C44] hover:text-white cursor-pointer shadow-xs"
+                      className="cursor-pointer rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-zinc-700 shadow-sm transition-colors hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900"
                     >
                       {preset.question}
                     </button>
@@ -767,12 +762,9 @@ export default function WorkspacePage() {
 
         {/* --- ERROR FEEDBACK --- */}
         {error && (
-          <Panel
-            padding="md"
-            className="border-red-500/40 bg-red-950/20 text-red-300"
-          >
-            <div className="flex items-center gap-2 text-sm text-red-300">
-              <XCircle className="size-4 shrink-0 text-red-400" />
+          <Panel padding="md" className="border border-rose-200 bg-rose-50 text-rose-800">
+            <div className="flex items-center gap-2 text-sm text-rose-800">
+              <XCircle className="size-4 shrink-0 text-rose-500" />
               <span>{error}</span>
             </div>
           </Panel>
@@ -781,8 +773,8 @@ export default function WorkspacePage() {
         {/* --- LOADING EXPERIENCE --- */}
         {(isSearching || isEvaluating) && (
           <div className="flex flex-col items-center justify-center py-20">
-            <Clock className="mb-3 size-8 animate-pulse text-sky-400" />
-            <p className="text-sm font-medium text-slate-300">
+            <Clock className="mb-3 size-8 animate-pulse text-zinc-400" />
+            <p className="text-sm font-medium text-zinc-600">
               Reconciling specifications and gathering evidence...
             </p>
           </div>
@@ -790,8 +782,8 @@ export default function WorkspacePage() {
 
         {/* --- DYNAMIC TARGET RESOLUTION SELECTOR --- */}
         {entityResults.length > 0 && !isSearching && !isEvaluating && (
-          <div className="flex flex-col gap-2 rounded-xl border border-[#1F2D44] bg-[#0E1420] p-4 shadow-sm">
-            <span className="text-slate-400 text-xs font-semibold tracking-wider uppercase font-mono">
+          <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <span className="font-mono text-xs font-semibold tracking-wider text-zinc-500 uppercase">
               Verification Targets Resolved
             </span>
             <div className="flex flex-wrap gap-2">
@@ -800,10 +792,10 @@ export default function WorkspacePage() {
                   key={ent.id}
                   onClick={() => evaluateTarget(ent)}
                   className={cn(
-                    "rounded-md border px-3 py-1.5 text-left text-xs font-mono font-medium transition-all cursor-pointer",
+                    "cursor-pointer rounded-md border px-3 py-1.5 text-left font-mono text-xs font-medium transition-colors",
                     selectedEntity?.id === ent.id
-                      ? "border-sky-500/60 bg-[#1E2C44] text-sky-300 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
-                      : "border-[#1F2D44] bg-[#162032] text-slate-300 hover:border-sky-500/40 hover:bg-[#1E2C44] hover:text-white",
+                      ? "border-zinc-900 bg-zinc-900 text-zinc-50"
+                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900",
                   )}
                 >
                   {ent.name} ({ent.identifier})
@@ -816,39 +808,39 @@ export default function WorkspacePage() {
         {/* --- DECISIONS HISTORY LIST (Only visible when no active workspace selection is running) --- */}
         {!activeDecision && !isSearching && !isEvaluating && (
           <Stack gap={4}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D44] pb-3">
+            <div className="flex flex-col justify-between gap-3 border-b border-zinc-200 pb-3 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 shrink-0">
+                <div className="shrink-0 rounded-md border border-zinc-200 bg-zinc-100 p-1.5 text-zinc-600">
                   <History className="size-5" />
                 </div>
                 <div>
-                  <h2 className="text-slate-100 text-base sm:text-lg font-bold tracking-tight">
+                  <h2 className="text-base font-bold tracking-tight text-zinc-900 sm:text-lg">
                     Recent Engineering Decisions
                   </h2>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-xs text-zinc-500">
                     Deterministic audit trail of finalized and active decision evaluations
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#162032] border border-[#1F2D44] text-xs font-mono text-slate-300">
-                  <span className="text-slate-400">Total:</span>
-                  <strong className="text-slate-100">{decisions.length}</strong>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 font-mono text-xs text-zinc-700">
+                  <span className="text-zinc-500">Total:</span>
+                  <strong className="text-zinc-900">{decisions.length}</strong>
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-300">
-                  <span className="text-emerald-400/80">Finalized:</span>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-xs text-emerald-800">
+                  <span className="text-emerald-600">Finalized:</span>
                   <strong>{decisions.filter((d) => d.status === "FINALIZED").length}</strong>
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-300">
-                  <span className="text-amber-400/80">In Progress:</span>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 font-mono text-xs text-amber-800">
+                  <span className="text-amber-600">In Progress:</span>
                   <strong>{decisions.filter((d) => d.status !== "FINALIZED").length}</strong>
                 </span>
               </div>
             </div>
 
             {decisions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#1F2D44] bg-[#0E1420]/50 py-16 text-center">
-                <p className="text-slate-400 text-sm font-medium">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/60 py-16 text-center">
+                <p className="text-sm font-medium text-zinc-500">
                   No decisions logged yet. Start a new verification query above to begin a workflow.
                 </p>
               </div>
@@ -858,19 +850,19 @@ export default function WorkspacePage() {
                   <div
                     key={dec.id}
                     onClick={() => handleSelectDecision(dec)}
-                    className="group relative flex flex-col justify-between rounded-xl border border-[#1F2D44] bg-[#0E1420] p-5 shadow-sm transition-all duration-200 hover:border-sky-500/50 hover:bg-[#162032] hover:shadow-lg cursor-pointer"
+                    className="group relative flex cursor-pointer flex-col justify-between rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-zinc-400 hover:shadow-md"
                   >
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between gap-2">
                         <Badge
                           className={cn(
-                            "border px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase font-mono rounded",
+                            "rounded border px-2.5 py-0.5 font-mono text-[11px] font-semibold tracking-wider uppercase",
                             getStatusBadgeColor(dec.status),
                           )}
                         >
                           {dec.status.replace(/_/g, " ")}
                         </Badge>
-                        <span className="text-slate-400 font-mono text-xs">
+                        <span className="font-mono text-xs text-zinc-500">
                           {new Date(dec.createdAt).toLocaleDateString(undefined, {
                             year: "numeric",
                             month: "short",
@@ -879,28 +871,30 @@ export default function WorkspacePage() {
                         </span>
                       </div>
 
-                      <h3 className="text-slate-100 font-semibold text-sm leading-snug group-hover:text-sky-300 transition-colors line-clamp-2">
+                      <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-zinc-900 transition-colors group-hover:text-zinc-700">
                         {dec.question}
                       </h3>
 
                       {dec.status === "FINALIZED" && dec.finalDecision && (
-                        <div className="mt-1 rounded-lg border border-[#1F2D44] bg-[#090D14] p-3">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">
+                        <div className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                          <span className="mb-1 block text-[10px] font-bold tracking-wider text-emerald-600 uppercase">
                             Final Decision Outcome:
                           </span>
-                          <p className="text-slate-200 text-xs font-mono leading-relaxed line-clamp-3">
+                          <p className="line-clamp-3 font-mono text-xs leading-relaxed text-zinc-700">
                             &quot;{dec.finalDecision}&quot;
                           </p>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#1F2D44]/70 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-mono text-[11px]">
+                    <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 text-xs">
+                      <span className="font-mono text-[11px] text-zinc-500">
                         {dec.id ? `ID: ${dec.id.slice(0, 8)}...` : ""}
                       </span>
-                      <div className="flex items-center gap-1 font-semibold text-sky-400 group-hover:text-sky-300 group-hover:translate-x-0.5 transition-all">
-                        <span>{dec.status === "FINALIZED" ? "View Full Audit" : "Resume Review"}</span>
+                      <div className="flex items-center gap-1 font-semibold text-zinc-900 transition-all group-hover:translate-x-0.5">
+                        <span>
+                          {dec.status === "FINALIZED" ? "View Full Audit" : "Resume Review"}
+                        </span>
                         <ChevronRight className="size-3.5" />
                       </div>
                     </div>
@@ -913,8 +907,8 @@ export default function WorkspacePage() {
 
         {/* --- IDLE MESSAGE WHEN ACTIVE BUT NO DETAILS LOADED --- */}
         {!selectedEntity && !isSearching && !isEvaluating && activeDecision && (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50/30 py-24 text-center dark:border-zinc-800 dark:bg-zinc-950/10">
-            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-600">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50/30 py-24 text-center">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
               <ShieldCheck className="size-7" />
             </div>
             <p className="text-foreground text-base font-medium">Workflow Resumed</p>
@@ -929,13 +923,10 @@ export default function WorkspacePage() {
         {resolution && selectedEntity && !isEvaluating && !isSearching && (
           <Stack gap={8}>
             {/* Target Header Banner */}
-            <Panel
-              padding="md"
-              className="border border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/10"
-            >
+            <Panel padding="md" className="border border-zinc-200 bg-zinc-50/50">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600">
                     <FileText className="size-5" />
                   </div>
                   <div className="flex flex-col">

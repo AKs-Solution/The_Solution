@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   SIDEBAR_NAV,
   isGroup,
@@ -95,15 +95,20 @@ function NavItem({
         title={item.label}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "group relative flex size-9 items-center justify-center rounded transition-all duration-150 select-none mx-auto mb-1",
+          "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
           isActive
-            ? "bg-slate-200 text-slate-900 border-r-2 border-slate-900 font-semibold"
-            : "text-slate-500 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent",
+            ? "bg-zinc-900 text-zinc-50"
+            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
         )}
       >
-        <Icon className={cn("size-4 shrink-0", isActive ? "text-slate-900" : "text-slate-500 group-hover:text-slate-800")} />
+        <Icon
+          className={cn(
+            "size-4 shrink-0",
+            isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
+          )}
+        />
         {item.badge && (
-          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-slate-700" />
+          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-zinc-400" />
         )}
       </Link>
     );
@@ -115,26 +120,26 @@ function NavItem({
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-2.5 rounded px-2.5 py-1.5 text-xs transition-all duration-150 select-none",
+        "group relative flex items-center gap-2.5 rounded px-2.5 py-1.5 text-xs transition-colors select-none",
         isActive
-          ? "bg-slate-200/80 text-slate-900 border-r-2 border-slate-900 font-semibold"
-          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 transition-colors border border-transparent font-medium",
+          ? "bg-zinc-900 font-medium text-zinc-50"
+          : "font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
       )}
     >
       <Icon
         className={cn(
           "size-4 shrink-0",
-          isActive ? "text-slate-900" : "text-slate-500 group-hover:text-slate-800",
+          isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
         )}
       />
       <span className="flex-1 truncate tracking-tight">{item.label}</span>
       {item.badge && (
         <span
           className={cn(
-            "ml-auto rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold border",
+            "ml-auto rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold",
             isActive
-              ? "bg-white text-slate-900 border-slate-300"
-              : "bg-slate-100 text-slate-600 border-slate-200",
+              ? "border-zinc-300 bg-zinc-50 text-zinc-900"
+              : "border-zinc-200 bg-zinc-100 text-zinc-600",
           )}
         >
           {item.badge}
@@ -148,6 +153,7 @@ function NavGroup({
   group,
   pathname,
   expandedGroups,
+  autoExpandedGroups,
   isCollapsed,
   toggleGroup,
   onNavigate,
@@ -155,17 +161,19 @@ function NavGroup({
   group: SidebarNavGroup;
   pathname: string;
   expandedGroups: Set<string>;
+  autoExpandedGroups?: Set<string>;
   isCollapsed?: boolean;
   toggleGroup: (label: string) => void;
   onNavigate?: () => void;
 }) {
   const Icon = iconMap[group.icon] ?? FileText;
-  const isExpanded = expandedGroups.has(group.label);
+  const isExpanded =
+    (expandedGroups.has(group.label) || autoExpandedGroups?.has(group.label)) ?? false;
   const hasActiveChild = groupHasActiveChild(pathname, group.items);
 
   if (isCollapsed) {
     return (
-      <div className="flex flex-col gap-0.5 my-0.5">
+      <div className="flex flex-col items-center gap-1">
         {group.items.map((item) => (
           <NavItem
             key={item.href}
@@ -186,28 +194,28 @@ function NavGroup({
         onClick={() => toggleGroup(group.label)}
         aria-expanded={isExpanded}
         className={cn(
-          "flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-xs font-medium tracking-tight transition-colors cursor-pointer select-none",
+          "flex w-full cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-xs font-medium tracking-tight transition-colors select-none",
           hasActiveChild
-            ? "text-slate-900 font-semibold"
-            : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900",
+            ? "font-semibold text-zinc-900"
+            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
         )}
       >
         <Icon
-          className={cn(
-            "size-4 shrink-0",
-            hasActiveChild ? "text-slate-900" : "text-slate-500",
-          )}
+          className={cn("size-4 shrink-0", hasActiveChild ? "text-zinc-900" : "text-zinc-500")}
         />
         <span className="flex-1 truncate text-left">{group.label}</span>
         <ChevronRight
           className={cn(
-            "size-3.5 shrink-0 text-slate-400 transition-transform duration-200",
-            isExpanded && "rotate-90 text-slate-800",
+            "size-3.5 shrink-0 text-zinc-400 transition-transform duration-200",
+            isExpanded && "rotate-90 text-zinc-800",
           )}
         />
       </button>
       {isExpanded && (
-        <nav className="mt-0.5 flex flex-col gap-0.5 pl-2.5 border-l border-slate-200 ml-3.5 my-0.5" aria-label={group.label}>
+        <nav
+          className="my-0.5 mt-0.5 ml-3.5 flex flex-col gap-0.5 border-l border-zinc-200 pl-2.5"
+          aria-label={group.label}
+        >
           {group.items.map((item) => (
             <NavItem
               key={item.href}
@@ -232,14 +240,17 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   // Initialize and persist collapsed state (default: collapsed)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("consecuencia.sidebar.collapsed");
-      if (saved !== null) {
-        setIsCollapsed(saved === "true");
+    const t = setTimeout(() => {
+      try {
+        const saved = localStorage.getItem("consecuencia.sidebar.collapsed");
+        if (saved !== null) {
+          setIsCollapsed(saved === "true");
+        }
+      } catch {
+        // Ignore
       }
-    } catch {
-      // Ignore
-    }
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const toggleCollapse = useCallback(() => {
@@ -273,18 +284,16 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, [toggleCollapse]);
 
-  // Auto-expand groups with active children on mount and path change
-  useEffect(() => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      for (const entry of SIDEBAR_NAV) {
-        if (isGroup(entry) && groupHasActiveChild(pathname, entry.items)) {
-          next.add(entry.label);
-        }
-      }
-      return next;
-    });
-  }, [pathname]);
+  // Groups with active children are auto-expanded during render
+  const autoExpandedLabels = useMemo(
+    () =>
+      new Set(
+        SIDEBAR_NAV.filter(
+          (entry) => isGroup(entry) && groupHasActiveChild(pathname, entry.items),
+        ).map((entry) => entry.label),
+      ),
+    [pathname],
+  );
 
   const toggleGroup = useCallback((label: string) => {
     setExpandedGroups((prev) => {
@@ -330,32 +339,47 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside
       className={cn(
-        "h-full border-r border-slate-200 bg-slate-100/70 shrink-0 overflow-y-auto hidden lg:flex flex-col justify-between select-none z-10 transition-all duration-200 ease-in-out p-2 text-slate-800",
+        "z-10 hidden h-full shrink-0 flex-col items-center justify-between overflow-y-auto border-r border-zinc-200 bg-white p-2 text-zinc-800 transition-all duration-200 ease-in-out select-none md:flex",
         isCollapsed ? "w-14" : "w-64",
       )}
     >
-      <div className="flex h-full flex-col justify-between overflow-y-auto min-h-0">
-        <div>
+      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto">
+        <div className={cn("flex flex-col gap-1", isCollapsed && "items-center")}>
           {/* Top Collapse Button */}
-          <div className="mb-2 flex items-center justify-between">
-            <span className={cn("text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-1", isCollapsed && "hidden")}>
-              Navigation
-            </span>
+          <div
+            className={cn(
+              "mb-2 flex items-center justify-between",
+              isCollapsed && "justify-center",
+            )}
+          >
+            {!isCollapsed && (
+              <span className="px-1 font-mono text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+                Navigation
+              </span>
+            )}
             <button
               type="button"
               onClick={toggleCollapse}
               title={isCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
               className={cn(
-                "flex size-6 items-center justify-center rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer",
+                "flex size-6 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900",
                 isCollapsed && "mx-auto size-8",
               )}
             >
-              {isCollapsed ? <ChevronRight className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
+              {isCollapsed ? (
+                <ChevronRight className="size-3.5" />
+              ) : (
+                <ChevronLeft className="size-3.5" />
+              )}
             </button>
           </div>
 
           {/* Navigation Items */}
-          <div ref={navRef} onKeyDown={handleKeyDown} className="flex flex-col gap-0.5">
+          <div
+            ref={navRef}
+            onKeyDown={handleKeyDown}
+            className={cn("flex flex-col gap-0.5", isCollapsed && "items-center")}
+          >
             {SIDEBAR_NAV.map((entry) =>
               isGroup(entry) ? (
                 <NavGroup
@@ -363,6 +387,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   group={entry}
                   pathname={pathname}
                   expandedGroups={expandedGroups}
+                  autoExpandedGroups={autoExpandedLabels}
                   isCollapsed={isCollapsed}
                   toggleGroup={toggleGroup}
                   onNavigate={onNavigate}
@@ -380,30 +405,30 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
 
-        {/* Telemetry Footer */}
+        {/* Status Footer */}
         <div
           className={cn(
-            "mt-3 rounded border border-slate-200 bg-white p-2 text-[10px] text-slate-600 font-mono shadow-xs",
-            isCollapsed && "p-1.5 text-center",
+            "mt-3 rounded border border-zinc-200 bg-white p-2 font-mono text-[10px] text-zinc-500",
+            isCollapsed && "border-0 bg-transparent p-1.5 text-center",
           )}
         >
           {isCollapsed ? (
             <div className="flex flex-col items-center gap-1 font-mono text-[8px]">
-              <span className="size-1.5 rounded-full bg-slate-700" />
-              <span className="text-[8px] text-slate-800 font-medium">FAR25</span>
+              <span className="size-1.5 rounded-full bg-zinc-400" />
+              <span className="text-[8px] font-medium text-zinc-700">OK</span>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">VERIFICATION:</span>
-                <span className="text-slate-800 font-medium flex items-center gap-1">
+                <span className="text-zinc-400">STATUS</span>
+                <span className="flex items-center gap-1 font-medium text-zinc-800">
                   <span className="size-1 rounded-full bg-emerald-600" />
                   DETERMINISTIC
                 </span>
               </div>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-slate-500">COMPLIANCE:</span>
-                <span className="text-slate-800 font-medium">AS9100 / FAR 25</span>
+                <span className="text-zinc-400">COMPLIANCE</span>
+                <span className="font-medium text-zinc-700">AS9100 / FAR 25</span>
               </div>
             </>
           )}

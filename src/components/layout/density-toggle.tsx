@@ -9,17 +9,20 @@ export function DensityToggle() {
   const [density, setDensity] = useState<DensityMode>("compact");
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("consecuencia.ui.density") as DensityMode;
-      if (saved === "compact" || saved === "comfortable") {
-        setDensity(saved);
-        document.documentElement.setAttribute("data-density", saved);
-      } else {
-        document.documentElement.setAttribute("data-density", "compact");
+    const t = setTimeout(() => {
+      try {
+        const saved = localStorage.getItem("consecuencia.ui.density") as DensityMode;
+        if (saved === "compact" || saved === "comfortable") {
+          setDensity(saved);
+          document.documentElement.setAttribute("data-density", saved);
+        } else {
+          document.documentElement.setAttribute("data-density", "compact");
+        }
+      } catch {
+        // Ignore localStorage issues
       }
-    } catch {
-      // Ignore localStorage issues
-    }
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const toggleDensity = () => {
@@ -38,10 +41,10 @@ export function DensityToggle() {
       type="button"
       onClick={toggleDensity}
       title={`Current Density: ${density.toUpperCase()} (Click to toggle)`}
-      className="flex h-7.5 items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/50 px-2 text-xs font-semibold text-slate-400 hover:border-sky-500/40 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer shadow-xs select-none"
+      className="flex h-7.5 cursor-pointer items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2 text-xs font-semibold text-zinc-500 shadow-xs transition-all select-none hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-800"
     >
-      <SlidersHorizontal className="size-3 text-sky-400" />
-      <span className="hidden font-mono text-[10px] sm:inline uppercase tracking-wider">
+      <SlidersHorizontal className="size-3 text-zinc-400" />
+      <span className="hidden font-mono text-[10px] tracking-wider uppercase sm:inline">
         {density}
       </span>
     </button>

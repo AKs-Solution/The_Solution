@@ -46,15 +46,15 @@ export function CertificationDashboard({ health, onGeneratePackage }: Certificat
   ];
 
   return (
-    <div className="w-full space-y-6 rounded-xl border border-slate-800 bg-slate-900 p-6 font-sans text-slate-100 shadow-2xl">
+    <div className="w-full space-y-6 rounded-xl border border-zinc-200 bg-white p-6 font-sans text-zinc-900 shadow-2xl">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 border-b border-slate-800 pb-6 md:flex-row md:items-center">
+      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 md:flex-row md:items-center">
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
+          <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-zinc-900">
             <Award className="h-6 w-6 text-emerald-400" /> Certification & Compliance Intelligence
             Engine
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-zinc-500">
             Continuous deterministic evidence binding, 10-level traceability, and automated audit
             readiness.
           </p>
@@ -75,37 +75,37 @@ export function CertificationDashboard({ health, onGeneratePackage }: Certificat
 
       {/* Main Score Overview */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-800/50 p-5">
-          <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+        <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-100 p-5">
+          <div className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
             Overall Compliance Score
           </div>
-          <div className="flex items-baseline gap-1 text-4xl font-black text-white">
+          <div className="flex items-baseline gap-1 text-4xl font-black text-zinc-900">
             {health.overallComplianceScore}{" "}
-            <span className="text-sm font-normal text-slate-400">/ 100</span>
+            <span className="text-sm font-normal text-zinc-500">/ 100</span>
           </div>
           <div className="text-xs font-medium text-emerald-400">
             All 10 traceability levels verified.
           </div>
         </div>
 
-        <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-800/50 p-5">
-          <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+        <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-100 p-5">
+          <div className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
             Audit Readiness Score
           </div>
           <div className="flex items-baseline gap-1 text-4xl font-black text-emerald-400">
             {health.metrics.auditReadiness}%
           </div>
-          <div className="text-xs text-slate-400">SHA-256 evidence proofs verified.</div>
+          <div className="text-xs text-zinc-500">SHA-256 evidence proofs verified.</div>
         </div>
 
-        <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-800/50 p-5">
-          <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+        <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-100 p-5">
+          <div className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
             Documentation Completeness
           </div>
           <div className="flex items-baseline gap-1 text-4xl font-black text-indigo-400">
             {health.metrics.documentationCompleteness}%
           </div>
-          <div className="text-xs text-slate-400">0 superseded documents active.</div>
+          <div className="text-xs text-zinc-500">0 superseded documents active.</div>
         </div>
       </div>
 
@@ -116,13 +116,13 @@ export function CertificationDashboard({ health, onGeneratePackage }: Certificat
           return (
             <div
               key={idx}
-              className="space-y-1 rounded-lg border border-slate-800 bg-slate-800/30 p-3.5"
+              className="space-y-1 rounded-lg border border-zinc-200 bg-zinc-100 p-3.5"
             >
-              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
                 <Icon className="h-3.5 w-3.5 text-emerald-400" />
                 <span className="truncate">{m.label}</span>
               </div>
-              <div className="text-lg font-bold text-white">{m.val}%</div>
+              <div className="text-lg font-bold text-zinc-900">{m.val}%</div>
             </div>
           );
         })}

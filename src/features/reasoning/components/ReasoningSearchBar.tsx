@@ -38,38 +38,38 @@ export function ReasoningSearchBar() {
           placeholder="Ask an engineering question (e.g. 'Can we substitute Grade 5 Titanium under cyclic fatigue?')..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+          className="flex-1 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-900 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none"
         />
         <button
           type="submit"
           disabled={isSearching || !query.trim()}
-          className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition disabled:opacity-50"
+          className="rounded-xl bg-cyan-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-cyan-500 disabled:opacity-50"
         >
           {isSearching ? "Reasoning..." : "Reason Query"}
         </button>
       </form>
 
       {result && (
-        <div className="p-5 rounded-xl bg-slate-900 border border-cyan-900/60 space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
+        <div className="space-y-3 rounded-xl border border-cyan-900/60 bg-white p-5">
+          <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
+            <span className="font-mono text-[10px] tracking-wider text-cyan-400 uppercase">
               Reasoning Search Answer
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+            <span className="rounded border border-cyan-800 bg-cyan-950 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-300">
               Confidence: {Math.round(result.confidenceScore * 100)}%
             </span>
           </div>
 
-          <p className="text-xs text-slate-200 leading-relaxed font-medium">{result.answer}</p>
+          <p className="text-xs leading-relaxed font-medium text-zinc-900">{result.answer}</p>
 
           <div className="grid grid-cols-2 gap-3 pt-2 text-[11px]">
             <div>
-              <span className="text-slate-400 font-semibold block mb-1">Applied Principles:</span>
+              <span className="mb-1 block font-semibold text-zinc-500">Applied Principles:</span>
               <div className="flex flex-wrap gap-1">
                 {result.appliedPrinciples.map((p) => (
                   <span
                     key={p.code}
-                    className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-cyan-300 font-mono text-[10px]"
+                    className="rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-cyan-300"
                   >
                     {p.name}
                   </span>
@@ -77,8 +77,10 @@ export function ReasoningSearchBar() {
               </div>
             </div>
             <div>
-              <span className="text-slate-400 font-semibold block mb-1">Cited Evidence Sources:</span>
-              <ul className="space-y-1 text-slate-300">
+              <span className="mb-1 block font-semibold text-zinc-500">
+                Cited Evidence Sources:
+              </span>
+              <ul className="space-y-1 text-zinc-700">
                 {result.citedEvidence.map((ev) => (
                   <li key={ev.id} className="truncate">
                     • {ev.title} ({Math.round(ev.weight * 100)}%)

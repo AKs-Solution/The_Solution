@@ -16,15 +16,15 @@ export function EnterpriseSecurityDashboard({
   readinessReport,
 }: EnterpriseSecurityDashboardProps) {
   return (
-    <div className="w-full space-y-6 rounded-xl border border-slate-800 bg-slate-900 p-6 font-sans text-slate-100 shadow-2xl">
+    <div className="w-full space-y-6 rounded-xl border border-zinc-200 bg-white p-6 font-sans text-zinc-900 shadow-2xl">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 border-b border-slate-800 pb-6 md:flex-row md:items-center">
+      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 md:flex-row md:items-center">
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900">
             <ShieldCheck className="h-6 w-6 text-emerald-400" /> Enterprise Platform & Security
             Control Center
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-zinc-500">
             Real-time surveillance of multi-tenant isolation, RBAC enforcement, immutable audit
             logging, and security observability.
           </p>
@@ -36,7 +36,7 @@ export function EnterpriseSecurityDashboard({
             <div className="text-[11px] font-semibold text-emerald-400 uppercase">
               Enterprise Status
             </div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-bold text-zinc-900">
               {readinessReport.overallStatus} ({readinessReport.readinessScore}/100)
             </div>
           </div>
@@ -45,29 +45,29 @@ export function EnterpriseSecurityDashboard({
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="space-y-1 rounded-xl border border-slate-800 bg-slate-800/40 p-4">
-          <div className="text-xs font-medium text-slate-400">Tenant Isolation</div>
+        <div className="space-y-1 rounded-xl border border-zinc-200 bg-zinc-100 p-4">
+          <div className="text-xs font-medium text-zinc-500">Tenant Isolation</div>
           <div className="flex items-center gap-2 text-xl font-bold text-emerald-400">
             <Lock className="h-4 w-4" /> {metrics.tenantCount} Isolated Tenants
           </div>
         </div>
 
-        <div className="space-y-1 rounded-xl border border-slate-800 bg-slate-800/40 p-4">
-          <div className="text-xs font-medium text-slate-400">P99 API Latency</div>
+        <div className="space-y-1 rounded-xl border border-zinc-200 bg-zinc-100 p-4">
+          <div className="text-xs font-medium text-zinc-500">P99 API Latency</div>
           <div className="flex items-center gap-2 text-xl font-bold text-indigo-400">
             <Activity className="h-4 w-4" /> {metrics.p99LatencyMs} ms
           </div>
         </div>
 
-        <div className="space-y-1 rounded-xl border border-slate-800 bg-slate-800/40 p-4">
-          <div className="text-xs font-medium text-slate-400">Knowledge Graph Nodes</div>
+        <div className="space-y-1 rounded-xl border border-zinc-200 bg-zinc-100 p-4">
+          <div className="text-xs font-medium text-zinc-500">Knowledge Graph Nodes</div>
           <div className="flex items-center gap-2 text-xl font-bold text-blue-400">
             <Database className="h-4 w-4" /> {(metrics.graphNodesTotal / 1000000).toFixed(2)}M
           </div>
         </div>
 
-        <div className="space-y-1 rounded-xl border border-slate-800 bg-slate-800/40 p-4">
-          <div className="text-xs font-medium text-slate-400">Audit Trail Integrity</div>
+        <div className="space-y-1 rounded-xl border border-zinc-200 bg-zinc-100 p-4">
+          <div className="text-xs font-medium text-zinc-500">Audit Trail Integrity</div>
           <div className="flex items-center gap-2 text-xl font-bold text-emerald-400">
             <Key className="h-4 w-4" /> {metrics.auditTrailIntegrityScore}% SHA-256
           </div>
@@ -76,13 +76,13 @@ export function EnterpriseSecurityDashboard({
 
       {/* Security Checklist */}
       <div className="space-y-3 pt-2">
-        <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-slate-400 uppercase">
+        <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-zinc-500 uppercase">
           <Server className="h-4 w-4 text-indigo-400" /> Enterprise Readiness Verification Matrix
         </h3>
 
         <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-2">
-          <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/60 p-3">
-            <span className="font-medium text-slate-300">
+          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-100 p-3">
+            <span className="font-medium text-zinc-700">
               Strict Multi-Tenant Customer Data Isolation
             </span>
             <span className="rounded border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] text-emerald-400">
@@ -90,15 +90,15 @@ export function EnterpriseSecurityDashboard({
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/60 p-3">
-            <span className="font-medium text-slate-300">Fine-Grained Graph & Document RBAC</span>
+          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-100 p-3">
+            <span className="font-medium text-zinc-700">Fine-Grained Graph & Document RBAC</span>
             <span className="rounded border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] text-emerald-400">
               VERIFIED
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/60 p-3">
-            <span className="font-medium text-slate-300">
+          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-100 p-3">
+            <span className="font-medium text-zinc-700">
               Immutable SHA-256 Cryptographic Audit Logs
             </span>
             <span className="rounded border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] text-emerald-400">
@@ -106,8 +106,8 @@ export function EnterpriseSecurityDashboard({
             </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/60 p-3">
-            <span className="font-medium text-slate-300">
+          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-100 p-3">
+            <span className="font-medium text-zinc-700">
               SAML 2.0 / Okta / Azure AD SSO Integration
             </span>
             <span className="rounded border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] text-emerald-400">

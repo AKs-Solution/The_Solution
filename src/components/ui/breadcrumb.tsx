@@ -30,16 +30,23 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(
           return (
             <span key={`${item.label}-${index}`} className="flex items-center gap-1.5">
               {index > 0 &&
-                (separator ?? <ChevronRight className="text-muted-foreground/50 size-3 shrink-0" />)}
+                (separator ?? (
+                  <ChevronRight className="text-muted-foreground/50 size-3 shrink-0" />
+                ))}
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="text-muted-foreground hover:text-sky-400 transition-colors tracking-tight"
+                  className="tracking-tight text-zinc-500 transition-colors hover:text-zinc-900"
                 >
                   {item.label}
                 </Link>
               ) : (
-                <span className={cn("tracking-tight", isLast ? "text-foreground font-semibold" : "text-muted-foreground")}>
+                <span
+                  className={cn(
+                    "tracking-tight",
+                    isLast ? "text-foreground font-semibold" : "text-muted-foreground",
+                  )}
+                >
                   {item.label}
                 </span>
               )}

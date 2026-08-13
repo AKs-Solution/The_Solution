@@ -24,9 +24,8 @@ function getSystemTheme(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function applyTheme(theme: Theme) {
-  const resolved = theme === "system" ? getSystemTheme() : theme;
-  document.documentElement.classList.toggle("dark", resolved === "dark");
+function applyTheme() {
+  document.documentElement.classList.remove("dark");
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -35,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const stored = getStoredTheme();
-      applyTheme(stored);
+      applyTheme();
       return stored;
     }
     return "system";
@@ -53,7 +52,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
       if (theme === "system") {
-        applyTheme("system");
+        applyTheme();
         setResolvedTheme(getSystemTheme());
       }
     };
@@ -64,7 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
     localStorage.setItem(STORAGE_KEY, next);
-    applyTheme(next);
+    applyTheme();
     setResolvedTheme(next === "system" ? getSystemTheme() : next);
   }, []);
 

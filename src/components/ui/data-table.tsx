@@ -44,8 +44,8 @@ interface SortState {
   dir: "asc" | "desc";
 }
 
-export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
-  (
+export const DataTable = forwardRef(
+  <T,>(
     {
       className = "",
       data,
@@ -59,21 +59,21 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
       initialSort,
       maxHeight,
       ...props
-    },
+    }: DataTableProps<T>,
     ref,
   ) => {
     const [sort, setSort] = useState<SortState | null>(initialSort ?? null);
     const [hidden, setHidden] = useState<Set<string>>(
-      () =>
-        new Set(
-          columns.filter((c) => c.defaultVisible === false).map((c) => c.key),
-        ),
+      () => new Set(columns.filter((c) => c.defaultVisible === false).map((c) => c.key)),
     );
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const visibleColumns = useMemo(() => columns.filter((c) => !hidden.has(c.key)), [columns, hidden]);
+    const visibleColumns = useMemo(
+      () => columns.filter((c) => !hidden.has(c.key)),
+      [columns, hidden],
+    );
 
     const sortedData = useMemo(() => {
       if (!sort) return data;
@@ -141,7 +141,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
             <table className="w-full caption-bottom text-sm">
               <thead
                 className={cn(
-                  "border-border bg-[#080c14]/95 sticky top-0 z-10 backdrop-blur-md",
+                  "border-border sticky top-0 z-10 bg-white backdrop-blur-md",
                   canScrollLeft && "scroll-edge-left",
                   canScrollRight && "scroll-edge-right",
                 )}
@@ -154,7 +154,9 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
                       <th
                         key={col.key}
                         scope="col"
-                        aria-sort={isSorted ? (sort!.dir === "asc" ? "ascending" : "descending") : "none"}
+                        aria-sort={
+                          isSorted ? (sort!.dir === "asc" ? "ascending" : "descending") : "none"
+                        }
                         className={cn(
                           "text-muted-foreground density-px-sm density-py-sm font-mono text-xs font-semibold tracking-wider whitespace-nowrap uppercase",
                           alignClass(col.align),
@@ -166,7 +168,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
                             type="button"
                             onClick={() => toggleSort(col.key)}
                             className={cn(
-                              "hover:text-foreground inline-flex items-center gap-1 rounded transition-colors focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
+                              "hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded transition-colors focus-visible:ring-2 focus-visible:outline-none",
                               alignClass(col.align),
                             )}
                             aria-label={`Sort by ${typeof col.header === "string" ? col.header : col.key}`}
@@ -196,7 +198,10 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
                   Array.from({ length: skeletonRows }).map((_, rowIndex) => (
                     <tr key={`skeleton-${rowIndex}`} aria-hidden="true">
                       {visibleColumns.map((col) => (
-                        <td key={col.key} className={cn("density-px-sm density-py-sm", alignClass(col.align))}>
+                        <td
+                          key={col.key}
+                          className={cn("density-px-sm density-py-sm", alignClass(col.align))}
+                        >
                           <Skeleton className="h-4 w-full max-w-[140px]" shimmer />
                         </td>
                       ))}
@@ -258,7 +263,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps<any>>(
               trigger={
                 <button
                   type="button"
-                  className="border-border bg-background text-muted-foreground hover:text-foreground hover:bg-surface-hover inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+                  className="border-border bg-background text-muted-foreground hover:text-foreground hover:bg-surface-hover focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                   aria-label="Toggle column visibility"
                 >
                   <Columns3 className="size-3.5" aria-hidden="true" />

@@ -40,15 +40,15 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 p-6 text-center shadow-xs">
-          <div className="flex size-10 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-6 text-center shadow-sm">
+          <div className="flex size-10 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600">
             <AlertOctagon className="size-5" />
           </div>
           <div className="max-w-md">
-            <p className="text-sm font-semibold text-slate-200">
+            <p className="text-sm font-semibold text-zinc-900">
               {this.props.name ? `${this.props.name} Failed to Load` : "Telemetry Component Error"}
             </p>
-            <p className="mt-1 font-mono text-xs text-rose-400/80 truncate">
+            <p className="mt-1 font-mono text-xs text-rose-600">
               {this.state.error?.message || "An unexpected error occurred in this workspace view."}
             </p>
           </div>
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
             size="sm"
             variant="secondary"
             onClick={this.reset}
-            className="mt-1 border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:border-slate-700 hover:bg-slate-800"
+            className="mt-1 border border-zinc-200 bg-white text-xs text-zinc-700 hover:border-zinc-300 hover:bg-zinc-100"
           >
             <RefreshCw className="mr-1.5 size-3.5" />
             Retry Component

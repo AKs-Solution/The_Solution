@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
+  Command,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -28,18 +29,15 @@ const KIND_ICON_MAP: Record<WorkspaceTabKind, LucideIcon> = {
   ledger: Monitor,
 };
 
+function openSearchPalette() {
+  window.dispatchEvent(new CustomEvent("consecuencia:open-search"));
+}
+
 export function WorkspaceTabBar() {
   const router = useRouter();
   const pathname = usePathname();
-  const {
-    tabs,
-    activeTabId,
-    activateTab,
-    closeTab,
-    closeTabs,
-    togglePin,
-    openTab,
-  } = useWorkspaceTabs();
+  const { tabs, activeTabId, activateTab, closeTab, closeTabs, togglePin, openTab } =
+    useWorkspaceTabs();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -80,13 +78,7 @@ export function WorkspaceTabBar() {
   };
 
   const handleNewTab = () => {
-    openTab({
-      kind: "ledger",
-      ref: "/dashboard",
-      title: "Mission Console",
-      href: "/dashboard",
-    });
-    router.push("/dashboard");
+    openSearchPalette();
   };
 
   const scrollLeft = () => {
@@ -116,13 +108,13 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="w-full h-10 border-b border-[#1F2D44] bg-[#0E1420]/95 backdrop-blur-md flex-shrink-0 z-20 px-2 sm:px-4 flex items-center select-none gap-2 overflow-x-auto text-slate-200">
+    <div className="no-scrollbar z-20 flex h-10 w-full flex-shrink-0 items-center gap-1 overflow-x-auto border-b border-zinc-200 bg-zinc-100/80 px-4 text-zinc-500 select-none">
       {/* Scroll Left */}
       <button
         type="button"
         onClick={scrollLeft}
         title="Scroll tabs left"
-        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900 sm:flex"
       >
         <ChevronLeft className="size-3.5" />
       </button>
@@ -130,12 +122,15 @@ export function WorkspaceTabBar() {
       {/* Tabs Container */}
       <div
         ref={scrollRef}
-        className="flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"
+        className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto py-0.5"
         role="tablist"
       >
         {tabs.map((tab) => {
           const Icon = KIND_ICON_MAP[tab.kind] ?? FileText;
-          const isActive = tab.id === activeTabId || pathname === tab.href || (tab.href !== "/" && pathname?.startsWith(`${tab.href}/`));
+          const isActive =
+            tab.id === activeTabId ||
+            pathname === tab.href ||
+            (tab.href !== "/" && pathname?.startsWith(`${tab.href}/`));
 
           return (
             <div
@@ -151,20 +146,22 @@ export function WorkspaceTabBar() {
               }}
               title={`${tab.title} (Middle-click to close)`}
               className={cn(
-                "group relative px-3.5 py-1.5 text-xs rounded-t-md flex items-center gap-2 flex-shrink-0 cursor-pointer select-none transition-all duration-150 border-t border-x",
+                "flex flex-shrink-0 cursor-pointer items-center gap-2 transition-colors select-none",
                 isActive
-                  ? "bg-[#162032] text-sky-300 border-[#1F2D44] border-b-2 border-b-sky-400 font-semibold shadow-[0_0_12px_rgba(56,189,248,0.2)]"
-                  : "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-[#162032]/60 border-transparent border-b-2",
+                  ? "border-b-2 border-zinc-900 bg-white px-4 py-2 text-xs font-medium text-zinc-900 shadow-sm"
+                  : "border-b-2 border-transparent px-4 py-2 text-xs text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-800",
               )}
             >
-              <Icon className={cn("size-3.5 shrink-0", isActive ? "text-sky-400" : "text-slate-400")} />
+              <Icon
+                className={cn("size-3.5 shrink-0", isActive ? "text-zinc-900" : "text-zinc-500")}
+              />
               <span className="max-w-[140px] truncate tracking-tight">{tab.title}</span>
 
               {tab.pinned && (
-                <Pin className="size-2.5 shrink-0 text-sky-400/80 ml-0.5" aria-label="Pinned Tab" />
+                <Pin className="ml-0.5 size-2.5 shrink-0 text-zinc-400" aria-label="Pinned Tab" />
               )}
 
-              <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="ml-1 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                   type="button"
                   title={tab.pinned ? "Unpin tab" : "Pin tab"}
@@ -172,7 +169,7 @@ export function WorkspaceTabBar() {
                     e.stopPropagation();
                     togglePin(tab.id);
                   }}
-                  className="rounded p-0.5 hover:bg-[#1E2C44] text-slate-400 hover:text-slate-200 transition-colors"
+                  className="rounded p-0.5 text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
                 >
                   {tab.pinned ? <PinOff className="size-2.5" /> : <Pin className="size-2.5" />}
                 </button>
@@ -185,7 +182,7 @@ export function WorkspaceTabBar() {
                       e.stopPropagation();
                       closeTab(tab.id);
                     }}
-                    className="rounded p-0.5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 transition-colors"
+                    className="rounded p-0.5 text-zinc-400 transition-colors hover:bg-rose-100 hover:text-rose-600"
                   >
                     <X className="size-2.5" />
                   </button>
@@ -199,11 +196,11 @@ export function WorkspaceTabBar() {
         <button
           type="button"
           onClick={handleNewTab}
-          title="New Workspace Tab (Alt+N)"
-          className="flex h-7 items-center justify-center rounded border border-[#1F2D44] bg-[#162032] px-2.5 text-xs text-slate-300 hover:border-sky-500/40 hover:bg-[#1E2C44] hover:text-white transition-all cursor-pointer shrink-0 gap-1 font-medium shadow-xs"
+          title="Open Command Palette (Ctrl+K)"
+          className="flex h-6 shrink-0 cursor-pointer items-center justify-center gap-1 rounded border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
-          <Plus className="size-3 text-sky-400" />
-          <span className="text-[11px] font-mono">NEW TAB</span>
+          <Plus className="size-3" />
+          <Command className="size-2.5" />
         </button>
       </div>
 
@@ -212,7 +209,7 @@ export function WorkspaceTabBar() {
         type="button"
         onClick={scrollRight}
         title="Scroll tabs right"
-        className="hidden sm:flex size-6 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900 sm:flex"
       >
         <ChevronRight className="size-3.5" />
       </button>
@@ -223,24 +220,24 @@ export function WorkspaceTabBar() {
           type="button"
           onClick={() => setShowMenu((prev) => !prev)}
           title="Tab options"
-          className="flex size-7 items-center justify-center rounded text-slate-400 hover:bg-[#162032] hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+          className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900"
         >
           <MoreVertical className="size-3.5" />
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 top-8 z-50 w-44 rounded-md border border-[#1F2D44] bg-[#0E1420] p-1 shadow-xl text-xs">
+          <div className="absolute top-8 right-0 z-50 w-44 rounded-md border border-zinc-200 bg-white p-1 text-xs shadow-sm">
             <button
               type="button"
               onClick={closeOthers}
-              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-slate-300 hover:bg-[#162032] hover:text-white transition-colors cursor-pointer"
+              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
             >
               Close Other Tabs
             </button>
             <button
               type="button"
               onClick={closeUnpinned}
-              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-slate-300 hover:bg-[#162032] hover:text-white transition-colors cursor-pointer"
+              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
             >
               Close Unpinned Tabs
             </button>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Header } from "./header";
-import { Footer } from "./footer";
+import { Sidebar } from "./sidebar";
 import { WorkspaceTabBar } from "./workspace-tab-bar";
 import { SearchCommandPalette } from "@/features/search";
 
@@ -10,18 +10,18 @@ interface ShellProps {
 
 export function Shell({ children }: ShellProps) {
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#090D14] text-slate-100 m-0 p-0 antialiased">
-      {/* Fixed Top Avionics Glass Header */}
+    <div className="m-0 flex h-screen w-screen flex-col overflow-hidden bg-zinc-50 p-0 text-zinc-900 antialiased">
+      {/* Fixed Top Header */}
       <Header />
-      {/* Integrated Sub-Header Workspace Tab Bar */}
+      {/* Fixed Sub-Header Workspace Tab Bar */}
       <WorkspaceTabBar />
-      {/* Main Content Workspace Canvas */}
-      <div className="flex-1 flex min-h-0 overflow-hidden relative w-full">
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 bg-[#090D14] text-slate-100 flex flex-col justify-between max-w-full">
-          <div className="flex-1 min-w-0 w-full max-w-7xl mx-auto">
-            {children}
-          </div>
-          <Footer />
+      {/* Workspace Middle Container */}
+      <div className="relative flex min-h-0 w-full flex-1 overflow-hidden">
+        {/* Slim Collapsed Sidebar */}
+        <Sidebar />
+        {/* Main Canvas */}
+        <main className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-x-hidden overflow-y-auto bg-zinc-50 p-6 md:p-8">
+          {children}
         </main>
       </div>
       <SearchCommandPalette />

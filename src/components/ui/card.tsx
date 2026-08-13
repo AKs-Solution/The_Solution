@@ -10,7 +10,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ className = "", ...
     <div
       ref={ref}
       className={cn(
-        "border border-[#1F2D44] bg-[#0E1420] rounded-lg transition-colors text-slate-100 shadow-sm",
+        "rounded-lg border border-zinc-200/80 bg-white text-zinc-900 shadow-sm transition-colors",
         className,
       )}
       {...props}
@@ -37,7 +37,7 @@ export const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={cn("text-slate-100 text-sm font-semibold tracking-tight", className)}
+        className={cn("text-sm font-semibold tracking-tight text-zinc-900", className)}
         {...props}
       />
     );
@@ -50,7 +50,7 @@ export type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
 export const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className = "", ...props }, ref) => {
-    return <p ref={ref} className={cn("text-slate-400 text-xs", className)} {...props} />;
+    return <p ref={ref} className={cn("text-xs text-zinc-500", className)} {...props} />;
   },
 );
 

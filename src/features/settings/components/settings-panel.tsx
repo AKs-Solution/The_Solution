@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {   Building2, KeyRound, LayoutDashboard, LogOut, Moon, RotateCcw, Sun, Trash2, User } from "lucide-react";
+import {
+  Building2,
+  KeyRound,
+  LayoutDashboard,
+  LogOut,
+  Moon,
+  RotateCcw,
+  Sun,
+  Trash2,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -36,11 +46,8 @@ function readTheme(): ThemePreference {
   return "system";
 }
 
-function applyTheme(theme: ThemePreference) {
-  const root = document.documentElement;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const useDark = theme === "dark" || (theme === "system" && prefersDark);
-  root.classList.toggle("dark", useDark);
+function applyTheme() {
+  document.documentElement.classList.remove("dark");
 }
 
 function WorkspaceSettingsCard() {
@@ -224,14 +231,14 @@ export function SettingsPanel() {
     const current = readTheme();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(current);
-    applyTheme(current);
+    applyTheme();
     void load();
   }, [load]);
 
   function updateTheme(next: ThemePreference) {
     setTheme(next);
     window.localStorage.setItem(THEME_STORAGE_KEY, next);
-    applyTheme(next);
+    applyTheme();
   }
 
   async function handleLogout() {

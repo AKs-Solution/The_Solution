@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function RootLayout({
   children,
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased dark font-sans">
-      <body className="h-screen w-screen overflow-hidden bg-[#090d14] text-slate-100 flex flex-col m-0 p-0">
+    <html lang="en" className="h-full font-sans antialiased">
+      <body className="m-0 flex h-screen w-screen flex-col overflow-hidden bg-zinc-50 p-0 text-zinc-900">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

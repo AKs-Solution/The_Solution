@@ -15,28 +15,28 @@ export interface EpistemicBadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const STATUS_STYLES: Record<EpistemicStatus, { badge: string; dot: string }> = {
   RECORDED: {
-    badge: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-    dot: "bg-cyan-400",
+    badge: "bg-zinc-100 text-zinc-700 border-zinc-300",
+    dot: "bg-zinc-400",
   },
   DERIVED: {
-    badge: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-    dot: "bg-emerald-400",
+    badge: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    dot: "bg-emerald-600",
   },
   INFERRED: {
-    badge: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-800 border-amber-200",
+    dot: "bg-amber-600",
   },
   UNKNOWN: {
-    badge: "border-rose-500/40 bg-rose-500/10 text-rose-300",
-    dot: "bg-rose-400",
+    badge: "bg-rose-50 text-rose-800 border-rose-200",
+    dot: "bg-rose-600",
   },
   GAP: {
-    badge: "border-rose-500/40 bg-rose-500/10 text-rose-300",
-    dot: "bg-rose-400",
+    badge: "bg-rose-50 text-rose-800 border-rose-200",
+    dot: "bg-rose-600",
   },
   CRITICAL: {
-    badge: "border-rose-500/60 bg-rose-500/20 text-rose-200 shadow-[0_0_10px_rgba(244,63,94,0.3)] font-semibold",
-    dot: "bg-rose-400 animate-pulse",
+    badge: "bg-rose-50 text-rose-800 border-rose-300 font-semibold",
+    dot: "bg-rose-600 animate-pulse",
   },
 };
 
@@ -65,10 +65,12 @@ export const EpistemicBadge = forwardRef<HTMLSpanElement, EpistemicBadgeProps>(
         ref={ref}
         size={size}
         variant="outline"
-        className={cn("border font-mono text-xs px-2 py-0.5 rounded", styles.badge, className)}
+        className={cn("rounded border px-2 py-0.5 font-mono text-xs", styles.badge, className)}
         {...props}
       >
-        {showDot && <span className={cn("size-1.5 rounded-full mr-1.5", styles.dot)} aria-hidden="true" />}
+        {showDot && (
+          <span className={cn("mr-1.5 size-1.5 rounded-full", styles.dot)} aria-hidden="true" />
+        )}
         {label ?? DEFAULT_LABELS[normalized]}
       </Badge>
     );
