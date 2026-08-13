@@ -47,13 +47,19 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set(REQUEST_ID_HEADER, requestId);
   requestHeaders.set(NONCE_HEADER, nonce);
 
+  const proto =
+    request.headers.get("x-forwarded-proto") ??
+    (request.nextUrl.protocol ? request.nextUrl.protocol.replace(":", "") : "http");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
+  const expectedOrigin = `${proto}://${host}`;
+
   if (
     pathname.startsWith("/api/") &&
     !isSameOriginRequest({
       method: request.method,
       originHeader: request.headers.get("origin"),
       refererHeader: request.headers.get("referer"),
-      expectedOrigin: request.nextUrl.origin,
+      expectedOrigin,
     })
   ) {
     logger.warn("CSRF check failed: cross-origin mutating request rejected", {
