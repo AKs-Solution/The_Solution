@@ -198,7 +198,7 @@ export function WorkspaceTabBar() {
                 <Pin className="ml-0.5 size-2.5 shrink-0 text-zinc-400" aria-label="Pinned Tab" />
               )}
 
-              <div className="ml-1 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="ml-1 flex items-center gap-0.5">
                 <button
                   type="button"
                   title={tab.pinned ? "Unpin tab" : "Pin tab"}
@@ -207,7 +207,7 @@ export function WorkspaceTabBar() {
                     e.stopPropagation();
                     togglePin(tab.id);
                   }}
-                  className="rounded p-0.5 text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
+                  className="rounded p-0.5 text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-zinc-200 hover:text-zinc-900"
                 >
                   {tab.pinned ? <PinOff className="size-2.5" /> : <Pin className="size-2.5" />}
                 </button>
@@ -221,7 +221,10 @@ export function WorkspaceTabBar() {
                       e.stopPropagation();
                       closeTab(tab.id);
                     }}
-                    className="rounded p-0.5 text-zinc-400 transition-colors hover:bg-rose-100 hover:text-rose-600"
+                    className={cn(
+                      "rounded p-0.5 text-zinc-400 transition-colors hover:bg-rose-100 hover:text-rose-600",
+                      !isActive && "opacity-60 hover:opacity-100",
+                    )}
                   >
                     <X className="size-2.5" />
                   </button>
