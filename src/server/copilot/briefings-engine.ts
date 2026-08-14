@@ -21,33 +21,43 @@ export async function generateEngineeringBriefing(
 ): Promise<EngineeringBriefing> {
   try {
     const [decisions, alerts, precedents] = await Promise.all([
-      (prisma as any).engineeringDecision?.findMany({
-        where: { organizationId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }).catch(() => []) ?? [],
-      (prisma as any).anomalyAlert?.findMany({
-        orderBy: { detectedAt: "desc" },
-        take: 5,
-      }).catch(() => []) ?? [],
-      (prisma as any).precedent?.findMany({
-        where: { organizationId },
-        orderBy: { createdAt: "desc" },
-        take: 3,
-      }).catch(() => []) ?? [],
+      (prisma as any).engineeringDecision
+        ?.findMany({
+          where: { organizationId },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        })
+        .catch(() => []) ?? [],
+      (prisma as any).anomalyAlert
+        ?.findMany({
+          orderBy: { detectedAt: "desc" },
+          take: 5,
+        })
+        .catch(() => []) ?? [],
+      (prisma as any).historicalPrecedent
+        ?.findMany({
+          where: { organizationId },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        })
+        .catch(() => []) ?? [],
     ]);
 
     const milestones = decisions.map((d: any) => `Decision: ${(d.description || "").slice(0, 80)}`);
-    const risks = alerts.map((a: any) => `Anomaly Alert: ${a.description || a.title || "Detected variance"}`);
+    const risks = alerts.map(
+      (a: any) => `Anomaly Alert: ${a.description || a.title || "Detected variance"}`,
+    );
     const newPrecedentsCaptured = precedents.map((p: any) => `Precedent: ${p.title || p.id}`);
 
-    const headline = decisions.length > 0
-      ? `${decisions.length} Active Decisions Tracked & Traceability Verified`
-      : "Engineering System Initialized — Ready for Ingestion";
+    const headline =
+      decisions.length > 0
+        ? `${decisions.length} Active Decisions Tracked & Traceability Verified`
+        : "Engineering System Initialized — Ready for Ingestion";
 
-    const executiveSummary = decisions.length > 0
-      ? `System monitoring ${decisions.length} recorded engineering decisions and ${alerts.length} live surveillance telemetry signals.`
-      : "No engineering decisions or anomalies logged for this period.";
+    const executiveSummary =
+      decisions.length > 0
+        ? `System monitoring ${decisions.length} recorded engineering decisions and ${alerts.length} live surveillance telemetry signals.`
+        : "No engineering decisions or anomalies logged for this period.";
 
     return {
       briefingId: `BRIEF-${Date.now()}`,

@@ -44,9 +44,12 @@ When a user accepts an invitation:
 2. `OrganizationMember` record is created with the assigned role
 3. `AuthEvent` is logged as `organization.invitation.accepted`
 
+## Email Delivery
+
+Invitation emails are sent via Resend when `RESEND_API_KEY` is configured (see `.env.example`). The invite link points to `/invitations`, where the recipient can sign in and accept. If no key is configured, emails are skipped with a server-log warning.
+
 ## Future Enhancements
 
-- Email notification when invitation is sent
 - Reminder emails for pending invitations
 - Bulk invitation support
 - Invitation cancellation by owner

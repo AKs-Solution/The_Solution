@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { requestPasswordReset } from "@/server/auth";
+import { passwordResetRateLimiter } from "@/server/security/rate-limiter";
+import { rateLimitedResponse } from "@/server/security/response-helpers";
+import { RateLimitedError } from "@/shared/errors";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +17,19 @@ export async function POST(request: Request) {
     }
 
     const ipAddress =
-      request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? undefined;
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      undefined;
+
+    if (ipAddress) {
+      const retryAfter = passwordResetRateLimiter.check(ipAddress);
+      if (retryAfter !== null) {
+        return rateLimitedResponse(
+          new RateLimitedError("Too many password reset attempts. Try again later.", retryAfter),
+        );
+      }
+      passwordResetRateLimiter.record(ipAddress);
+    }
 
     await requestPasswordReset(email.toLowerCase().trim(), ipAddress);
 

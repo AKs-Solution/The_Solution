@@ -3,6 +3,8 @@ import { prisma } from "@/server/db";
 import { AppError, UnauthorizedError } from "@/shared/errors";
 import { hashPassword, verifyPassword } from "./password-service";
 import { createSession, destroySession, validateSession } from "./session-service";
+import { createVerificationToken, consumeVerificationToken } from "./token-service";
+import { sendPasswordResetEmail } from "@/server/mail";
 
 export interface RegisterInput {
   email: string;
@@ -195,18 +197,12 @@ export async function requestPasswordReset(email: string, _ipAddress?: string): 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return;
 
-  const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-  await (prisma as any).passwordResetToken
-    ?.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt,
-      },
-    })
-    .catch(() => null);
+  try {
+    const token = await createVerificationToken(user.id, "password_reset", 1);
+    await sendPasswordResetEmail(user.email, token);
+  } catch (err) {
+    console.warn("[AuthService] Failed to send password reset email:", err);
+  }
 }
 
 export async function resetPassword(
@@ -216,28 +212,19 @@ export async function resetPassword(
   const token = typeof input === "string" ? input : input.token;
   const password = typeof input === "string" ? newPassword || "" : input.password;
 
-  const resetToken = await (prisma as any).passwordResetToken
-    ?.findUnique({
-      where: { token },
-      include: { user: true },
-    })
-    .catch(() => null);
-
-  if (!resetToken || resetToken.expiresAt < new Date()) {
-    throw new Error("Invalid or expired reset token");
+  const record = await consumeVerificationToken(token, "password_reset");
+  if (!record) {
+    throw new AppError("Invalid or expired reset token", "INVALID_RESET_TOKEN", 400);
   }
 
   const passwordHash = hashPassword(password);
 
   await prisma.user
     .update({
-      where: { id: resetToken.userId },
+      where: { id: record.userId },
       data: { passwordHash },
     })
     .catch(() => null);
 
-  await (prisma as any).passwordResetToken
-    ?.delete({ where: { id: resetToken.id } })
-    .catch(() => null);
-  await prisma.session.deleteMany({ where: { userId: resetToken.userId } }).catch(() => null);
+  await prisma.session.deleteMany({ where: { userId: record.userId } }).catch(() => null);
 }

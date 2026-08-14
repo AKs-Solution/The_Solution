@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { prisma } from "@/server/db";
 import { validateSession } from "@/server/auth/session-service";
 import { DEFAULT_ROLES } from "@/server/rbac/permissions";
+import { sendInvitationEmail } from "@/server/mail";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/shared/errors";
 
 export const INVITABLE_ROLE_SLUGS = new Set(
@@ -137,6 +138,7 @@ export async function inviteMember(
       invitedBy: session.userId,
       expiresAt,
     },
+    include: { organization: { select: { name: true } } },
   });
 
   await prisma.authEvent.create({
@@ -146,6 +148,8 @@ export async function inviteMember(
       metadata: { organizationId, email: normalizedEmail },
     },
   });
+
+  await sendInvitationEmail(normalizedEmail, invitation.organization.name, role);
 
   return { invitationId: invitation.id };
 }
