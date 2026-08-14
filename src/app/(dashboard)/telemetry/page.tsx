@@ -63,7 +63,7 @@ export default function MetrologyRegistryPage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Activity className="text-indigo-650 size-6 dark:text-indigo-400" />
+              <Activity className="size-6 text-indigo-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Metrology & Sensor Deviation Registry
               </h1>
@@ -100,19 +100,17 @@ export default function MetrologyRegistryPage() {
                       key={t.id}
                       className={`flex flex-col gap-3 rounded-xl border p-5 transition-all ${
                         isAttested
-                          ? "border-emerald-250 bg-emerald-50/5 dark:border-emerald-950/20"
+                          ? "border-emerald-200 bg-emerald-50/5"
                           : limitCrossed
-                            ? "border-amber-250 bg-amber-50/5 dark:border-amber-950/20"
-                            : "border-zinc-200 bg-zinc-50/10 dark:border-zinc-800 dark:bg-zinc-900/10"
+                            ? "border-amber-200 bg-amber-50/5"
+                            : "border-zinc-200 bg-zinc-50/10"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <Cpu className="size-5 text-indigo-600 dark:text-indigo-400" />
+                          <Cpu className="size-5 text-indigo-600" />
                           <div className="flex flex-col text-left">
-                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                              {t.machineId}
-                            </span>
+                            <span className="text-sm font-bold text-zinc-900">{t.machineId}</span>
                             <span className="text-[10px] text-zinc-400">
                               Recorded: {new Date(t.timestamp).toLocaleTimeString()}
                             </span>
@@ -120,45 +118,43 @@ export default function MetrologyRegistryPage() {
                         </div>
 
                         {isAttested ? (
-                          <Badge className="border-emerald-250 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800">
                             Attested By Engineer
                           </Badge>
                         ) : limitCrossed ? (
-                          <Badge className="border-amber-250 bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                          <Badge className="border-amber-200 bg-amber-50 text-amber-800">
                             Tolerance Alert
                           </Badge>
                         ) : (
-                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800">
                             Nominal
                           </Badge>
                         )}
                       </div>
 
-                      <Divider className="border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="border-zinc-100" />
 
                       <div className="grid grid-cols-2 gap-4 text-left text-xs sm:grid-cols-4">
                         <div>
                           <span className="block text-zinc-400">Spindle Speed</span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             {t.spindleSpeedRPM.toLocaleString()} RPM
                           </span>
                         </div>
                         <div>
                           <span className="block text-zinc-400">Feed Rate</span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             {t.feedRateMMPM.toLocaleString()} mm/min
                           </span>
                         </div>
                         <div>
                           <span className="block text-zinc-400">Sensor G-Force</span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                            {t.vibrationG} G
-                          </span>
+                          <span className="font-semibold text-zinc-800">{t.vibrationG} G</span>
                         </div>
                         <div>
                           <span className="block text-zinc-400">Measured Deviation</span>
                           <span
-                            className={`font-bold ${limitCrossed && !isAttested ? "text-amber-600" : "text-zinc-800 dark:text-zinc-200"}`}
+                            className={`font-bold ${limitCrossed && !isAttested ? "text-amber-600" : "text-zinc-800"}`}
                           >
                             {t.deviationMM} mm
                           </span>
@@ -167,7 +163,7 @@ export default function MetrologyRegistryPage() {
 
                       {limitCrossed && !isAttested && (
                         <div className="mt-1 flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-left text-xs">
-                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                          <div className="flex items-center gap-2 text-amber-700">
                             <ShieldAlert className="size-4 shrink-0" />
                             <span>
                               Warning: Metrology drift exceeds nominal 0.05mm limit. Requires manual
@@ -184,7 +180,7 @@ export default function MetrologyRegistryPage() {
                             <Button
                               onClick={() => handleSignOff(t.id)}
                               disabled={!engineerName || signingId === t.id}
-                              className="h-8 bg-amber-600 py-1 text-xs text-white hover:bg-amber-700 dark:bg-amber-500"
+                              className="h-8 bg-amber-600 py-1 text-xs text-white hover:bg-amber-700"
                             >
                               {signingId === t.id
                                 ? "Signing off..."
@@ -206,7 +202,7 @@ export default function MetrologyRegistryPage() {
 
           {/* POLICY LIMITS */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+            <Card className="border-zinc-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
@@ -216,11 +212,11 @@ export default function MetrologyRegistryPage() {
                     <h2 className="text-foreground text-base font-bold">Tolerance Guidelines</h2>
                   </div>
 
-                  <Divider className="border-zinc-200 dark:border-zinc-800" />
+                  <Divider className="border-zinc-200" />
 
                   <div className="flex flex-col gap-2 text-left text-xs">
-                    <div className="border-zinc-150 dark:border-zinc-850 rounded border bg-zinc-50 p-3 dark:bg-zinc-900">
-                      <span className="mb-1 block font-semibold text-zinc-800 dark:text-zinc-200">
+                    <div className="rounded border border-zinc-200 bg-zinc-50 p-3">
+                      <span className="mb-1 block font-semibold text-zinc-800">
                         Standard Limits:
                       </span>
                       <p className="text-[11px] leading-relaxed text-zinc-500">

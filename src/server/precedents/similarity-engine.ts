@@ -1,5 +1,6 @@
 import { Precedent, PrecedentMatchContext, MatchedPrecedent } from "@/features/precedents/types";
-import { INDUSTRY_FAILURE_SEEDS, queryModelMany } from "@/server/precedents/seed-industry-graph";
+import { INDUSTRY_FAILURE_SEEDS } from "@/server/precedents/seed-industry-graph";
+import { prisma } from "@/server/db";
 
 interface MatchResult {
   score: number;
@@ -252,14 +253,13 @@ function categorySimilarity(a: string, b: string): number {
   const shared = tokensA.filter((t) => tokensB.includes(t));
   const jaccard = shared.length / Math.max(tokensA.length, tokensB.length);
   const containment =
-    a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase()) ? 0.6 : 0;
+    a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase())
+      ? 0.6
+      : 0;
   return Math.max(jaccard, containment);
 }
 
-function seedIndustryMatches(
-  context: IndustryFailureQuery,
-  limit: number,
-): IndustryFailureMatch[] {
+function seedIndustryMatches(context: IndustryFailureQuery, limit: number): IndustryFailureMatch[] {
   const records: RawIndustryFailureMatch[] = INDUSTRY_FAILURE_SEEDS.map((seed) => ({
     id: seed.id,
     componentType: seed.componentType,
@@ -332,10 +332,10 @@ export async function queryIndustryFailureRecords(
   try {
     const [publicRecords, airworthinessDirectives, serviceDifficultyReports, ntsbAccidents] =
       await Promise.all([
-        queryModelMany("publicFailureRecord", { take: 100 }),
-        queryModelMany("airworthinessDirective", { take: 100 }),
-        queryModelMany("serviceDifficultyReport", { take: 100 }),
-        queryModelMany("ntsbAccident", { take: 100 }),
+        prisma.publicFailureRecord.findMany({ take: 100 }).catch(() => []),
+        prisma.airworthinessDirective.findMany({ take: 100 }).catch(() => []),
+        prisma.serviceDifficultyReport.findMany({ take: 100 }).catch(() => []),
+        prisma.nTSBAccident.findMany({ take: 100 }).catch(() => []),
       ]);
 
     const toMatch = (
@@ -359,15 +359,24 @@ export async function queryIndustryFailureRecords(
         : [hashKey],
       programContext: String(record.programContext || "Industry Failure Graph"),
       occurredAt: new Date(
-        Number(record.occurredAt || record.issuedAt || record.reportedAt || record.accidentDate) || Date.now(),
+        Number(record.occurredAt || record.issuedAt || record.reportedAt || record.accidentDate) ||
+          Date.now(),
       ).toISOString(),
     });
 
     const records: RawIndustryFailureMatch[] = [
-      ...publicRecords.map((r) => toMatch(r as any, `pub:${(r as any).id}`, "Unspecified")),
-      ...airworthinessDirectives.map((r) => toMatch(r as any, `ad:${(r as any).adNumber}`, "Unspecified")),
-      ...serviceDifficultyReports.map((r) => toMatch(r as any, `sdr:${(r as any).sdrNumber}`, "Unspecified")),
-      ...ntsbAccidents.map((r) => toMatch(r as any, `ntsb:${(r as any).accidentNumber}`, "Unspecified")),
+      ...publicRecords.map((r) =>
+        toMatch(r as Record<string, unknown>, `pub:${r.id}`, "Unspecified"),
+      ),
+      ...airworthinessDirectives.map((r) =>
+        toMatch(r as Record<string, unknown>, `ad:${r.adNumber}`, "Unspecified"),
+      ),
+      ...serviceDifficultyReports.map((r) =>
+        toMatch(r as Record<string, unknown>, `sdr:${r.sdrNumber}`, "Unspecified"),
+      ),
+      ...ntsbAccidents.map((r) =>
+        toMatch(r as Record<string, unknown>, `ntsb:${r.accidentNumber}`, "Unspecified"),
+      ),
     ];
 
     if (records.length === 0) {

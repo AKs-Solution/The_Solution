@@ -166,7 +166,7 @@ export function SupplierList({
                   <TableCell>
                     {supplier.liveCapacityScore !== undefined ? (
                       <div className="flex w-24 flex-col gap-1">
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
                           <div
                             className="h-full rounded-full bg-indigo-500"
                             style={{ width: `${Math.round(supplier.liveCapacityScore * 100)}%` }}

@@ -136,7 +136,11 @@ export const INDUSTRY_FAILURE_SEEDS: IndustryFailureSeed[] = [
  * on the client or the database is unavailable.
  */
 export async function queryModelMany(model: string, args: unknown): Promise<unknown[]> {
-  const delegate = (prisma as any)[model];
+  const delegates = prisma as unknown as Record<
+    string,
+    { findMany?: (args: unknown) => Promise<unknown[]> } | undefined
+  >;
+  const delegate = delegates[model];
   if (!delegate?.findMany) return [];
   return delegate.findMany(args).catch(() => []);
 }
@@ -170,7 +174,7 @@ export async function seedIndustryGraph(): Promise<IndustryGraphSeedResult> {
     let ntsbAccidents = 0;
 
     for (const seed of INDUSTRY_FAILURE_SEEDS) {
-      await (prisma as any).publicFailureRecord?.upsert({
+      await prisma.publicFailureRecord.upsert({
         where: { id: seed.id },
         update: {
           sourceType: seed.sourceType,
@@ -203,7 +207,7 @@ export async function seedIndustryGraph(): Promise<IndustryGraphSeedResult> {
       publicRecords += 1;
 
       if (seed.sourceType === "AD") {
-        await (prisma as any).airworthinessDirective?.upsert({
+        await prisma.airworthinessDirective.upsert({
           where: { adNumber: seed.recordNumber },
           update: {
             title: `AD: ${seed.failureMode} — ${seed.componentType}`,
@@ -229,7 +233,7 @@ export async function seedIndustryGraph(): Promise<IndustryGraphSeedResult> {
       }
 
       if (seed.sourceType === "SDR") {
-        await (prisma as any).serviceDifficultyReport?.upsert({
+        await prisma.serviceDifficultyReport.upsert({
           where: { sdrNumber: seed.recordNumber },
           update: {
             componentType: seed.componentType,
@@ -255,7 +259,7 @@ export async function seedIndustryGraph(): Promise<IndustryGraphSeedResult> {
       }
 
       if (seed.sourceType === "NTSB") {
-        await (prisma as any).ntsbAccident?.upsert({
+        await prisma.nTSBAccident.upsert({
           where: { accidentNumber: seed.recordNumber },
           update: {
             componentType: seed.componentType,

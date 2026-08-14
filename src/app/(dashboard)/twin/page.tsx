@@ -63,7 +63,7 @@ export default function LifecycleTwinPage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <PlaneTakeoff className="text-indigo-650 size-6 dark:text-indigo-400" />
+              <PlaneTakeoff className="size-6 text-indigo-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Lifecycle Fatigue Attestations
               </h1>
@@ -97,42 +97,42 @@ export default function LifecycleTwinPage() {
                   return (
                     <div
                       key={t.id}
-                      className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5 dark:border-zinc-800 dark:bg-zinc-900/10"
+                      className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <Layers className="size-5 text-zinc-500" />
                           <div className="flex flex-col text-left">
-                            <h3 className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                            <h3 className="font-mono text-sm font-bold text-zinc-900">
                               PART ID: {t.componentId.slice(0, 15)}...
                             </h3>
                             <span className="text-[10px] text-zinc-400">Twin ID: {t.id}</span>
                           </div>
                         </div>
 
-                        <Badge className="border-indigo-250 bg-indigo-50 text-indigo-800 dark:bg-indigo-950/20 dark:text-indigo-400">
+                        <Badge className="border-indigo-200 bg-indigo-50 text-indigo-800">
                           Active Telemetry Stream
                         </Badge>
                       </div>
 
-                      <Divider className="border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="border-zinc-100" />
 
                       <div className="grid grid-cols-3 gap-4 text-left text-xs">
                         <div>
                           <span className="mb-0.5 block text-zinc-400">As-Flown Hours</span>
-                          <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-bold text-zinc-800">
                             {t.flightHours.toLocaleString()} Hrs
                           </span>
                         </div>
                         <div>
                           <span className="mb-0.5 block text-zinc-400">As-Built Deviation</span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             {t.metrologyAnomalyMM} mm (Surface)
                           </span>
                         </div>
                         <div>
                           <span className="mb-0.5 block text-zinc-400">Remaining Service Life</span>
-                          <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                          <span className="font-bold text-indigo-600">
                             {t.predictedLifeHrs.toLocaleString()} Hrs
                           </span>
                         </div>
@@ -144,7 +144,7 @@ export default function LifecycleTwinPage() {
                           <span>Verified Structural Margin</span>
                           <span>{lifePercent}% Remaining</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
                           <div
                             className="h-full rounded-full bg-indigo-500 transition-all"
                             style={{ width: `${lifePercent}%` }}
@@ -153,7 +153,7 @@ export default function LifecycleTwinPage() {
                       </div>
 
                       {/* MANUAL REVIEW CARD */}
-                      <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs dark:bg-zinc-900/30">
+                      <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs">
                         <span className="font-semibold text-zinc-500">
                           Sign off on fatigue degradation adjustement based on sensor analysis:
                         </span>
@@ -167,7 +167,7 @@ export default function LifecycleTwinPage() {
                           <Button
                             onClick={() => handleManualLifeAttestation(t.id)}
                             disabled={!engineerName || wearingId === t.id}
-                            className="h-8 bg-indigo-600 py-1 text-xs text-white hover:bg-indigo-700 dark:bg-indigo-500"
+                            className="h-8 bg-indigo-600 py-1 text-xs text-white hover:bg-indigo-700"
                           >
                             {wearingId === t.id
                               ? "Submitting..."
@@ -188,7 +188,7 @@ export default function LifecycleTwinPage() {
 
           {/* POLICY GUIDE */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+            <Card className="border-zinc-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
@@ -198,10 +198,10 @@ export default function LifecycleTwinPage() {
                     <h2 className="text-foreground text-base font-bold">Lifecycle Wear Bounds</h2>
                   </div>
 
-                  <Divider className="border-zinc-200 dark:border-zinc-800" />
+                  <Divider className="border-zinc-200" />
 
-                  <div className="border-zinc-150 dark:border-zinc-850 rounded border bg-zinc-50 p-3 text-left text-xs dark:bg-zinc-900">
-                    <span className="mb-1 block font-semibold text-zinc-800 dark:text-zinc-200">
+                  <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-left text-xs">
+                    <span className="mb-1 block font-semibold text-zinc-800">
                       Fatigue Audit Rules:
                     </span>
                     <p className="text-[11px] leading-normal text-zinc-500">

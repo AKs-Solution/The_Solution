@@ -15,6 +15,35 @@ export type WorkspaceDensity = "compact" | "comfortable" | "spacious";
 
 export type WorkspaceLayout = "studio" | "records" | "classic";
 
+export type WorkspaceLayoutMode = "tab-driven" | "sidebar-expanded" | "minimal-focus";
+
+export interface LayoutModeOption {
+  id: WorkspaceLayoutMode;
+  name: string;
+  description: string;
+}
+
+export const LAYOUT_MODE_OPTIONS: LayoutModeOption[] = [
+  {
+    id: "tab-driven",
+    name: "Tab Driven",
+    description:
+      "Top tab bar for open records with a collapsed navigation rail. Best for working across several records.",
+  },
+  {
+    id: "sidebar-expanded",
+    name: "Expanded Sidebar",
+    description:
+      "Full-width sidebar hierarchy for deep navigation while the workspace tab bar stays visible.",
+  },
+  {
+    id: "minimal-focus",
+    name: "Minimal Focus",
+    description:
+      "Header-only navigation with an auto-hiding sidebar and a full-canvas workspace. Best for single-record focus.",
+  },
+];
+
 export interface LayoutOption {
   id: WorkspaceLayout;
   name: string;
@@ -71,6 +100,7 @@ export type WidgetPrefs = Record<string, { visible: boolean; minimized: boolean 
 export interface WorkspacePreferencesState {
   density: WorkspaceDensity;
   layout: WorkspaceLayout;
+  layoutMode: WorkspaceLayoutMode;
   activeViewId: string;
   views: WorkspaceView[];
   widgetPrefs: WidgetPrefs;
@@ -80,6 +110,8 @@ export interface WorkspacePreferencesState {
 }
 
 const STORAGE_KEY = "consecuencia.workspace.v1";
+
+export const LAYOUT_MODE_STORAGE_KEY = "consecuencia.layout.mode";
 
 export const DENSITY_LABELS: Record<WorkspaceDensity, string> = {
   compact: "Compact",
@@ -156,6 +188,7 @@ function getDefaultState(): WorkspacePreferencesState {
   return {
     density: "comfortable",
     layout: "studio",
+    layoutMode: "tab-driven",
     activeViewId: "mission-control",
     views: WORKSPACE_PRESETS,
     widgetPrefs: { ...DEFAULT_WIDGET_PREFS },
@@ -199,6 +232,12 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
       r.layout === "studio" || r.layout === "records" || r.layout === "classic"
         ? r.layout
         : fallback.layout,
+    layoutMode:
+      r.layoutMode === "tab-driven" ||
+      r.layoutMode === "sidebar-expanded" ||
+      r.layoutMode === "minimal-focus"
+        ? r.layoutMode
+        : fallback.layoutMode,
     activeViewId: activeView.id,
     views,
     widgetPrefs:
@@ -213,8 +252,7 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
       r.drawerSizes && typeof r.drawerSizes === "object"
         ? { ...fallback.drawerSizes, ...(r.drawerSizes as Record<string, number>) }
         : activeView.drawerSizes,
-    lastUpdated:
-      typeof r.lastUpdated === "string" ? r.lastUpdated : new Date().toISOString(),
+    lastUpdated: typeof r.lastUpdated === "string" ? r.lastUpdated : new Date().toISOString(),
   };
 }
 
@@ -229,10 +267,24 @@ function readLocal(): WorkspacePreferencesState | null {
   }
 }
 
+function readLayoutMode(): WorkspaceLayoutMode {
+  if (typeof window === "undefined") return "tab-driven";
+  try {
+    const stored = window.localStorage.getItem(LAYOUT_MODE_STORAGE_KEY);
+    if (stored === "tab-driven" || stored === "sidebar-expanded" || stored === "minimal-focus") {
+      return stored;
+    }
+  } catch {
+    // Storage unavailable — fall back to the default.
+  }
+  return "tab-driven";
+}
+
 export interface WorkspacePreferencesValue extends WorkspacePreferencesState {
   activeView: WorkspaceView | null;
   setDensity: (density: WorkspaceDensity) => void;
   setLayout: (layout: WorkspaceLayout) => void;
+  setLayoutMode: (mode: WorkspaceLayoutMode) => void;
   applyView: (viewId: string) => void;
   saveCurrentView: (name: string, icon?: WorkspaceViewIcon) => WorkspaceView | null;
   deleteView: (viewId: string) => void;
@@ -246,9 +298,10 @@ export interface WorkspacePreferencesValue extends WorkspacePreferencesState {
 const WorkspacePreferencesContext = createContext<WorkspacePreferencesValue | null>(null);
 
 export function WorkspacePreferencesProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<WorkspacePreferencesState>(() =>
-    sanitizeState(readLocal() ?? getDefaultState()),
-  );
+  const [state, setState] = useState<WorkspacePreferencesState>(() => {
+    const snapshot = sanitizeState(readLocal() ?? getDefaultState());
+    return { ...snapshot, layoutMode: readLayoutMode() };
+  });
   const [hydrated, setHydrated] = useState(false);
   const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -256,6 +309,15 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
   useEffect(() => {
     document.documentElement.setAttribute("data-density", state.density);
   }, [state.density]);
+
+  // Mirror the layout mode to its dedicated key so the shell reflects it instantly.
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LAYOUT_MODE_STORAGE_KEY, state.layoutMode);
+    } catch {
+      // Storage unavailable — the layout mode remains in the shared snapshot.
+    }
+  }, [state.layoutMode]);
 
   // Hydrate from the server when no local snapshot exists yet.
   useEffect(() => {
@@ -312,6 +374,10 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
     setState((prev) => ({ ...prev, layout }));
   }, []);
 
+  const setLayoutMode = useCallback((layoutMode: WorkspaceLayoutMode) => {
+    setState((prev) => ({ ...prev, layoutMode }));
+  }, []);
+
   const applyView = useCallback((viewId: string) => {
     setState((prev) => {
       const view = prev.views.find((v) => v.id === viewId);
@@ -347,7 +413,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       }));
       return view;
     },
-    [state.density, state.widgetPrefs, state.drawerSizes],
+    [state.density, state.widgetPrefs, state.widgetOrder, state.drawerSizes],
   );
 
   const deleteView = useCallback((viewId: string) => {
@@ -415,6 +481,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       activeView: state.views.find((v) => v.id === state.activeViewId) ?? null,
       setDensity,
       setLayout,
+      setLayoutMode,
       applyView,
       saveCurrentView,
       deleteView,
@@ -428,6 +495,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       state,
       setDensity,
       setLayout,
+      setLayoutMode,
       applyView,
       saveCurrentView,
       deleteView,

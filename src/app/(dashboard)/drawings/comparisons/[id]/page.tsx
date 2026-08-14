@@ -90,15 +90,15 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-white">
-        <RefreshCw className="size-8 animate-spin text-zinc-400" />
+      <div className="flex min-h-full items-center justify-center">
+        <RefreshCw className="size-8 animate-spin text-zinc-500" />
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-white">
+      <div className="flex min-h-full items-center justify-center">
         <p>Drawing Comparison job not found.</p>
       </div>
     );
@@ -107,7 +107,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
   const dimsCount = changes.filter((c) => c.changeType === "DIMENSION").length;
 
   return (
-    <PageContainer className="min-h-screen bg-zinc-950 text-zinc-100">
+    <PageContainer className="bg-white">
       <Stack gap={6}>
         {/* HEADER BAR */}
         <div className="flex flex-col gap-2">
@@ -116,7 +116,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
               <ArrowLeft className="size-3" /> Dashboard
             </Link>
             <span>/</span>
-            <span className="font-medium text-zinc-300">Revision Comparison</span>
+            <span className="font-medium text-zinc-600">Revision Comparison</span>
           </div>
 
           <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
@@ -125,14 +125,14 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                 <h1 className="text-foreground text-2xl font-bold tracking-tight">
                   Revision Change Analysis
                 </h1>
-                <Badge variant="secondary" className="border-zinc-700 bg-zinc-800 text-zinc-300">
+                <Badge variant="secondary" className="border-zinc-700 bg-zinc-100 text-zinc-600">
                   Job ID: {job.id.substring(0, 8)}
                 </Badge>
               </div>
               <p className="text-muted-foreground mt-1 text-sm">
                 Comparing revision sheets:{" "}
-                <span className="font-semibold text-zinc-300">{job.revA?.revisionLabel}</span> vs{" "}
-                <span className="font-semibold text-zinc-300">{job.revB?.revisionLabel}</span>
+                <span className="font-semibold text-zinc-600">{job.revA?.revisionLabel}</span> vs{" "}
+                <span className="font-semibold text-zinc-600">{job.revB?.revisionLabel}</span>
               </p>
             </div>
 
@@ -141,7 +141,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                 onClick={handleExportCSV}
                 variant="secondary"
                 size="sm"
-                className="hover:bg-zinc-85 border-zinc-800 bg-zinc-900"
+                className="border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
               >
                 <FileSpreadsheet className="mr-2 size-4" /> Export CSV
               </Button>
@@ -149,7 +149,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                 onClick={() => window.print()}
                 variant="secondary"
                 size="sm"
-                className="hover:bg-zinc-85 border-zinc-800 bg-zinc-900"
+                className="border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
               >
                 <Printer className="mr-2 size-4" /> Print PDF Report
               </Button>
@@ -159,60 +159,62 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
 
         {/* ANALYTICS BANNER */}
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-3">
-          <Card className="border-zinc-800 bg-zinc-900/50">
+          <Card className="border-zinc-200 bg-zinc-100/50">
             <CardContent className="flex items-center gap-4 p-4">
               <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-indigo-500">
                 <AlertTriangle className="size-6" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-zinc-400 uppercase">
+                <span className="text-xs font-semibold text-zinc-500 uppercase">
                   Total Changes Detected
                 </span>
-                <span className="text-2xl font-extrabold text-white">{changes.length} Changes</span>
+                <span className="text-2xl font-extrabold text-zinc-900">
+                  {changes.length} Changes
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-800 bg-zinc-900/50">
+          <Card className="border-zinc-200 bg-zinc-100/50">
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-indigo-400">
+              <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-indigo-600">
                 <FileText className="size-6" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-zinc-400 uppercase">
+                <span className="text-xs font-semibold text-zinc-500 uppercase">
                   Dimension Changes
                 </span>
-                <span className="text-2xl font-extrabold text-indigo-400">
+                <span className="text-2xl font-extrabold text-indigo-600">
                   {dimsCount} dimensions
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-800 bg-zinc-900/50">
+          <Card className="border-zinc-200 bg-zinc-100/50">
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-400">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-600">
                 <CheckCircle2 className="size-6" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-zinc-400 uppercase">Status</span>
-                <span className="text-2xl font-extrabold text-emerald-400">Ready</span>
+                <span className="text-xs font-semibold text-zinc-500 uppercase">Status</span>
+                <span className="text-2xl font-extrabold text-emerald-600">Ready</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* TAB SWITCHER */}
-        <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
+        <div className="flex items-center gap-2 border-b border-zinc-200 pb-2">
           <Button
             onClick={() => setActiveTab("vector-canvas")}
-            className={`h-9 px-4 text-xs font-semibold ${activeTab === "vector-canvas" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-zinc-900 text-zinc-300"}`}
+            className={`h-9 px-4 text-xs font-semibold ${activeTab === "vector-canvas" ? "bg-indigo-600 text-zinc-900 hover:bg-indigo-700" : "bg-zinc-100 text-zinc-600"}`}
           >
             Interactive Workspace
           </Button>
           <Button
             onClick={() => setActiveTab("raw-pdf")}
-            className={`h-9 px-4 text-xs font-semibold ${activeTab === "raw-pdf" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-zinc-900 text-zinc-300"}`}
+            className={`h-9 px-4 text-xs font-semibold ${activeTab === "raw-pdf" ? "bg-indigo-600 text-zinc-900 hover:bg-indigo-700" : "bg-zinc-100 text-zinc-600"}`}
           >
             Raw PDF Sheets
           </Button>
@@ -223,31 +225,31 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
           <SplitLayout ratio="2:1">
             {/* LEFT: INTERACTIVE VIEWER */}
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/60 p-3">
+              <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-100/60 p-3">
                 <div className="flex items-center gap-2">
                   <Button
                     onClick={() => setViewMode("side-by-side")}
-                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "side-by-side" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-zinc-900 text-zinc-300"}`}
+                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "side-by-side" ? "bg-indigo-600 text-zinc-900 hover:bg-indigo-700" : "bg-zinc-100 text-zinc-600"}`}
                   >
                     Side-by-Side
                   </Button>
                   <Button
                     onClick={() => setViewMode("overlay")}
-                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "overlay" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-zinc-900 text-zinc-300"}`}
+                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "overlay" ? "bg-indigo-600 text-zinc-900 hover:bg-indigo-700" : "bg-zinc-100 text-zinc-600"}`}
                   >
                     Overlay Blend
                   </Button>
                   <Button
                     onClick={() => setViewMode("heatmap")}
-                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "heatmap" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-zinc-900 text-zinc-300"}`}
+                    className={`h-9 px-4 text-xs font-semibold ${viewMode === "heatmap" ? "bg-indigo-600 text-zinc-900 hover:bg-indigo-700" : "bg-zinc-100 text-zinc-600"}`}
                   >
                     Diff Heatmap
                   </Button>
                 </div>
 
                 {viewMode === "overlay" && (
-                  <div className="flex items-center gap-2 text-xs text-zinc-400">
-                    <Sliders className="size-4 text-zinc-400" />
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Sliders className="size-4 text-zinc-500" />
                     <span>Opacity:</span>
                     <input
                       type="range"
@@ -258,7 +260,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                       onChange={(e) => setOpacity(parseFloat(e.target.value))}
                       className="h-1.5 w-24 cursor-pointer appearance-none rounded-lg bg-zinc-700"
                     />
-                    <span className="w-8 font-semibold text-zinc-300">
+                    <span className="w-8 font-semibold text-zinc-600">
                       {Math.round(opacity * 100)}%
                     </span>
                   </div>
@@ -278,7 +280,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
 
             {/* RIGHT: SEARCH, FILTERS & CHANGE LEDGER */}
             <div className="flex flex-col gap-4">
-              <span className="text-left text-xs font-bold tracking-wider text-zinc-400 uppercase">
+              <span className="text-left text-xs font-bold tracking-wider text-zinc-500 uppercase">
                 Drawing Change Ledger
               </span>
 
@@ -289,7 +291,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search dimensions, notes, materials..."
-                  className="h-10 border-zinc-800 bg-zinc-900 pl-9 text-sm"
+                  className="h-10 border-zinc-200 bg-zinc-100 pl-9 text-sm"
                 />
               </div>
 
@@ -306,7 +308,7 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                         className={`flex cursor-pointer flex-col gap-3 rounded-xl border p-4 text-left transition-all ${
                           isSelected
                             ? "border-indigo-500 bg-indigo-500/[0.02]"
-                            : "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60"
+                            : "border-zinc-200 bg-zinc-100/40 hover:bg-zinc-100/60"
                         }`}
                       >
                         <div className="flex items-start justify-between">
@@ -314,21 +316,21 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                             <span className="text-[10px] font-bold text-zinc-500 uppercase">
                               {c.changeType}
                             </span>
-                            <h4 className="text-sm font-bold text-zinc-100">{c.category}</h4>
+                            <h4 className="text-sm font-bold text-zinc-900">{c.category}</h4>
                           </div>
                           <Badge variant="destructive">{c.actionType}</Badge>
                         </div>
 
-                        <p className="text-xs leading-normal text-zinc-400">{c.description}</p>
+                        <p className="text-xs leading-normal text-zinc-500">{c.description}</p>
 
-                        <Divider className="border-zinc-800" />
+                        <Divider className="border-zinc-200" />
 
-                        <div className="grid grid-cols-2 gap-3 rounded border border-zinc-900 bg-zinc-950 p-2.5 font-mono text-xs">
+                        <div className="grid grid-cols-2 gap-3 rounded border border-zinc-200 bg-zinc-50 p-2.5 font-mono text-xs">
                           <div>
                             <span className="mb-0.5 block text-[9px] text-zinc-500 uppercase">
                               Revision A
                             </span>
-                            <span className="text-zinc-350 line-through">
+                            <span className="text-zinc-500 line-through">
                               {c.oldValue || "N/A"}
                             </span>
                           </div>
@@ -336,25 +338,25 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
                             <span className="mb-0.5 block text-[9px] text-zinc-500 uppercase">
                               Revision B
                             </span>
-                            <span className="font-bold text-indigo-400">{c.newValue || "N/A"}</span>
+                            <span className="font-bold text-indigo-600">{c.newValue || "N/A"}</span>
                           </div>
                         </div>
 
                         {isSelected && (
                           <div className="animate-in fade-in mt-1 flex flex-col gap-2 text-xs duration-200">
                             <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-3">
-                              <span className="mb-1 block font-bold text-indigo-400">
+                              <span className="mb-1 block font-bold text-indigo-600">
                                 Potential Manufacturing Considerations:
                               </span>
-                              <p className="text-zinc-350 text-[11px] leading-relaxed">
+                              <p className="text-[11px] leading-relaxed text-zinc-500">
                                 {c.manufacturingImpact || "Unable to determine."}
                               </p>
                             </div>
                             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                              <span className="mb-1 block font-bold text-emerald-400">
+                              <span className="mb-1 block font-bold text-emerald-600">
                                 Potential Quality Considerations:
                               </span>
-                              <p className="text-zinc-350 text-[11px] leading-relaxed">
+                              <p className="text-[11px] leading-relaxed text-zinc-500">
                                 {c.qualityImpact || "Unable to determine."}
                               </p>
                             </div>
@@ -373,25 +375,25 @@ export default function ComparisonDetailsPage({ params }: { params: Promise<{ id
           </SplitLayout>
         ) : (
           /* RAW PDF SHEETS EMBEDS */
-          <div className="grid h-[650px] w-full grid-cols-1 gap-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 lg:grid-cols-2">
+          <div className="grid h-[650px] w-full grid-cols-1 gap-8 rounded-2xl border border-zinc-200 bg-zinc-100 p-4 lg:grid-cols-2">
             <div className="flex h-full flex-col gap-2">
-              <span className="text-left text-xs font-bold tracking-wider text-zinc-400 uppercase">
+              <span className="text-left text-xs font-bold tracking-wider text-zinc-500 uppercase">
                 Revision {job.revA?.revisionLabel} File
               </span>
               <embed
                 src={job.revA?.fileUrl}
                 type="application/pdf"
-                className="border-zinc-850 h-full w-full rounded-xl border"
+                className="h-full w-full rounded-xl border border-zinc-200"
               />
             </div>
             <div className="flex h-full flex-col gap-2">
-              <span className="text-left text-xs font-bold tracking-wider text-zinc-400 uppercase">
+              <span className="text-left text-xs font-bold tracking-wider text-zinc-500 uppercase">
                 Revision {job.revB?.revisionLabel} File
               </span>
               <embed
                 src={job.revB?.fileUrl}
                 type="application/pdf"
-                className="border-zinc-850 h-full w-full rounded-xl border"
+                className="h-full w-full rounded-xl border border-zinc-200"
               />
             </div>
           </div>

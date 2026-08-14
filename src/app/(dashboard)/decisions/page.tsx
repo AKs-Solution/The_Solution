@@ -6,7 +6,13 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { GitCommit, RefreshCw, FileText, ChevronRight } from "lucide-react";
-import { PageContainer, Stack, SubTabInspector, useScopedTabState, useWorkspaceTabs } from "@/components/layout";
+import {
+  PageContainer,
+  Stack,
+  SubTabInspector,
+  useScopedTabState,
+  useWorkspaceTabs,
+} from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
 import { EpistemicBadge } from "@/components/ui/epistemic-badge";
 
@@ -75,21 +81,21 @@ export default function DecisionAuditTrailPage() {
   };
 
   return (
-    <PageContainer className="min-h-screen bg-zinc-950 p-8 text-zinc-100">
+    <PageContainer className="bg-white">
       <Stack gap={8}>
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1 text-left">
             <div className="flex items-center gap-2">
-              <GitCommit className="size-6 text-emerald-400" />
-              <h1 className="text-2xl font-bold tracking-tight text-white">
+              <GitCommit className="size-6 text-emerald-600" />
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
                 Engineering Decision Audit Trail
               </h1>
-              <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] text-emerald-400">
+              <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] text-emerald-700">
                 LIFECYCLE VERIFIED
               </Badge>
             </div>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-zinc-500">
               Trace engineering intent from proposal and approval through production milestones and
               measured outcomes.
             </p>
@@ -99,19 +105,19 @@ export default function DecisionAuditTrailPage() {
             onClick={fetchDecisions}
             variant="secondary"
             size="sm"
-            className="border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
+            className="border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
           >
             <RefreshCw className="mr-2 size-3.5" /> Refresh Audit Trail
           </Button>
         </div>
 
-        <SubTabInspector activeTab="overview" className="rounded-xl border border-zinc-800" />
+        <SubTabInspector activeTab="overview" className="rounded-xl border border-zinc-200" />
 
         {/* WORKSPACE LAYOUT */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* LEFT: DECISIONS TIMELINE */}
           <div className="flex flex-col gap-4 text-left lg:col-span-2">
-            <span className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+            <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
               Historical Decision Ledger
             </span>
 
@@ -121,69 +127,69 @@ export default function DecisionAuditTrailPage() {
               </div>
             ) : decisions.length === 0 ? (
               /* DEMO TIMELINE CARD WHEN EMPTY */
-              <Card className="border-zinc-800 bg-zinc-900/30 p-6">
+              <Card className="border-zinc-200 bg-zinc-100 p-6">
                 <CardContent className="flex flex-col gap-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-400">
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-700">
                         <FileText className="size-5" />
                       </div>
                       <div className="flex flex-col">
-                        <h3 className="text-base font-bold text-white">
+                        <h3 className="text-base font-bold text-zinc-900">
                           Tighten bore tolerance ±0.015 → ±0.010
                         </h3>
-                        <span className="text-xs text-zinc-400">
+                        <span className="text-xs text-zinc-500">
                           Wing Root Bracket · Decision ID: dec-8402
                         </span>
                       </div>
                     </div>
-                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-emerald-700">
                       SUCCESSFUL OUTCOME
                     </Badge>
                   </div>
 
-                  <Divider className="border-zinc-800" />
+                  <Divider className="border-zinc-200" />
 
                   {/* TIMELINE STEPS */}
-                  <div className="relative flex flex-col gap-4 border-l-2 border-zinc-800 pl-6 text-xs">
+                  <div className="relative flex flex-col gap-4 border-l-2 border-zinc-200 pl-6 text-xs">
                     <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-950 bg-indigo-500" />
-                      <span className="font-bold text-indigo-400">
+                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-indigo-500" />
+                      <span className="font-bold text-indigo-600">
                         2024-01-15 10:30 AM — DECISION PROPOSED
                       </span>
-                      <p className="text-zinc-300">By: Sarah Chen (Stress Engineer)</p>
-                      <p className="text-zinc-400">
+                      <p className="text-zinc-600">By: Sarah Chen (Stress Engineer)</p>
+                      <p className="text-zinc-500">
                         Reason: Improve fit margin by 30%. No structural load impact.
                       </p>
                     </div>
 
                     <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-950 bg-emerald-500" />
-                      <span className="font-bold text-emerald-400">
+                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-emerald-500" />
+                      <span className="font-bold text-emerald-600">
                         2024-01-16 2:00 PM — DECISION APPROVED
                       </span>
-                      <p className="text-zinc-300">By: John Smith (Chief Engineer)</p>
-                      <p className="text-zinc-400">
+                      <p className="text-zinc-600">By: John Smith (Chief Engineer)</p>
+                      <p className="text-zinc-500">
                         Note: Approved. Supplier TechMach confirmed process capability. Condition:
                         Require SPC Cpk ≥ 1.67.
                       </p>
                     </div>
 
                     <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-950 bg-amber-500" />
-                      <span className="font-bold text-amber-400">
+                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-amber-500" />
+                      <span className="font-bold text-amber-600">
                         2024-02-01 9:15 AM — FIRST ARTICLE MILESTONE
                       </span>
-                      <p className="text-zinc-300">Result: ✓ PASSED SPC verification (Cpk 1.67)</p>
-                      <p className="text-zinc-400">Cost Impact: +$150/part | Schedule: +3 days</p>
+                      <p className="text-zinc-600">Result: ✓ PASSED SPC verification (Cpk 1.67)</p>
+                      <p className="text-zinc-500">Cost Impact: +$150/part | Schedule: +3 days</p>
                     </div>
 
                     <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-950 bg-emerald-400" />
-                      <span className="font-bold text-emerald-300">
+                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-emerald-400" />
+                      <span className="font-bold text-emerald-600">
                         2024-12-10 4:00 PM — RETROACTIVE FINAL OUTCOME
                       </span>
-                      <p className="text-zinc-200">
+                      <p className="text-zinc-700">
                         Outcome: SUCCESS · Achieved 30% fit improvement. Zero field failures over
                         1000+ flight hours.
                       </p>
@@ -197,15 +203,15 @@ export default function DecisionAuditTrailPage() {
                   key={d.id}
                   href={`/decisions/${d.id}`}
                   onClick={() => openInTab(d)}
-                  className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-900/25 p-5 transition-all hover:border-zinc-700 hover:bg-zinc-900/50"
+                  className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-100 p-5 transition-all hover:border-zinc-400 hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-zinc-400">
+                    <div className="rounded-lg border border-zinc-200 bg-zinc-100 p-3 text-zinc-500">
                       <GitCommit className="size-5" />
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-zinc-100 transition-colors group-hover:text-emerald-400">
+                        <h4 className="text-sm font-bold text-zinc-900 transition-colors group-hover:text-emerald-600">
                           {d.description}
                         </h4>
                         <EpistemicBadge status={d.epistemicStatus || "RECORDED"} size="sm" />
@@ -216,7 +222,7 @@ export default function DecisionAuditTrailPage() {
                       </span>
                     </div>
                   </div>
-                  <ChevronRight className="size-4 text-zinc-500 group-hover:text-emerald-400" />
+                  <ChevronRight className="size-4 text-zinc-500 group-hover:text-emerald-600" />
                 </Link>
               ))
             )}
@@ -224,7 +230,7 @@ export default function DecisionAuditTrailPage() {
 
           {/* RIGHT: PROPOSE DECISION FORM */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-800 bg-zinc-900/30">
+            <Card className="border-zinc-200 bg-zinc-100">
               <CardContent className="p-6">
                 <form onSubmit={handleCreateDecision}>
                   <Stack gap={4}>
@@ -232,19 +238,19 @@ export default function DecisionAuditTrailPage() {
                       <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
                         Log Intent
                       </span>
-                      <h3 className="text-sm font-extrabold text-white">
+                      <h3 className="text-sm font-extrabold text-zinc-900">
                         Propose Engineering Decision
                       </h3>
                     </div>
 
-                    <Divider className="border-zinc-800" />
+                    <Divider className="border-zinc-200" />
 
                     <div className="flex flex-col gap-1.5 text-left">
-                      <label className="text-xs font-semibold text-zinc-400">Decision Type</label>
+                      <label className="text-xs font-semibold text-zinc-500">Decision Type</label>
                       <select
                         value={decisionType}
                         onChange={(e) => setDecisionType(e.target.value)}
-                        className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-200"
+                        className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700"
                       >
                         <option value="TOLERANCE_CHANGE">TOLERANCE_CHANGE</option>
                         <option value="MATERIAL_SUB">MATERIAL_SUB</option>
@@ -254,7 +260,7 @@ export default function DecisionAuditTrailPage() {
                     </div>
 
                     <div className="flex flex-col gap-1.5 text-left">
-                      <label className="text-xs font-semibold text-zinc-400">
+                      <label className="text-xs font-semibold text-zinc-500">
                         Decision Summary
                       </label>
                       <Input
@@ -262,12 +268,12 @@ export default function DecisionAuditTrailPage() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="e.g. Tighten bore tolerance ±0.015 → ±0.010"
-                        className="h-10 border-zinc-800 bg-zinc-950 text-sm"
+                        className="h-10 border-zinc-200 bg-zinc-50 text-sm"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5 text-left">
-                      <label className="text-xs font-semibold text-zinc-400">
+                      <label className="text-xs font-semibold text-zinc-500">
                         Engineering Rationale
                       </label>
                       <Input
@@ -275,14 +281,14 @@ export default function DecisionAuditTrailPage() {
                         value={rationale}
                         onChange={(e) => setRationale(e.target.value)}
                         placeholder="e.g. Improve fit margin by 30%"
-                        className="h-10 border-zinc-800 bg-zinc-950 text-sm"
+                        className="h-10 border-zinc-200 bg-zinc-50 text-sm"
                       />
                     </div>
 
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="h-10 w-full bg-emerald-600 text-xs font-semibold tracking-wider text-white uppercase hover:bg-emerald-700"
+                      className="h-10 w-full bg-emerald-600 text-xs font-semibold tracking-wider text-zinc-900 uppercase hover:bg-emerald-700"
                     >
                       {isSubmitting ? "Logging Decision..." : "Record Decision Intent"}
                     </Button>

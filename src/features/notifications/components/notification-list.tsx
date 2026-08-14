@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NotificationItem {
   id: string;
@@ -73,7 +74,17 @@ export function NotificationList() {
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground text-sm">Loading notifications...</p>
+        <div className="divide-border border-border divide-y rounded-lg border">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-start justify-between gap-4 px-4 py-3">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-56" />
+                <Skeleton className="h-3 w-80 max-w-full" />
+              </div>
+              <Skeleton className="h-5 w-12" />
+            </div>
+          ))}
+        </div>
       ) : notifications.length === 0 ? (
         <EmptyState
           icon={<Bell className="size-10" />}

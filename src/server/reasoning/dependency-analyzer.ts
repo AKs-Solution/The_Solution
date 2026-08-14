@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db";
+import type { EngineeringEntity } from "@prisma/client";
 
 export interface ImpactAnalysisResult {
   targetId: string;
@@ -51,7 +52,10 @@ function buildAdjacency(edges: GraphEdge[]): Map<string, string[]> {
   return adjacency;
 }
 
-function bfsLevels(startNode: string, adjacency: Map<string, string[]>): {
+function bfsLevels(
+  startNode: string,
+  adjacency: Map<string, string[]>,
+): {
   levels: Map<string, number>;
   maxDepth: number;
 } {
@@ -140,31 +144,33 @@ export async function analyzeDependencyImpact(
   targetId: string,
 ): Promise<ImpactAnalysisResult> {
   try {
-    const [relationships, entities, decisions, suppliers, qualityEvents] =
-      await Promise.all([
-        (prisma as any).engineeringRelationship?.findMany({ where: { organizationId } }).catch(() => []) ?? [],
-        (prisma as any).engineeringEntity?.findMany({ where: { organizationId, deletedAt: null } }).catch(() => []) ?? [],
-        (prisma as any).engineeringDecision?.findMany({ where: { organizationId } }).catch(() => []) ?? [],
-        (prisma as any).supplier?.findMany({ where: { organizationId } }).catch(() => []) ?? [],
-        (prisma as any).qualityEvent?.findMany({ where: { organizationId } }).catch(() => []) ?? [],
-      ]);
+    const [relationships, entities, decisions, suppliers, qualityEvents] = await Promise.all([
+      prisma.engineeringRelationship.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.engineeringEntity
+        .findMany({ where: { organizationId, deletedAt: null } })
+        .catch(() => []),
+      prisma.engineeringDecision.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.supplier.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.qualityEvent.findMany({ where: { organizationId } }).catch(() => []),
+    ]);
 
-    const entityById = new Map((entities as any[]).map((e) => [e.id, e]));
-    const decisionById = new Map((decisions as any[]).map((d) => [d.id, d]));
+    const entityById = new Map(entities.map((e) => [e.id, e] as const));
+    const decisionById = new Map(decisions.map((d) => [d.id, d] as const));
 
     const targetDecision = decisionById.get(targetId);
     let startEntityId: string | null = null;
 
     if (targetDecision) {
-      startEntityId =
-        targetDecision.partId || targetDecision.subjectEntityId || targetDecision.programId || null;
+      startEntityId = targetDecision.partId || targetDecision.programId || null;
     } else if (entityById.has(targetId)) {
       startEntityId = targetId;
-    } else if ((relationships as any[]).some((r) => r.sourceEntityId === targetId || r.targetEntityId === targetId)) {
+    } else if (
+      relationships.some((r) => r.sourceEntityId === targetId || r.targetEntityId === targetId)
+    ) {
       startEntityId = targetId;
     }
 
-    const edges: GraphEdge[] = (relationships as any[])
+    const edges: GraphEdge[] = relationships
       .filter((r) => entityById.has(r.sourceEntityId) && entityById.has(r.targetEntityId))
       .map((r) => ({ source: r.sourceEntityId, target: r.targetEntityId }));
 
@@ -180,68 +186,80 @@ export async function analyzeDependencyImpact(
     const affectedComponents = directlyAffectedIds
       .concat(indirectlyAffectedIds)
       .map((id) => entityById.get(id))
-      .filter(Boolean)
-      .map((e) => ({
-        id: e.id,
-        name: e.name,
-        identifier: e.identifier,
-        partNumber: typeof e.partNumber === "string" ? e.partNumber : undefined,
-      }));
+      .filter((e): e is EngineeringEntity => e !== undefined)
+      .map((e) => {
+        const rawMetadata = (e.metadata as unknown as Record<string, unknown> | null) ?? {};
+        return {
+          id: e.id,
+          name: e.name,
+          identifier: e.identifier,
+          partNumber:
+            typeof rawMetadata.partNumber === "string" ? rawMetadata.partNumber : undefined,
+        };
+      });
 
     const linkedSupplierIds = new Set<string>();
-    for (const d of decisions as any[]) {
-      if (d.supplierId && (affectedEntityIds.includes(d.partId) || d.partId === startEntityId)) {
+    for (const d of decisions) {
+      if (
+        d.supplierId &&
+        d.partId != null &&
+        (affectedEntityIds.includes(d.partId) || d.partId === startEntityId)
+      ) {
         linkedSupplierIds.add(d.supplierId);
       }
     }
-    for (const ev of qualityEvents as any[]) {
+    for (const ev of qualityEvents) {
       if (ev.supplierId && affectedEntityIds.includes(ev.entityId)) {
         linkedSupplierIds.add(ev.supplierId);
       }
     }
 
-    const affectedSuppliers = (suppliers as any[])
+    const affectedSuppliers = suppliers
       .filter((s) => linkedSupplierIds.has(s.id))
       .map((s) => ({ id: s.id, name: s.name, code: s.identifier }));
 
     const affectedDecisionSet = new Set<string>();
-    for (const d of decisions as any[]) {
+    for (const d of decisions) {
       if (d.id === targetId) continue;
-      if (affectedEntityIds.includes(d.partId) || d.partId === startEntityId) {
+      if (
+        d.partId != null &&
+        (affectedEntityIds.includes(d.partId) || d.partId === startEntityId)
+      ) {
         affectedDecisionSet.add(d.id);
       }
     }
 
-    const dependentDecisions = (decisions as any[])
+    const dependentDecisions = decisions
       .filter((d) => affectedDecisionSet.has(d.id))
       .slice(0, 10)
       .map((d) => ({
         id: d.id,
-        description: d.description || d.title || "Engineering Decision",
+        description: d.description || "Engineering Decision",
         status: d.status || "PROPOSED",
-        impactLevel: (directlyAffectedIds.includes(d.partId) ? "DIRECT" : "INDIRECT") as "DIRECT" | "INDIRECT",
+        impactLevel: (d.partId != null && directlyAffectedIds.includes(d.partId)
+          ? "DIRECT"
+          : "INDIRECT") as "DIRECT" | "INDIRECT",
       }));
 
     const affectedCertifications = Array.from(
       new Set(
-        (decisions as any[])
-          .concat(entities as any[], qualityEvents as any[])
-          .flatMap((row) => {
-            const metadata = (row.metadata ?? {}) as Record<string, unknown>;
-            const certs = Array.isArray(metadata.certifications) ? metadata.certifications : [];
-            return certs.map((c) => String(c));
-          }),
+        [...decisions, ...entities, ...qualityEvents].flatMap((row) => {
+          const rawMetadata = (row as { metadata?: unknown }).metadata;
+          const metadata = (rawMetadata ?? {}) as Record<string, unknown>;
+          const certs = Array.isArray(metadata.certifications) ? metadata.certifications : [];
+          return certs.map((c) => String(c));
+        }),
       ),
     ).slice(0, 4);
 
     const inheritedAssumptions = Array.from(
       new Set(
-        (targetDecision ? [targetDecision] : [])
-          .flatMap((d) => {
-            const metadata = (d.metadata ?? {}) as Record<string, unknown>;
-            const assumptions = Array.isArray(metadata.assumptions) ? metadata.assumptions : [];
-            return assumptions.map((a) => String(a));
-          }),
+        (targetDecision ? [targetDecision] : []).flatMap((d) => {
+          const rawMetadata = (d as { metadata?: unknown }).metadata;
+          const metadata = (rawMetadata ?? {}) as Record<string, unknown>;
+          const assumptions = Array.isArray(metadata.assumptions) ? metadata.assumptions : [];
+          return assumptions.map((a) => String(a));
+        }),
       ),
     );
 
@@ -263,9 +281,7 @@ export async function analyzeDependencyImpact(
         ? dependentDecisions
         : fallbackImpact(targetId).dependentDecisions;
     const finalSuppliers =
-      affectedSuppliers.length > 0
-        ? affectedSuppliers
-        : fallbackImpact(targetId).affectedSuppliers;
+      affectedSuppliers.length > 0 ? affectedSuppliers : fallbackImpact(targetId).affectedSuppliers;
     const finalAssumptions =
       inheritedAssumptions.length > 0
         ? inheritedAssumptions
@@ -285,7 +301,7 @@ export async function analyzeDependencyImpact(
     return {
       targetId,
       targetType: "DECISION",
-      directlyAffectedCount: directCount || (relationships as any[]).length || 1,
+      directlyAffectedCount: directCount || relationships.length || 1,
       indirectlyAffectedCount: indirectCount,
       dependentDecisions: finalDecisions,
       affectedComponents: finalComponents,

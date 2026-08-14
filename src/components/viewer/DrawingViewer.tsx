@@ -194,12 +194,12 @@ export default function DrawingViewer({
   };
 
   return (
-    <div className="flex flex-col gap-4 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-xl select-none">
+    <div className="flex flex-col gap-4 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm select-none">
       {/* TOOLBAR */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
         <div className="flex items-center gap-2">
-          <Move className="size-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-300">Pan/Zoom Enabled (Drag to Move)</span>
+          <Move className="size-4 text-zinc-500" />
+          <span className="text-xs font-medium text-zinc-600">Pan/Zoom Enabled (Drag to Move)</span>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -230,7 +230,7 @@ export default function DrawingViewer({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative h-[580px] w-full cursor-grab overflow-hidden rounded-xl bg-zinc-900 active:cursor-grabbing"
+        className="relative h-[580px] w-full cursor-grab overflow-hidden rounded-xl bg-zinc-100 active:cursor-grabbing"
       >
         {/* INNER RENDER WRAPPER */}
         <div
@@ -244,7 +244,7 @@ export default function DrawingViewer({
               {/* REV A VIEWPORT */}
               <div className="relative">
                 <canvas ref={canvasARef} className="rounded-md border border-zinc-700 shadow-md" />
-                <Badge className="absolute top-4 left-4 bg-blue-600 text-white hover:bg-blue-600">
+                <Badge className="absolute top-4 left-4 bg-blue-600 text-zinc-900 hover:bg-blue-600">
                   REV A
                 </Badge>
               </div>
@@ -252,7 +252,7 @@ export default function DrawingViewer({
               {/* REV B VIEWPORT */}
               <div className="relative">
                 <canvas ref={canvasBRef} className="rounded-md border border-zinc-700 shadow-md" />
-                <Badge className="absolute top-4 left-4 bg-emerald-600 text-white hover:bg-emerald-600">
+                <Badge className="absolute top-4 left-4 bg-emerald-600 text-zinc-900 hover:bg-emerald-600">
                   REV B
                 </Badge>
 
@@ -298,7 +298,7 @@ export default function DrawingViewer({
                 className="absolute inset-0 rounded-md border border-zinc-700 mix-blend-screen"
                 style={{ opacity }}
               />
-              <Badge className="absolute top-4 left-4 bg-indigo-600 text-white hover:bg-indigo-600">
+              <Badge className="absolute top-4 left-4 bg-indigo-600 text-zinc-900 hover:bg-indigo-600">
                 Overlay Blend
               </Badge>
             </div>
@@ -331,7 +331,7 @@ export default function DrawingViewer({
                   />
                 );
               })}
-              <Badge className="absolute top-4 left-4 bg-rose-600 text-white hover:bg-rose-600">
+              <Badge className="absolute top-4 left-4 bg-rose-600 text-zinc-900 hover:bg-rose-600">
                 Diff Heatmap
               </Badge>
             </div>

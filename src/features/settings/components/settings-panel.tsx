@@ -21,11 +21,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/ui/query-error";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/shared/utils";
 import { DensitySwitcher } from "@/components/layout/workspace-controls";
 import {
+  LAYOUT_MODE_OPTIONS,
   LAYOUT_OPTIONS,
   useWorkspacePreferences,
   type WorkspaceLayout,
+  type WorkspaceLayoutMode,
 } from "@/components/layout/workspace-preferences";
 
 interface CurrentUser {
@@ -183,6 +186,85 @@ function VisualLayoutCard() {
                 ].join(" ")}
               >
                 <LayoutPreview layout={option.id} />
+                <span className="text-foreground text-sm font-semibold">{option.name}</span>
+                <span className="text-muted-foreground text-xs leading-relaxed">
+                  {option.description}
+                </span>
+                {isActive && (
+                  <Badge variant="secondary" size="sm" className="w-fit">
+                    Active
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LayoutModePreview({ mode }: { mode: WorkspaceLayoutMode }) {
+  const showTabs = mode !== "minimal-focus";
+  const sidebarWide = mode === "sidebar-expanded";
+  return (
+    <div className="border-border bg-muted/50 h-16 w-full overflow-hidden rounded-md border p-1.5">
+      <div className="bg-background border-border/50 flex h-full w-full overflow-hidden rounded-[3px] border">
+        <div
+          className={cn(
+            "bg-muted-foreground/10 h-full border-r border-black/5",
+            sidebarWide ? "w-5" : "w-2",
+          )}
+        />
+        <div className="flex h-full flex-1 flex-col">
+          {showTabs && (
+            <div className="flex h-2 items-end gap-0.5 border-b border-black/5 px-1">
+              <div className="bg-foreground/70 h-1.5 w-4 rounded-t-[2px]" />
+              <div className="bg-muted-foreground/30 h-1.5 w-3 rounded-t-[2px]" />
+              <div className="bg-muted-foreground/30 h-1.5 w-3 rounded-t-[2px]" />
+            </div>
+          )}
+          <div className="flex flex-1 flex-col gap-0.5 p-1">
+            <div className="bg-foreground/10 h-1 w-full rounded-sm" />
+            <div className="bg-foreground/5 h-1 w-3/4 rounded-sm" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LayoutModeCard() {
+  const { layoutMode, setLayoutMode } = useWorkspacePreferences();
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <LayoutDashboard className="size-4" aria-hidden="true" />
+          Workspace layout mode
+        </CardTitle>
+        <CardDescription>
+          Choose how the shell arranges the tab bar, sidebar, and canvas. Applies instantly and is
+          remembered on this device.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {LAYOUT_MODE_OPTIONS.map((option) => {
+            const isActive = layoutMode === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setLayoutMode(option.id)}
+                aria-pressed={isActive}
+                className={[
+                  "border-border hover:bg-surface-hover flex flex-col gap-2 rounded-xl border p-3 text-left transition-colors",
+                  isActive ? "ring-ring bg-surface ring-2" : "",
+                ].join(" ")}
+              >
+                <LayoutModePreview mode={option.id} />
                 <span className="text-foreground text-sm font-semibold">{option.name}</span>
                 <span className="text-muted-foreground text-xs leading-relaxed">
                   {option.description}
@@ -365,6 +447,8 @@ export function SettingsPanel() {
       </Card>
 
       <VisualLayoutCard />
+
+      <LayoutModeCard />
 
       <WorkspaceSettingsCard />
     </div>

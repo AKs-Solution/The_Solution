@@ -6,7 +6,13 @@ import { getEndToEndTraceability } from "../../../src/server/compliance/complian
 import { generateCertificationPackage } from "../../../src/server/compliance/package-generator";
 import { monitorActiveDecisions } from "../../../src/server/sentinel/decision-sentinel";
 import { evaluateEnterprisePermission } from "../../../src/server/enterprise/rbac-middleware";
-import { logEnterpriseAuditEvent, verifyAuditIntegrity } from "../../../src/server/enterprise/audit-logger";
+import {
+  logEnterpriseAuditEvent,
+  verifyAuditIntegrity,
+} from "../../../src/server/enterprise/audit-logger";
+import { isDatabaseAvailable } from "../../helpers/db-gate";
+
+const dbOk = await isDatabaseAvailable();
 
 describe("Phase 10: Final Version 1.0 Acceptance & System Certification Test Suite", () => {
   const v1OrgId = "org-consecuencia-v1-certification";
@@ -17,24 +23,23 @@ describe("Phase 10: Final Version 1.0 Acceptance & System Certification Test Sui
     expect(sentinel.monitoredDecisions).toBeDefined();
   });
 
-  it(
-    "certifies Subsystem 5: 10-Level Certification Compliance & Package Generation",
-    async () => {
-      const trace = await getEndToEndTraceability(v1OrgId, "req-v1-101");
-      expect(trace).toBeDefined();
-      expect(trace.nodes.length).toBeGreaterThan(0);
+  it("certifies Subsystem 5: 10-Level Certification Compliance & Package Generation", async () => {
+    const trace = await getEndToEndTraceability(v1OrgId, "req-v1-101");
+    expect(trace).toBeDefined();
+    expect(trace.nodes.length).toBeGreaterThan(0);
 
-      const pkg = await generateCertificationPackage(v1OrgId, "FAA Part 33 Airworthiness");
-      expect(pkg).toBeDefined();
-      expect(pkg.hashProof.length).toBe(64);
-    },
-    25000,
-  );
+    const pkg = await generateCertificationPackage(v1OrgId, "FAA Part 33 Airworthiness");
+    expect(pkg).toBeDefined();
+    expect(pkg.hashProof.length).toBe(64);
+  }, 25000);
 
-  it(
+  it.runIf(dbOk)(
     "certifies Subsystem 6-7: Decision Sentinel & Engineering Copilot Workspace",
     async () => {
-      const copilotRes = await queryEngineeringCopilot(v1OrgId, "Explain Titanium material selection.");
+      const copilotRes = await queryEngineeringCopilot(
+        v1OrgId,
+        "Explain Titanium material selection.",
+      );
       expect(copilotRes).toBeDefined();
       expect(copilotRes.evidenceHashes.length).toBeGreaterThan(0);
 
@@ -45,7 +50,7 @@ describe("Phase 10: Final Version 1.0 Acceptance & System Certification Test Sui
     25000,
   );
 
-  it(
+  it.runIf(dbOk)(
     "certifies Subsystem 8-9: Enterprise Multi-Tenancy, RBAC & Immutable SHA-256 Audit Logging",
     async () => {
       const perm = evaluateEnterprisePermission({

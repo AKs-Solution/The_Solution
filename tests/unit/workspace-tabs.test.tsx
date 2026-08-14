@@ -36,7 +36,10 @@ function Probe() {
       <span data-testid="active-title">{ctx.activeTab?.title ?? "none"}</span>
       <span data-testid="ids">{ctx.tabs.map((t) => t.id).join(",")}</span>
       <span data-testid="pins">
-        {ctx.tabs.filter((t) => t.pinned).map((t) => t.id).join(",")}
+        {ctx.tabs
+          .filter((t) => t.pinned)
+          .map((t) => t.id)
+          .join(",")}
       </span>
       <span data-testid="draft">{draft}</span>
       <button
@@ -67,7 +70,18 @@ function Probe() {
       >
         open-drawing
       </button>
-      <button type="button" onClick={() => ctx.openTab({ kind: "decision", ref: "dec-1", title: "Updated title", subtitle: "APPROVED", href: "/decisions/dec-1" })}>
+      <button
+        type="button"
+        onClick={() =>
+          ctx.openTab({
+            kind: "decision",
+            ref: "dec-1",
+            title: "Updated title",
+            subtitle: "APPROVED",
+            href: "/decisions/dec-1",
+          })
+        }
+      >
         open-dec-updated
       </button>
       <button type="button" onClick={() => ctx.activateTab("decision:dec-1")}>
@@ -85,7 +99,10 @@ function Probe() {
       <button type="button" onClick={() => ctx.togglePin("decision:dec-1")}>
         pin-dec
       </button>
-      <button type="button" onClick={() => ctx.setScopedValue(ctx.activeTabId ?? "root", "custom", 42)}>
+      <button
+        type="button"
+        onClick={() => ctx.setScopedValue(ctx.activeTabId ?? "root", "custom", 42)}
+      >
         set-scoped
       </button>
       <span data-testid="scoped">
@@ -262,7 +279,7 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await waitFor(() => {
-      const raw = window.localStorage.getItem("morningstar.tabs.v1");
+      const raw = window.localStorage.getItem("consecuencia.tabs.v1");
       expect(raw).toBeTruthy();
       const parsed: Array<{ id: string; auto?: boolean }> = JSON.parse(raw!);
       const ids = parsed.map((t) => t.id);
@@ -272,7 +289,7 @@ describe("workspace tabs engine", () => {
 });
 
 function decisionTabIsAuto(): boolean {
-  const raw = window.localStorage.getItem("morningstar.tabs.v1");
+  const raw = window.localStorage.getItem("consecuencia.tabs.v1");
   if (!raw) return false;
   const parsed: Array<{ id: string; auto?: boolean }> = JSON.parse(raw);
   const tab = parsed.find((t) => t.id === "decision:dec-1");

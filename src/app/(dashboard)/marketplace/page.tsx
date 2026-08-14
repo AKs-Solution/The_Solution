@@ -118,7 +118,7 @@ export default function MarketplacePage() {
             <h1 className="text-foreground text-2xl font-bold tracking-tight">
               IP Marketplace & ZK Export Router
             </h1>
-            <div className="flex gap-1 rounded-lg border border-zinc-200 p-0.5 dark:border-zinc-800">
+            <div className="flex gap-1 rounded-lg border border-zinc-200 p-0.5">
               <Button
                 variant={activeTab === "marketplace" ? "secondary" : "ghost"}
                 size="sm"
@@ -160,27 +160,23 @@ export default function MarketplacePage() {
                   {axioms.map((a) => (
                     <div
                       key={a.id}
-                      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5 dark:border-zinc-800 dark:bg-zinc-900/10"
+                      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col">
-                          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                            {a.title}
-                          </h3>
+                          <h3 className="text-sm font-bold text-zinc-900">{a.title}</h3>
                           <span className="mt-0.5 text-[10px] text-zinc-400">Asset ID: {a.id}</span>
                         </div>
                         <Badge variant="secondary" size="sm">
                           {a.axiomType}
                         </Badge>
                       </div>
-                      <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                        {a.description}
-                      </p>
+                      <p className="text-xs leading-relaxed text-zinc-600">{a.description}</p>
 
-                      <Divider className="border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="border-zinc-100" />
 
                       <div className="flex items-center justify-between text-xs">
-                        <div className="text-zinc-550 flex items-center gap-1 dark:text-zinc-400">
+                        <div className="text-zinc-550 flex items-center gap-1">
                           <Coins className="size-4 text-amber-500" />
                           <span>
                             Earning rate: <span className="font-semibold">$0.15/use</span>
@@ -190,7 +186,7 @@ export default function MarketplacePage() {
                           <span className="block text-[10px] font-semibold text-zinc-400 uppercase">
                             Total Royalties
                           </span>
-                          <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                          <span className="text-sm font-bold text-indigo-600">
                             ${a.royaltiesEarned.toFixed(2)}
                           </span>
                         </div>
@@ -207,7 +203,7 @@ export default function MarketplacePage() {
 
             {/* PUBLISH AXIOM FORM */}
             <div className="lg:col-span-1">
-              <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <form onSubmit={handlePublish}>
                     <Stack gap={4}>
@@ -220,7 +216,7 @@ export default function MarketplacePage() {
                         </h2>
                       </div>
 
-                      <Divider className="border-zinc-200 dark:border-zinc-800" />
+                      <Divider className="border-zinc-200" />
 
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-zinc-500">Axiom Title</label>
@@ -240,7 +236,7 @@ export default function MarketplacePage() {
                           required
                           value={pubDesc}
                           onChange={(e) => setPubDesc(e.target.value)}
-                          className="bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring dark:bg-background flex h-20 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"
+                          className="bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-20 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                           placeholder="Provide details on mechanical constraints or ratios..."
                         />
                       </div>
@@ -250,7 +246,7 @@ export default function MarketplacePage() {
                         <select
                           value={pubType}
                           onChange={(e) => setPubType(e.target.value)}
-                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 dark:border-zinc-800"
+                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2"
                         >
                           <option value="LPBF_PARAMETER">LPBF Additive Param</option>
                           <option value="CNC_PARAMETER">5-Axis CNC Milling Param</option>
@@ -261,7 +257,7 @@ export default function MarketplacePage() {
                       <Button
                         type="submit"
                         disabled={isPublishing}
-                        className="w-full bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500"
+                        className="w-full bg-indigo-600 text-white hover:bg-indigo-700"
                       >
                         {isPublishing ? "Registering Asset..." : "List KAA in Marketplace"}
                       </Button>
@@ -288,13 +284,13 @@ export default function MarketplacePage() {
                   {clearances.map((c) => (
                     <div
                       key={c.id}
-                      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5 dark:border-zinc-800 dark:bg-zinc-900/10"
+                      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="size-5 text-emerald-600" />
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                            <span className="text-sm font-bold text-zinc-900">
                               Export Proof Verified
                             </span>
                             <span className="text-[10px] text-zinc-400">
@@ -303,16 +299,16 @@ export default function MarketplacePage() {
                           </div>
                         </div>
 
-                        <Badge className="border-emerald-250 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800">
                           {c.zkProofStatus}
                         </Badge>
                       </div>
 
-                      <div className="dark:border-zinc-850 rounded border border-zinc-200 bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-900">
+                      <div className="rounded border border-zinc-200 bg-zinc-100 p-3 font-mono text-xs">
                         <div className="mb-1 text-[10px] font-semibold text-zinc-400 uppercase">
                           Redacted Sourcing Geometry Specs (Safe for Export)
                         </div>
-                        <pre className="overflow-x-auto leading-normal whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
+                        <pre className="overflow-x-auto leading-normal whitespace-pre-wrap text-zinc-800">
                           {JSON.stringify(c.redactedGeoSpecs, null, 2)}
                         </pre>
                       </div>
@@ -328,7 +324,7 @@ export default function MarketplacePage() {
 
             {/* ZK EXPORT DISPATCHER */}
             <div className="lg:col-span-1">
-              <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <form onSubmit={handleClearance}>
                     <Stack gap={4}>
@@ -341,7 +337,7 @@ export default function MarketplacePage() {
                         </h2>
                       </div>
 
-                      <Divider className="border-zinc-200 dark:border-zinc-800" />
+                      <Divider className="border-zinc-200" />
 
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-zinc-500">
@@ -351,7 +347,7 @@ export default function MarketplacePage() {
                           required
                           value={selectedEntityId}
                           onChange={(e) => setSelectedEntityId(e.target.value)}
-                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 dark:border-zinc-800"
+                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2"
                         >
                           <option value="">Choose part...</option>
                           {entities.map((e) => (
@@ -369,7 +365,7 @@ export default function MarketplacePage() {
                         <select
                           value={clearanceType}
                           onChange={(e) => setClearanceType(e.target.value)}
-                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 dark:border-zinc-800"
+                          className="bg-background flex h-10 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2"
                         >
                           <option value="ITAR">ITAR (USML Restricted)</option>
                           <option value="EAR99">EAR99 (Dual-Use Commercial)</option>
@@ -380,7 +376,7 @@ export default function MarketplacePage() {
                       <Button
                         type="submit"
                         disabled={isClearing || !selectedEntityId}
-                        className="w-full bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500"
+                        className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
                       >
                         {isClearing ? "Generating ZK Proof..." : "Generate ZK Export Envelope"}
                       </Button>

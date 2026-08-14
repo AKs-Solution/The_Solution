@@ -52,16 +52,42 @@ const CHANGE_TYPES = [
   "Structural Margin Reduction",
 ];
 
+interface CertificationAssessmentBody {
+  changeType: string;
+  allowableChangePercent: number;
+  materialChange: boolean;
+  loadCaseChange: boolean;
+  aircraft: string;
+}
+
+interface CertificationPrecedentDetail {
+  program: string;
+  allowableChange: string;
+  faaOutcome: string;
+  duration: string;
+  costImpact: string;
+}
+
+interface CertificationResult {
+  prediction: string;
+  confidence: number;
+  historicalPrecedents: number;
+  primaryReason: string;
+  expectedTimeline: string;
+  recommendedAction: string;
+  precedentDetails?: CertificationPrecedentDetail[];
+}
+
 export default function CertificationPage() {
   const [changeType, setChangeType] = useState(CHANGE_TYPES[0]);
   const [allowableChangePercent, setAllowableChangePercent] = useState(15);
   const [materialChange, setMaterialChange] = useState(false);
   const [loadCaseChange, setLoadCaseChange] = useState(false);
   const [aircraft, setAircraft] = useState("B787");
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<CertificationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const runAssessment = useCallback(async (body: any) => {
+  const runAssessment = useCallback(async (body: CertificationAssessmentBody) => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/intelligence/certification-risk", {
@@ -81,19 +107,28 @@ export default function CertificationPage() {
   }, []);
 
   useEffect(() => {
-    runAssessment({
-      changeType,
-      allowableChangePercent: 15,
-      materialChange: false,
-      loadCaseChange: false,
-      aircraft,
-    });
+    const timer = setTimeout(() => {
+      void runAssessment({
+        changeType,
+        allowableChangePercent: 15,
+        materialChange: false,
+        loadCaseChange: false,
+        aircraft,
+      });
+    }, 0);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    void runAssessment({ changeType, allowableChangePercent, materialChange, loadCaseChange, aircraft });
+    void runAssessment({
+      changeType,
+      allowableChangePercent,
+      materialChange,
+      loadCaseChange,
+      aircraft,
+    });
   }
 
   const prediction = result?.prediction ?? "UNCERTAIN";
@@ -110,7 +145,7 @@ export default function CertificationPage() {
               <h1 className="text-foreground text-2xl font-extrabold tracking-tight md:text-3xl">
                 Certification Readiness
               </h1>
-              <Badge className="hidden border-indigo-500/20 bg-indigo-500/10 text-[9px] text-indigo-600 sm:inline-flex dark:text-indigo-400">
+              <Badge className="hidden border-indigo-500/20 bg-indigo-500/10 text-[9px] text-indigo-600 sm:inline-flex">
                 DETERMINISTIC
               </Badge>
             </div>
@@ -122,17 +157,14 @@ export default function CertificationPage() {
           <WidgetCustomizeMenu widgets={WIDGETS} />
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="border-border bg-background rounded-lg border p-4"
-        >
+        <form onSubmit={handleSubmit} className="border-border bg-background rounded-lg border p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-muted-foreground text-xs font-medium">Change type</span>
               <select
                 value={changeType}
                 onChange={(e) => setChangeType(e.target.value)}
-                className="border-border bg-background text-foreground rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-ring focus-visible:ring-2"
+                className="border-border bg-background text-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
               >
                 {CHANGE_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -160,7 +192,7 @@ export default function CertificationPage() {
               <select
                 value={aircraft}
                 onChange={(e) => setAircraft(e.target.value)}
-                className="border-border bg-background text-foreground rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-ring focus-visible:ring-2"
+                className="border-border bg-background text-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
               >
                 {["B787", "A350", "B737", "A320", "C919"].map((a) => (
                   <option key={a} value={a}>
@@ -193,7 +225,7 @@ export default function CertificationPage() {
         </form>
 
         {isLoading ? (
-          <div className="border-border bg-background flex items-center justify-center rounded-lg border py-24 text-sm text-muted-foreground">
+          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-lg border py-24 text-sm">
             Evaluating against FAA certification precedents...
           </div>
         ) : (
@@ -210,10 +242,10 @@ export default function CertificationPage() {
                           className={cn(
                             "rounded-lg border px-4 py-2 font-mono text-lg font-extrabold tracking-wide",
                             prediction === "REQUIRED"
-                              ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                              ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
                               : prediction === "NOT_REQUIRED"
-                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                                : "border-amber-500/30 bg-amber-500/10 text-amber-600",
                           )}
                         >
                           {prediction.replace("_", " ")}
@@ -227,7 +259,7 @@ export default function CertificationPage() {
                           </div>
                           <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                             <div
-                              className="bg-gradient-to-r from-blue-500 to-emerald-500 h-full rounded-full"
+                              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500"
                               style={{
                                 width: `${Math.round((result?.confidence ?? 0) * 100)}%`,
                               }}
@@ -281,9 +313,7 @@ export default function CertificationPage() {
                           <thead>
                             <tr className="text-muted-foreground border-border border-b font-mono text-[10px] tracking-wider uppercase">
                               <th className="density-px-sm density-py-sm font-semibold">Program</th>
-                              <th className="density-px-sm density-py-sm font-semibold">
-                                Change
-                              </th>
+                              <th className="density-px-sm density-py-sm font-semibold">Change</th>
                               <th className="density-px-sm density-py-sm font-semibold">
                                 FAA outcome
                               </th>
@@ -296,37 +326,42 @@ export default function CertificationPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-border divide-y">
-                            {(result?.precedentDetails ?? []).map((p: any, i: number) => (
-                              <tr key={i} className="hover:bg-surface-hover transition-colors">
-                                <td className="text-foreground density-px-sm density-py-sm font-medium">
-                                  {p.program}
-                                </td>
-                                <td className="text-muted-foreground density-px-sm density-py-sm">
-                                  {p.allowableChange}
-                                </td>
-                                <td className="density-px-sm density-py-sm">
-                                  <span
-                                    className={cn(
-                                      "rounded px-2 py-0.5 font-mono text-[10px] font-semibold",
-                                      p.faaOutcome.toLowerCase().includes("required")
-                                        ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-                                    )}
-                                  >
-                                    {p.faaOutcome}
-                                  </span>
-                                </td>
-                                <td className="text-muted-foreground density-px-sm density-py-sm font-mono text-xs">
-                                  {p.duration}
-                                </td>
-                                <td className="text-muted-foreground density-px-sm density-py-sm text-xs">
-                                  {p.costImpact}
-                                </td>
-                              </tr>
-                            ))}
+                            {(result?.precedentDetails ?? []).map(
+                              (p: CertificationPrecedentDetail, i: number) => (
+                                <tr key={i} className="hover:bg-surface-hover transition-colors">
+                                  <td className="text-foreground density-px-sm density-py-sm font-medium">
+                                    {p.program}
+                                  </td>
+                                  <td className="text-muted-foreground density-px-sm density-py-sm">
+                                    {p.allowableChange}
+                                  </td>
+                                  <td className="density-px-sm density-py-sm">
+                                    <span
+                                      className={cn(
+                                        "rounded px-2 py-0.5 font-mono text-[10px] font-semibold",
+                                        p.faaOutcome.toLowerCase().includes("required")
+                                          ? "bg-rose-500/10 text-rose-600"
+                                          : "bg-emerald-500/10 text-emerald-600",
+                                      )}
+                                    >
+                                      {p.faaOutcome}
+                                    </span>
+                                  </td>
+                                  <td className="text-muted-foreground density-px-sm density-py-sm font-mono text-xs">
+                                    {p.duration}
+                                  </td>
+                                  <td className="text-muted-foreground density-px-sm density-py-sm text-xs">
+                                    {p.costImpact}
+                                  </td>
+                                </tr>
+                              ),
+                            )}
                             {(result?.precedentDetails ?? []).length === 0 && (
                               <tr>
-                                <td colSpan={5} className="text-muted-foreground density-py-sm text-center text-xs">
+                                <td
+                                  colSpan={5}
+                                  className="text-muted-foreground density-py-sm text-center text-xs"
+                                >
                                   No precedents on record for this configuration.
                                 </td>
                               </tr>

@@ -77,7 +77,7 @@ export default function TribalPage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Mic className="size-6 text-indigo-600 dark:text-indigo-400" />
+              <Mic className="size-6 text-indigo-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Expertise & Tribal Knowledge Ledger
               </h1>
@@ -109,17 +109,15 @@ export default function TribalPage() {
                 {logs.map((l) => (
                   <div
                     key={l.id}
-                    className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5 dark:border-zinc-800 dark:bg-zinc-900/10"
+                    className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-lg bg-zinc-100 p-2 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                        <div className="rounded-lg bg-zinc-100 p-2 text-zinc-600">
                           <User className="size-4" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                            {l.operatorName}
-                          </span>
+                          <span className="text-xs font-bold text-zinc-900">{l.operatorName}</span>
                           <span className="text-[9px] text-zinc-400">
                             {new Date(l.createdAt).toLocaleString()}
                           </span>
@@ -133,14 +131,14 @@ export default function TribalPage() {
                       )}
                     </div>
 
-                    <div className="text-zinc-605 dark:text-zinc-405 dark:border-zinc-850 flex items-start gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 text-xs italic dark:bg-zinc-950">
+                    <div className="text-zinc-605 flex items-start gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 text-xs italic">
                       <MessageSquare className="mt-0.5 size-4 shrink-0 text-indigo-400" />
                       <span>&ldquo;{l.transcription}&rdquo;</span>
                     </div>
 
                     <div className="flex items-center justify-between font-mono text-[11px] text-zinc-500">
                       <span>Mapped G-Code Adjustment:</span>
-                      <span className="rounded border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-600 dark:border-indigo-950 dark:bg-indigo-950/20 dark:text-indigo-400">
+                      <span className="rounded border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-600">
                         {l.gcodeOffset}
                       </span>
                     </div>
@@ -156,7 +154,7 @@ export default function TribalPage() {
 
           {/* UPLOAD TRIBAL NOTES */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+            <Card className="border-zinc-200 shadow-sm">
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit}>
                   <Stack gap={4}>
@@ -167,7 +165,7 @@ export default function TribalPage() {
                       <h2 className="text-foreground text-base font-bold">Log Tacit Override</h2>
                     </div>
 
-                    <Divider className="border-zinc-200 dark:border-zinc-800" />
+                    <Divider className="border-zinc-200" />
 
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-medium text-zinc-500">
@@ -189,7 +187,7 @@ export default function TribalPage() {
                         required
                         value={transcription}
                         onChange={(e) => setTranscription(e.target.value)}
-                        className="bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring dark:bg-background flex h-20 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"
+                        className="bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-20 w-full rounded-md border border-zinc-200 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder="Explain override reason (e.g., 'Reduced cut depth because material was too hard')..."
                       />
                     </div>
@@ -219,7 +217,7 @@ export default function TribalPage() {
                     <Button
                       type="submit"
                       disabled={isCapturing}
-                      className="w-full bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500"
+                      className="w-full bg-indigo-600 text-white hover:bg-indigo-700"
                     >
                       {isCapturing ? "Logging note..." : "Log Verbatim Note"}
                     </Button>

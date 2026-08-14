@@ -22,14 +22,14 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
           onClick={() => onCheckedChange?.(!checked)}
           className={cn(
             "focus-visible:ring-ring relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-            checked ? "bg-black dark:bg-white" : "bg-muted-foreground/30",
+            checked ? "bg-black" : "bg-muted-foreground/30",
             className,
           )}
           {...props}
         >
           <span
             className={cn(
-              "pointer-events-none block size-4 rounded-full bg-white shadow-sm ring-0 transition-transform dark:bg-black",
+              "pointer-events-none block size-4 rounded-full bg-white shadow-sm ring-0 transition-transform",
               checked ? "translate-x-4" : "translate-x-0",
             )}
           />

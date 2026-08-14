@@ -16,7 +16,9 @@ function Probe() {
       <span data-testid="visible-count">
         {Object.values(ctx.widgetPrefs).filter((w) => w.visible).length}
       </span>
-      <span data-testid="minimized-kpi">{ctx.widgetPrefs["kpi-row"]?.minimized ? "yes" : "no"}</span>
+      <span data-testid="minimized-kpi">
+        {ctx.widgetPrefs["kpi-row"]?.minimized ? "yes" : "no"}
+      </span>
       <span data-testid="order">{ctx.widgetOrder.join(",")}</span>
       <span data-testid="views-count">{ctx.views.length}</span>
       <button type="button" onClick={() => ctx.setDensity("compact")}>
@@ -148,7 +150,7 @@ describe("WorkspacePreferencesProvider", () => {
     await renderProbe();
     await user.click(screen.getByRole("button", { name: "set-compact" }));
     await waitFor(() => {
-      const raw = window.localStorage.getItem("morningstar.workspace.v1");
+      const raw = window.localStorage.getItem("consecuencia.workspace.v1");
       expect(raw).toBeTruthy();
       expect(JSON.parse(raw!).density).toBe("compact");
     });

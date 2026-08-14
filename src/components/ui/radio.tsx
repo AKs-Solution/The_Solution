@@ -18,7 +18,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           id={inputId}
           type="radio"
           className={cn(
-            "focus:ring-ring size-4 accent-black focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:accent-white",
+            "focus:ring-ring size-4 accent-black focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
           {...props}

@@ -68,15 +68,38 @@ describe("isSameOriginRequest", () => {
     ).toBe(true);
   });
 
-  it("rejects a mutating request with neither Origin nor Referer", () => {
-    expect(
-      isSameOriginRequest({
-        method: "POST",
-        originHeader: null,
-        refererHeader: null,
-        expectedOrigin,
-      }),
-    ).toBe(false);
+  it("rejects a mutating request with neither Origin nor Referer in production", () => {
+    const prevNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      expect(
+        isSameOriginRequest({
+          method: "POST",
+          originHeader: null,
+          refererHeader: null,
+          expectedOrigin,
+        }),
+      ).toBe(false);
+    } finally {
+      process.env.NODE_ENV = prevNodeEnv;
+    }
+  });
+
+  it("allows a mutating request with neither Origin nor Referer in development/testing", () => {
+    const prevNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+    try {
+      expect(
+        isSameOriginRequest({
+          method: "POST",
+          originHeader: null,
+          refererHeader: null,
+          expectedOrigin,
+        }),
+      ).toBe(true);
+    } finally {
+      process.env.NODE_ENV = prevNodeEnv;
+    }
   });
 
   it("rejects a malformed Origin header instead of throwing", () => {

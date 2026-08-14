@@ -237,7 +237,7 @@ export function DataTable<T>({
         </div>
 
         {visibleColumns.length < columns.length && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-8 rounded-t-lg bg-gradient-to-b from-black/5 to-transparent dark:from-black/20" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-8 rounded-t-lg bg-gradient-to-b from-black/5 to-transparent" />
         )}
       </div>
 

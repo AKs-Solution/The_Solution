@@ -33,7 +33,7 @@ export function TrendLine({ points, height = 64 }: { points: TrendPoint[]; heigh
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      className="text-blue-600 dark:text-blue-400"
+      className="text-blue-600"
       role="img"
       aria-label="Trend chart"
     >

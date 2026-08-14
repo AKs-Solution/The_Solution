@@ -1,6 +1,13 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 import { motion, useInView, type Variants } from "motion/react";
 import { cn } from "@/shared/utils";
 
@@ -17,11 +24,10 @@ type MotionDivProps = Omit<
 export interface FadeInProps extends MotionDivProps {
   delay?: number;
   y?: number;
-  once?: boolean;
 }
 
 export const FadeIn = forwardRef<HTMLDivElement, FadeInProps>(
-  ({ className = "", delay = 0, y = 12, once = true, children, ...props }, ref) => {
+  ({ className = "", delay = 0, y = 12, children, ...props }, ref) => {
     return (
       <motion.div
         ref={ref}
@@ -41,7 +47,7 @@ export const FadeIn = forwardRef<HTMLDivElement, FadeInProps>(
 FadeIn.displayName = "FadeIn";
 
 export const SlideIn = forwardRef<HTMLDivElement, FadeInProps>(
-  ({ className = "", delay = 0, y = 0, once = true, children, ...props }, ref) => {
+  ({ className = "", delay = 0, y = 0, children, ...props }, ref) => {
     return (
       <motion.div
         ref={ref}

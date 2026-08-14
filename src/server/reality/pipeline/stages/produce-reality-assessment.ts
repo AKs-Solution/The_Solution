@@ -85,13 +85,16 @@ export const produceRealityAssessmentStage: WorkflowStage<RealityPipelineContext
         // Look up any active NCRs for the suppliers attached to these entities
         // In AKSCI, EngineeringEntities relate to Suppliers via ManufacturingEvents or SupplierRelationships
         // For simplicity, we just check manufacturing events and quality events for the specific entities
-        const ncrCount = await (prisma as any).qualityEvent?.count({
-          where: {
-            organizationId: ctx.organizationId,
-            entityId: { in: ctx.entitiesEvaluated },
-            status: "OPEN",
-          },
-        }).catch(() => 0) ?? 0;
+        const ncrCount =
+          (await prisma.qualityEvent
+            .count({
+              where: {
+                organizationId: ctx.organizationId,
+                entityId: { in: ctx.entitiesEvaluated },
+                status: "OPEN",
+              },
+            })
+            .catch(() => 0)) ?? 0;
 
         if (ncrCount > 0) {
           isReady = false;
@@ -101,17 +104,19 @@ export const produceRealityAssessmentStage: WorkflowStage<RealityPipelineContext
           prScore -= ncrCount * 15;
         }
 
-        const mfgEvents = await (prisma as any).manufacturingEvent?.findMany({
-          where: {
-            organizationId: ctx.organizationId,
-            entityId: { in: ctx.entitiesEvaluated },
-          },
-          select: { quantityProduced: true, quantityScrapped: true },
-        }).catch(() => []) ?? [];
+        const mfgEvents = await prisma.manufacturingEvent
+          .findMany({
+            where: {
+              organizationId: ctx.organizationId,
+              entityId: { in: ctx.entitiesEvaluated },
+            },
+            select: { quantityProduced: true, quantityScrapped: true },
+          })
+          .catch(() => []);
 
         let totalProduced = 0;
         let totalScrapped = 0;
-        mfgEvents.forEach((e: any) => {
+        mfgEvents.forEach((e) => {
           totalProduced += e.quantityProduced;
           totalScrapped += e.quantityScrapped;
         });

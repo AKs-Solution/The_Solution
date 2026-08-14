@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { GraphViewer } from "./graph-viewer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryError } from "@/components/ui/query-error";
 import { Select } from "@/components/ui/select";
 import { ENTITY_TYPE_LABELS } from "@/server/engineering/constants";
 import { ENTITY_TYPES } from "@/server/engineering/constants";
@@ -54,6 +55,7 @@ export function GraphExplorer() {
   const [edges, setEdges] = useState<GraphEdge[]>([]);
   const [stats, setStats] = useState({ nodes: 0, edges: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [entityType, setEntityType] = useState("");
   const [selectedInfo, setSelectedInfo] = useState<
     { type: "node"; data: GraphNode } | { type: "edge"; data: GraphEdge } | null
@@ -62,12 +64,16 @@ export function GraphExplorer() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
+      setIsLoading(true);
+      setError("");
       const result = await fetchGraphData(entityType);
       if (cancelled) return;
       if (result) {
         setNodes(result.nodes);
         setEdges(result.edges);
         setStats(result.stats);
+      } else {
+        setError("Failed to load the knowledge graph. Please try again.");
       }
       setIsLoading(false);
     };
@@ -79,11 +85,14 @@ export function GraphExplorer() {
 
   async function refresh() {
     setIsLoading(true);
+    setError("");
     const result = await fetchGraphData(entityType);
     if (result) {
       setNodes(result.nodes);
       setEdges(result.edges);
       setStats(result.stats);
+    } else {
+      setError("Failed to load the knowledge graph. Please try again.");
     }
     setIsLoading(false);
   }
@@ -120,6 +129,10 @@ export function GraphExplorer() {
           {isLoading ? (
             <div className="flex size-full items-center justify-center rounded-lg border">
               <Skeleton className="size-full rounded-lg" />
+            </div>
+          ) : error ? (
+            <div className="flex size-full items-center justify-center rounded-lg border">
+              <QueryError message={error} onRetry={() => void refresh()} />
             </div>
           ) : nodes.length === 0 ? (
             <div className="flex size-full items-center justify-center rounded-lg border border-dashed">

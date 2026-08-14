@@ -109,7 +109,7 @@ export function SubTabInspector({
               {tab.badge && (
                 <span
                   className={cn(
-                    "py-0.2 rounded border px-1.5 font-mono text-[9px] font-semibold",
+                    "rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold",
                     isActive
                       ? "border-white/30 bg-white/20 text-zinc-100"
                       : "border-zinc-200 bg-zinc-100 text-zinc-500",

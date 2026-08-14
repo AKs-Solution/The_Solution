@@ -117,8 +117,8 @@ export async function generateCertificationPackage(
         where: { organizationId, deletedAt: null },
         take: 120,
       }),
-      (prisma as any).complianceProof?.findMany({ where: { organizationId }, take: 60 }).catch(() => []) ?? [],
-      (prisma as any).auditLog?.findMany({ where: { organizationId }, take: 150 }).catch(() => []) ?? [],
+      prisma.complianceProof.findMany({ where: { organizationId }, take: 60 }).catch(() => []),
+      prisma.auditLog.findMany({ where: { organizationId }, take: 150 }).catch(() => []),
     ]);
 
     const requirements = entities.filter((e) => e.entityType === "REQUIREMENT");
@@ -127,12 +127,13 @@ export async function generateCertificationPackage(
     const traceabilityMatrix: TraceRow[] = [];
     const collectedHashes = new Set<string>();
 
-    for (const proof of proofs as any[]) {
+    for (const proof of proofs) {
       if (typeof proof.gcodeHash === "string") collectedHashes.add(proof.gcodeHash);
       if (typeof proof.metrologyHash === "string") collectedHashes.add(proof.metrologyHash);
     }
-    for (const log of auditLogs as any[]) {
-      const hash = log.metadata?.hash;
+    for (const log of auditLogs) {
+      const logMetadata = (log.metadata ?? {}) as Record<string, unknown>;
+      const hash = logMetadata.hash;
       if (typeof hash === "string") collectedHashes.add(hash);
     }
 
@@ -143,10 +144,10 @@ export async function generateCertificationPackage(
           ? linkedEntity
           : (requirements[0] ?? linkedEntity ?? undefined);
 
-      const decisionProofs = (proofs as any[]).filter(
+      const decisionProofs = proofs.filter(
         (p) => p.componentId === (linkedEntity?.id ?? decision.partId),
       );
-      const decisionAuditActions = (auditLogs as any[])
+      const decisionAuditActions = auditLogs
         .filter((l) => l.entity === "DECISION" && l.entityId === decision.id)
         .slice(-3)
         .map((l) => String(l.action));
@@ -187,13 +188,13 @@ export async function generateCertificationPackage(
       "No decision type distribution recorded";
 
     const proofSummary =
-      (proofs as any[]).length > 0
-        ? `${(proofs as any[]).length} compliance proof token(s) (gcode/metrology hashes) bound to ${requirements.length} requirement(s).`
+      proofs.length > 0
+        ? `${proofs.length} compliance proof token(s) (gcode/metrology hashes) bound to ${requirements.length} requirement(s).`
         : "Compliance proofs pending generation; lineage verified against decision and audit records.";
 
     const auditSummary =
-      (auditLogs as any[]).length > 0
-        ? `${(auditLogs as any[]).length} audit log event(s) contribute to the reproducible evidence trail.`
+      auditLogs.length > 0
+        ? `${auditLogs.length} audit log event(s) contribute to the reproducible evidence trail.`
         : "No audit events on record for this organization scope.";
 
     const sections: CertificationPackage["sections"] = [

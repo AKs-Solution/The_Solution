@@ -3,7 +3,6 @@ import { prisma } from "@/server/db";
 import {
   INDUSTRY_FAILURE_SEEDS,
   IndustryFailureSeed,
-  queryModelMany,
 } from "@/server/precedents/seed-industry-graph";
 
 export interface HistoricalFailurePrecedent {
@@ -74,21 +73,23 @@ export async function queryFailurePrecedents(
   totalMatches: number;
 }> {
   try {
-    const [publicRecords, airworthinessDirectives, serviceDifficultyReports, ntsbAccidents, qualityEvents] =
-      await Promise.all([
-        queryModelMany("publicFailureRecord", { take: 50 }),
-        queryModelMany("airworthinessDirective", { take: 50 }),
-        queryModelMany("serviceDifficultyReport", { take: 50 }),
-        queryModelMany("ntsbAccident", { take: 50 }),
-        prisma.qualityEvent
-          .findMany({ where: { organizationId }, take: 20 })
-          .catch(() => []),
-      ]);
+    const [
+      publicRecords,
+      airworthinessDirectives,
+      serviceDifficultyReports,
+      ntsbAccidents,
+      qualityEvents,
+    ] = await Promise.all([
+      prisma.publicFailureRecord.findMany({ take: 50 }).catch(() => []),
+      prisma.airworthinessDirective.findMany({ take: 50 }).catch(() => []),
+      prisma.serviceDifficultyReport.findMany({ take: 50 }).catch(() => []),
+      prisma.nTSBAccident.findMany({ take: 50 }).catch(() => []),
+      prisma.qualityEvent.findMany({ where: { organizationId }, take: 20 }).catch(() => []),
+    ]);
 
     const precedents: HistoricalFailurePrecedent[] = [];
 
-    for (const record of publicRecords) {
-      const r = record as any;
+    for (const r of publicRecords) {
       const hashes: string[] = Array.isArray(r.evidenceHashes)
         ? r.evidenceHashes.map((h: unknown) => String(h))
         : [sha256(r.recordNumber || r.id)];
@@ -98,16 +99,17 @@ export async function queryFailurePrecedents(
         material: r.material,
         failureMode: r.failureMode,
         rootCause: r.rootCause,
-        invalidatedAssumption: r.invalidatedAssumption || "Design envelope assumption invalidated by field evidence.",
-        provenCorrectiveAction: r.provenCorrectiveAction || "Apply root-cause corrective action and verify by test.",
+        invalidatedAssumption:
+          r.invalidatedAssumption || "Design envelope assumption invalidated by field evidence.",
+        provenCorrectiveAction:
+          r.provenCorrectiveAction || "Apply root-cause corrective action and verify by test.",
         evidenceHashes: hashes,
         programContext: r.programContext || "Industry Failure Graph",
         occurredAt: new Date(r.occurredAt || r.createdAt || Date.now()).toISOString(),
       });
     }
 
-    for (const ad of airworthinessDirectives) {
-      const a = ad as any;
+    for (const a of airworthinessDirectives) {
       const hashes = [sha256(a.adNumber)];
       precedents.push({
         id: a.id,
@@ -115,7 +117,8 @@ export async function queryFailurePrecedents(
         material: a.material || "Unspecified",
         failureMode: a.failureMode || "Airworthiness Compliance Finding",
         rootCause: a.summary,
-        invalidatedAssumption: "Assumed design envelope invalidated by mandatory airworthiness finding.",
+        invalidatedAssumption:
+          "Assumed design envelope invalidated by mandatory airworthiness finding.",
         provenCorrectiveAction: a.correctiveAction || "Comply with airworthiness directive.",
         evidenceHashes: hashes,
         programContext: `FAA Airworthiness Directive ${a.adNumber}`,
@@ -123,8 +126,7 @@ export async function queryFailurePrecedents(
       });
     }
 
-    for (const sdr of serviceDifficultyReports) {
-      const s = sdr as any;
+    for (const s of serviceDifficultyReports) {
       const hashes = [sha256(s.sdrNumber)];
       precedents.push({
         id: s.id,
@@ -133,15 +135,15 @@ export async function queryFailurePrecedents(
         failureMode: s.failureMode,
         rootCause: s.rootCause || s.summary,
         invalidatedAssumption: "Service difficulty invalidates assumed operational robustness.",
-        provenCorrectiveAction: s.correctiveAction || "Implement service bulletin corrective action.",
+        provenCorrectiveAction:
+          s.correctiveAction || "Implement service bulletin corrective action.",
         evidenceHashes: hashes,
         programContext: `FAA Service Difficulty Report ${s.sdrNumber}`,
         occurredAt: new Date(s.reportedAt || Date.now()).toISOString(),
       });
     }
 
-    for (const accident of ntsbAccidents) {
-      const n = accident as any;
+    for (const n of ntsbAccidents) {
       const hashes = [sha256(n.accidentNumber)];
       precedents.push({
         id: n.id,
@@ -159,9 +161,11 @@ export async function queryFailurePrecedents(
 
     const entityIds = [...new Set(qualityEvents.map((qe) => qe.entityId).filter(Boolean))];
     const entities = entityIds.length
-      ? await queryModelMany("engineeringEntity", { where: { id: { in: entityIds } } })
+      ? await prisma.engineeringEntity
+          .findMany({ where: { id: { in: entityIds } } })
+          .catch(() => [])
       : [];
-    const entityById = new Map((entities as any[]).map((e) => [e.id, e]));
+    const entityById = new Map(entities.map((e) => [e.id, e]));
 
     for (const qe of qualityEvents) {
       const entity = entityById.get(qe.entityId);
@@ -172,7 +176,8 @@ export async function queryFailurePrecedents(
         material: typeof metadata.material === "string" ? metadata.material : "Unspecified",
         failureMode: qe.eventType || "Quality Anomaly",
         rootCause: qe.rootCause || qe.description,
-        invalidatedAssumption: "Operational envelope assumption invalidated by field quality event.",
+        invalidatedAssumption:
+          "Operational envelope assumption invalidated by field quality event.",
         provenCorrectiveAction:
           qe.correctiveAction || "Root-cause corrective action implemented and verified.",
         evidenceHashes: [sha256(qe.id)],

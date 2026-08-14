@@ -4,6 +4,9 @@ import { getRequirementIntelligence } from "../../../src/server/compliance/requi
 import { generateCertificationPackage } from "../../../src/server/compliance/package-generator";
 import { getAuditExplorerView } from "../../../src/server/compliance/audit-explorer-engine";
 import { calculateComplianceHealth } from "../../../src/server/compliance/compliance-health-calculator";
+import { isDatabaseAvailable } from "../../helpers/db-gate";
+
+const dbOk = await isDatabaseAvailable();
 
 describe("Phase 5: Certification & Compliance Intelligence Test Suite", () => {
   const sampleOrgId = "org-compliance-test-101";
@@ -29,16 +32,19 @@ describe("Phase 5: Certification & Compliance Intelligence Test Suite", () => {
     expect(first.applicableRegulations.length).toBeGreaterThan(0);
   });
 
-  it("generates reproducible certification package with SHA-256 evidence proofs", async () => {
-    const pkg = await generateCertificationPackage(
-      sampleOrgId,
-      "Test Propulsion Flight Certification",
-    );
-    expect(pkg).toBeDefined();
-    expect(pkg.hashProof).toBeDefined();
-    expect(pkg.sections.length).toBeGreaterThan(0);
-    expect(pkg.traceabilityMatrix.length).toBeGreaterThan(0);
-  });
+  it.runIf(dbOk)(
+    "generates reproducible certification package with SHA-256 evidence proofs",
+    async () => {
+      const pkg = await generateCertificationPackage(
+        sampleOrgId,
+        "Test Propulsion Flight Certification",
+      );
+      expect(pkg).toBeDefined();
+      expect(pkg.hashProof).toBeDefined();
+      expect(pkg.sections.length).toBeGreaterThan(0);
+      expect(pkg.traceabilityMatrix.length).toBeGreaterThan(0);
+    },
+  );
 
   it("renders audit explorer view with evidence lineage tree", async () => {
     const auditView = await getAuditExplorerView(sampleOrgId, "comp-840");

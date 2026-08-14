@@ -8,22 +8,22 @@ interface Props {
 }
 
 const nodeTypeColors: Record<ReasoningNodeType, { bg: string; border: string; text: string }> = {
-  EVIDENCE: { bg: "bg-blue-950/60", border: "border-blue-500/40", text: "text-blue-300" },
-  PRINCIPLE: { bg: "bg-purple-950/60", border: "border-purple-500/40", text: "text-purple-300" },
-  CONSTRAINT: { bg: "bg-amber-950/60", border: "border-amber-500/40", text: "text-amber-300" },
-  ASSUMPTION: { bg: "bg-cyan-950/60", border: "border-cyan-500/40", text: "text-cyan-300" },
-  TRADEOFF: { bg: "bg-teal-950/60", border: "border-teal-500/40", text: "text-teal-300" },
-  ALTERNATIVE: { bg: "bg-indigo-950/60", border: "border-indigo-500/40", text: "text-indigo-300" },
-  RISK: { bg: "bg-rose-950/60", border: "border-rose-500/40", text: "text-rose-300" },
+  EVIDENCE: { bg: "bg-blue-50", border: "border-blue-300", text: "text-blue-700" },
+  PRINCIPLE: { bg: "bg-purple-50", border: "border-purple-300", text: "text-purple-700" },
+  CONSTRAINT: { bg: "bg-amber-50", border: "border-amber-300", text: "text-amber-700" },
+  ASSUMPTION: { bg: "bg-cyan-50", border: "border-cyan-300", text: "text-cyan-700" },
+  TRADEOFF: { bg: "bg-teal-50", border: "border-teal-300", text: "text-teal-700" },
+  ALTERNATIVE: { bg: "bg-indigo-50", border: "border-indigo-300", text: "text-indigo-700" },
+  RISK: { bg: "bg-rose-50", border: "border-rose-300", text: "text-rose-700" },
   RECOMMENDATION: {
-    bg: "bg-emerald-950/60",
-    border: "border-emerald-500/40",
-    text: "text-emerald-300",
+    bg: "bg-emerald-50",
+    border: "border-emerald-300",
+    text: "text-emerald-700",
   },
-  CONCLUSION: { bg: "bg-emerald-900/80", border: "border-emerald-400", text: "text-emerald-200" },
+  CONCLUSION: { bg: "bg-emerald-50", border: "border-emerald-400", text: "text-emerald-800" },
   STEP: { bg: "bg-white", border: "border-zinc-200", text: "text-zinc-700" },
-  MISSING_EVIDENCE: { bg: "bg-rose-950/80", border: "border-rose-600", text: "text-rose-200" },
-  DECISION_BRANCH: { bg: "bg-amber-900/70", border: "border-amber-500", text: "text-amber-200" },
+  MISSING_EVIDENCE: { bg: "bg-rose-50", border: "border-rose-400", text: "text-rose-800" },
+  DECISION_BRANCH: { bg: "bg-amber-50", border: "border-amber-400", text: "text-amber-800" },
 };
 
 export function ReasoningGraphVisualizer({ graph }: Props) {
@@ -84,7 +84,7 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
                   onClick={() => setSelectedNodeId(node.id)}
                   className={`rounded-xl border p-3.5 text-left transition-all duration-200 ${colors.bg} ${colors.border} ${
                     isSelected
-                      ? "scale-[1.02] shadow-lg ring-2 shadow-cyan-950/40 ring-cyan-400"
+                      ? "scale-[1.02] shadow-lg ring-2 shadow-cyan-100 ring-cyan-500"
                       : "hover:border-zinc-300"
                   }`}
                 >
@@ -116,7 +116,7 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
           {selectedNode ? (
             <div className="space-y-4">
               <div className="rounded-lg border border-zinc-200 bg-white p-3">
-                <span className="font-mono text-[10px] text-cyan-400 uppercase">
+                <span className="font-mono text-[10px] text-cyan-600 uppercase">
                   {selectedNode.nodeType}
                 </span>
                 <h5 className="mt-1 text-sm font-bold text-zinc-900">{selectedNode.label}</h5>
@@ -142,16 +142,16 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
                           key={edge.id}
                           className="rounded-lg border border-zinc-200 bg-white p-3 text-xs"
                         >
-                          <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-cyan-300">
+                          <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-cyan-700">
                             <span>{isSource ? "OUTGOING ->" : "<- INCOMING"}</span>
-                            <span className="rounded border border-cyan-800 bg-cyan-950 px-1.5 py-0.5 text-cyan-200">
+                            <span className="rounded border border-cyan-200 bg-cyan-50 px-1.5 py-0.5 text-cyan-700">
                               {edge.edgeType}
                             </span>
                             <span className="text-zinc-500">
                               to {otherNode?.label || otherNodeId}
                             </span>
                           </div>
-                          <p className="mt-1.5 border-l-2 border-cyan-500 pl-2 text-[11px] leading-relaxed text-zinc-700 italic">
+                          <p className="mt-1.5 border-l-2 border-cyan-400 pl-2 text-[11px] leading-relaxed text-zinc-700 italic">
                             &quot;{edge.justification}&quot;
                           </p>
                         </div>

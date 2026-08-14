@@ -64,7 +64,7 @@ export default function SupplierAttestationPage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Handshake className="text-emerald-650 size-6 dark:text-emerald-400" />
+              <Handshake className="size-6 text-emerald-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Supplier Capability Attestations
               </h1>
@@ -101,38 +101,36 @@ export default function SupplierAttestationPage() {
                       key={s.id}
                       className={`flex flex-col gap-3 rounded-xl border p-5 transition-all ${
                         isAttested
-                          ? "border-emerald-250 bg-emerald-50/5 dark:border-emerald-950/20"
-                          : "dark:border-zinc-855 border-zinc-200 bg-zinc-50/10 dark:bg-zinc-900/10"
+                          ? "border-emerald-200 bg-emerald-50/5"
+                          : "border-zinc-200 bg-zinc-50/10"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <Building className="text-indigo-650 size-5 dark:text-indigo-400" />
+                          <Building className="size-5 text-indigo-600" />
                           <div className="flex flex-col text-left">
-                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                              {s.componentId}
-                            </span>
+                            <span className="text-sm font-bold text-zinc-900">{s.componentId}</span>
                             <span className="text-[10px] text-zinc-400">Proposal ID: {s.id}</span>
                           </div>
                         </div>
 
                         {isAttested ? (
-                          <Badge className="border-emerald-250 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800">
                             Capability Attested
                           </Badge>
                         ) : (
-                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800">
                             Proposed Match
                           </Badge>
                         )}
                       </div>
 
-                      <Divider className="border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="border-zinc-100" />
 
                       <div className="grid grid-cols-2 gap-4 text-left text-xs">
                         <div>
                           <span className="mb-0.5 block text-zinc-400">OEM Target Cost Limit</span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             ${s.oemTargetCost.toLocaleString()}
                           </span>
                         </div>
@@ -140,14 +138,14 @@ export default function SupplierAttestationPage() {
                           <span className="mb-0.5 block text-zinc-400">
                             Supplier Estimated Price
                           </span>
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          <span className="font-semibold text-zinc-800">
                             ${s.supplierPrice.toLocaleString()}
                           </span>
                         </div>
                       </div>
 
                       {!isAttested && (
-                        <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs dark:bg-zinc-900/30">
+                        <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs">
                           <span className="text-zinc-500">
                             Verify this supplier's capability matching based on AS9100 tooling
                             certifications.
@@ -162,7 +160,7 @@ export default function SupplierAttestationPage() {
                             <Button
                               onClick={() => handleAttestCapability(s.id)}
                               disabled={!engineerName || signingId === s.id}
-                              className="h-8 bg-indigo-600 py-1 text-xs text-white hover:bg-indigo-700 dark:bg-indigo-500"
+                              className="h-8 bg-indigo-600 py-1 text-xs text-white hover:bg-indigo-700"
                             >
                               {signingId === s.id
                                 ? "Attesting..."
@@ -173,7 +171,7 @@ export default function SupplierAttestationPage() {
                       )}
 
                       {isAttested && (
-                        <div className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700 dark:text-emerald-400">
+                        <div className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700">
                           <ShieldCheck className="size-4 shrink-0" />
                           <span>
                             Supplier link successfully verified and attested by lead engineer.
@@ -194,7 +192,7 @@ export default function SupplierAttestationPage() {
 
           {/* SOURCING COMPLIANCE */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm dark:border-zinc-800">
+            <Card className="border-zinc-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
@@ -204,10 +202,10 @@ export default function SupplierAttestationPage() {
                     <h2 className="text-foreground text-base font-bold">Policy Guide</h2>
                   </div>
 
-                  <Divider className="border-zinc-200 dark:border-zinc-800" />
+                  <Divider className="border-zinc-200" />
 
-                  <div className="border-zinc-150 dark:border-zinc-850 rounded border bg-zinc-50 p-3 text-left text-xs dark:bg-zinc-900">
-                    <span className="mb-1 block font-semibold text-zinc-800 dark:text-zinc-200">
+                  <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-left text-xs">
+                    <span className="mb-1 block font-semibold text-zinc-800">
                       Manual Provenance Rule:
                     </span>
                     <p className="text-[11px] leading-normal text-zinc-500">

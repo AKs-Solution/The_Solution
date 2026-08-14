@@ -101,8 +101,10 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
         const searchTerms = [
           entity.name,
           ...(entity.tags || []),
-          ...Object.values(entity.labels || {})
-        ].filter(Boolean).join(" ");
+          ...Object.values(entity.labels || {}),
+        ]
+          .filter(Boolean)
+          .join(" ");
 
         const res = await fetch(`/api/precedents?search=${encodeURIComponent(searchTerms)}`);
         if (res.ok) {
@@ -141,7 +143,14 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
 
   if (isLoading) return <EntityDetailSkeleton />;
   if (error) return <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />;
-  if (!entity) return null;
+  if (!entity) {
+    return (
+      <ErrorState
+        message="This entity could not be found or is no longer available."
+        onRetry={() => setReloadKey((k) => k + 1)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -284,16 +293,17 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div className="flex flex-col gap-1.5">
-            <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
+            <CardTitle className="text-foreground flex items-center gap-2 text-base font-bold">
               <History className="size-4 text-amber-500" />
               Related Historical Context & Lessons Learned
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Institutional engineering memory matching this entity&apos;s design space and system profile.
+            <p className="text-muted-foreground text-xs">
+              Institutional engineering memory matching this entity&apos;s design space and system
+              profile.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded px-2 py-0.5 font-semibold">
+            <span className="rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-amber-500">
               Deterministic Memory
             </span>
           </div>
@@ -301,22 +311,28 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
         <CardContent className="pt-6">
           {isPrecedentsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div>
+              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-amber-500"></div>
             </div>
           ) : relatedPrecedents.length === 0 ? (
-            <div className="text-center py-12 border border-dashed rounded-lg">
-              <HelpCircle className="size-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-              <p className="text-sm text-foreground font-semibold">No historical precedents found</p>
-              <p className="text-xs text-muted-foreground mt-1">There are no records in the organizational database for this design signature.</p>
+            <div className="rounded-lg border border-dashed py-12 text-center">
+              <HelpCircle className="text-muted-foreground mx-auto mb-2 size-8 opacity-50" />
+              <p className="text-foreground text-sm font-semibold">
+                No historical precedents found
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                There are no records in the organizational database for this design signature.
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
               {/* Left Column: List of Matched Precedents */}
-              <div className="lg:col-span-5 space-y-3">
-                <div className="text-[10px] font-mono font-bold tracking-widest text-muted-foreground uppercase mb-2">
-                  {hasKeywordMatch ? "HIGHLY RELEVANT PRECEDENTS" : "GENERAL SYSTEM PRECEDENTS (FALLBACK)"}
+              <div className="space-y-3 lg:col-span-5">
+                <div className="text-muted-foreground mb-2 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  {hasKeywordMatch
+                    ? "HIGHLY RELEVANT PRECEDENTS"
+                    : "GENERAL SYSTEM PRECEDENTS (FALLBACK)"}
                 </div>
-                <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                <div className="max-h-[480px] space-y-2 overflow-y-auto pr-1">
                   {relatedPrecedents.map((prec) => {
                     const isSelected = selectedPrecId === prec.id;
                     return (
@@ -324,49 +340,72 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                         key={prec.id}
                         type="button"
                         onClick={() => setSelectedPrecId(prec.id)}
-                        className={`w-full text-left p-3.5 rounded-lg border transition-all flex flex-col gap-2 group ${
+                        className={`group flex w-full flex-col gap-2 rounded-lg border p-3.5 text-left transition-all ${
                           isSelected
-                            ? "bg-amber-500/5 border-amber-500/30 ring-1 ring-amber-500/20"
-                            : "bg-background border-border hover:bg-zinc-50/50 dark:hover:bg-zinc-900/40"
+                            ? "border-amber-500/30 bg-amber-500/5 ring-1 ring-amber-500/20"
+                            : "bg-background border-border hover:bg-zinc-50/50"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className={`text-xs font-bold transition-colors line-clamp-1 ${
-                            isSelected ? "text-amber-600 dark:text-amber-400" : "text-foreground group-hover:text-amber-500"
-                          }`}>
+                          <span
+                            className={`line-clamp-1 text-xs font-bold transition-colors ${
+                              isSelected
+                                ? "text-amber-600"
+                                : "text-foreground group-hover:text-amber-500"
+                            }`}
+                          >
                             {prec.title}
                           </span>
-                          <ChevronRight className={`size-3 shrink-0 transition-transform ${
-                            isSelected ? "text-amber-500 translate-x-0.5" : "text-muted-foreground opacity-0 group-hover:opacity-100"
-                          }`} />
+                          <ChevronRight
+                            className={`size-3 shrink-0 transition-transform ${
+                              isSelected
+                                ? "translate-x-0.5 text-amber-500"
+                                : "text-muted-foreground opacity-0 group-hover:opacity-100"
+                            }`}
+                          />
                         </div>
-                        
-                        <p className="text-[11px] text-muted-foreground line-clamp-2">
+
+                        <p className="text-muted-foreground line-clamp-2 text-[11px]">
                           {prec.description}
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className={`text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded uppercase tracking-wider ${
-                            prec.type === "FAILURE" ? "bg-red-500/10 text-red-600" :
-                            prec.type === "SUCCESSFUL_DESIGN" ? "bg-green-500/10 text-green-600" :
-                            prec.type === "REGULATORY_PRECEDENT" ? "bg-blue-500/10 text-blue-600" :
-                            "bg-purple-500/10 text-purple-600"
-                          }`}>
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <span
+                            className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider uppercase ${
+                              prec.type === "FAILURE"
+                                ? "bg-red-500/10 text-red-600"
+                                : prec.type === "SUCCESSFUL_DESIGN"
+                                  ? "bg-green-500/10 text-green-600"
+                                  : prec.type === "REGULATORY_PRECEDENT"
+                                    ? "bg-blue-500/10 text-blue-600"
+                                    : "bg-purple-500/10 text-purple-600"
+                            }`}
+                          >
                             {prec.type.replace("_", " ")}
                           </span>
 
-                          <span className={`text-[10px] font-medium inline-flex items-center gap-1 ${
-                            prec.resolutionStatus === "RESOLVED" ? "text-green-600" :
-                            prec.resolutionStatus === "MITIGATED" ? "text-amber-600" : "text-zinc-500"
-                          }`}>
-                            <span className={`size-1 rounded-full ${
-                              prec.resolutionStatus === "RESOLVED" ? "bg-green-500" :
-                              prec.resolutionStatus === "MITIGATED" ? "bg-amber-500" : "bg-zinc-500"
-                            }`} />
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-medium ${
+                              prec.resolutionStatus === "RESOLVED"
+                                ? "text-green-600"
+                                : prec.resolutionStatus === "MITIGATED"
+                                  ? "text-amber-600"
+                                  : "text-zinc-500"
+                            }`}
+                          >
+                            <span
+                              className={`size-1 rounded-full ${
+                                prec.resolutionStatus === "RESOLVED"
+                                  ? "bg-green-500"
+                                  : prec.resolutionStatus === "MITIGATED"
+                                    ? "bg-amber-500"
+                                    : "bg-zinc-500"
+                              }`}
+                            />
                             {prec.resolutionStatus}
                           </span>
 
-                          <span className="text-[10px] font-mono text-muted-foreground ml-auto">
+                          <span className="text-muted-foreground ml-auto font-mono text-[10px]">
                             Confidence: {Math.round(prec.confidenceScore * 100)}%
                           </span>
                         </div>
@@ -377,70 +416,74 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
               </div>
 
               {/* Right Column: Precedent Details & Rich Explainability */}
-              <div className="lg:col-span-7 border rounded-xl p-5 bg-zinc-50/20 dark:bg-zinc-900/10">
+              <div className="rounded-xl border bg-zinc-50/20 p-5 lg:col-span-7">
                 {(() => {
-                  const prec = relatedPrecedents.find(p => p.id === selectedPrecId);
+                  const prec = relatedPrecedents.find((p) => p.id === selectedPrecId);
                   if (!prec) return null;
                   return (
                     <div className="space-y-4">
                       {/* Header */}
                       <div className="flex items-start justify-between border-b pb-3.5">
                         <div className="flex flex-col gap-1 pr-6">
-                          <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                          <span className="text-muted-foreground flex items-center gap-1 font-mono text-[9px] font-bold tracking-widest uppercase">
                             <Bookmark className="size-3 text-amber-500" />
                             Precedent Rationale
                           </span>
-                          <h4 className="text-sm font-bold text-foreground">
-                            {prec.title}
-                          </h4>
+                          <h4 className="text-foreground text-sm font-bold">{prec.title}</h4>
                         </div>
-                        <span className={`text-[10px] font-mono font-bold border rounded px-2 py-0.5 ${
-                          prec.type === "FAILURE" ? "border-red-500/20 bg-red-500/5 text-red-600" :
-                          prec.type === "SUCCESSFUL_DESIGN" ? "border-green-500/20 bg-green-500/5 text-green-600" :
-                          prec.type === "REGULATORY_PRECEDENT" ? "border-blue-500/20 bg-blue-500/5 text-blue-600" :
-                          "border-purple-500/20 bg-purple-500/5 text-purple-600"
-                        }`}>
+                        <span
+                          className={`rounded border px-2 py-0.5 font-mono text-[10px] font-bold ${
+                            prec.type === "FAILURE"
+                              ? "border-red-500/20 bg-red-500/5 text-red-600"
+                              : prec.type === "SUCCESSFUL_DESIGN"
+                                ? "border-green-500/20 bg-green-500/5 text-green-600"
+                                : prec.type === "REGULATORY_PRECEDENT"
+                                  ? "border-blue-500/20 bg-blue-500/5 text-blue-600"
+                                  : "border-purple-500/20 bg-purple-500/5 text-purple-600"
+                          }`}
+                        >
                           {prec.type.replace("_", " ")}
                         </span>
                       </div>
 
                       {/* Relevance description */}
                       <div>
-                        <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-1">
+                        <span className="text-muted-foreground mb-1 block font-mono text-[10px] font-semibold">
                           RELEVANCE ANALYSIS
                         </span>
-                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-lg p-3 text-xs text-foreground leading-relaxed">
-                          {prec.whyRelevant || "Direct match discovered based on system context overlap."}
+                        <div className="text-foreground rounded-lg border border-amber-500/10 bg-amber-500/5 p-3 text-xs leading-relaxed">
+                          {prec.whyRelevant ||
+                            "Direct match discovered based on system context overlap."}
                         </div>
                       </div>
 
                       {/* Abstract / Problem description */}
                       <div>
-                        <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-1">
+                        <span className="text-muted-foreground mb-1 block font-mono text-[10px] font-semibold">
                           ABSTRACT
                         </span>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground text-xs leading-relaxed">
                           {prec.description}
                         </p>
                       </div>
 
                       {/* Root cause and corrective action */}
                       {prec.rootCause && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3.5">
-                          <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3">
-                            <span className="text-[10px] font-mono font-bold text-red-600 block mb-1 uppercase tracking-wider">
+                        <div className="grid grid-cols-1 gap-4 border-t pt-3.5 md:grid-cols-2">
+                          <div className="rounded-lg border border-red-500/10 bg-red-500/5 p-3">
+                            <span className="mb-1 block font-mono text-[10px] font-bold tracking-wider text-red-600 uppercase">
                               Root Cause
                             </span>
-                            <p className="text-xs text-foreground leading-relaxed">
+                            <p className="text-foreground text-xs leading-relaxed">
                               {prec.rootCause}
                             </p>
                           </div>
                           {prec.correctiveAction && (
-                            <div className="bg-green-500/5 border border-green-500/10 rounded-lg p-3">
-                              <span className="text-[10px] font-mono font-bold text-green-600 block mb-1 uppercase tracking-wider">
+                            <div className="rounded-lg border border-green-500/10 bg-green-500/5 p-3">
+                              <span className="mb-1 block font-mono text-[10px] font-bold tracking-wider text-green-600 uppercase">
                                 Corrective Action
                               </span>
-                              <p className="text-xs text-foreground leading-relaxed">
+                              <p className="text-foreground text-xs leading-relaxed">
                                 {prec.correctiveAction}
                               </p>
                             </div>
@@ -450,25 +493,25 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
 
                       {/* Strength Ratings */}
                       <div className="border-t pt-3.5">
-                        <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-2">
+                        <span className="text-muted-foreground mb-2 block font-mono text-[10px] font-semibold">
                           STRENGTH RATINGS
                         </span>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="border border-border rounded-lg p-2.5 bg-background">
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium mb-1">
+                          <div className="border-border bg-background rounded-lg border p-2.5">
+                            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                               <ShieldCheck className="size-3.5 text-amber-500" />
                               <span>CONFIDENCE SCORE</span>
                             </div>
-                            <span className="text-base font-extrabold font-mono text-foreground">
+                            <span className="text-foreground font-mono text-base font-extrabold">
                               {Math.round(prec.confidenceScore * 100)}%
                             </span>
                           </div>
-                          <div className="border border-border rounded-lg p-2.5 bg-background">
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium mb-1">
+                          <div className="border-border bg-background rounded-lg border p-2.5">
+                            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                               <ShieldAlert className="size-3.5 text-blue-500" />
                               <span>EVIDENCE STRENGTH</span>
                             </div>
-                            <span className="text-base font-extrabold font-mono text-foreground">
+                            <span className="text-foreground font-mono text-base font-extrabold">
                               {Math.round((prec.evidenceStrength ?? prec.confidenceScore) * 100)}%
                             </span>
                           </div>
@@ -478,14 +521,17 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                       {/* Assumptions Rejected */}
                       {prec.assumptionsRejected && prec.assumptionsRejected.length > 0 && (
                         <div className="border-t pt-3.5">
-                          <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-2">
+                          <span className="text-muted-foreground mb-2 block font-mono text-[10px] font-semibold">
                             ASSUMPTIONS REJECTED / DEBUNKED
                           </span>
-                          <div className="bg-red-500/5 border border-red-500/15 rounded-lg p-3">
+                          <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-3">
                             <ul className="space-y-1.5">
                               {prec.assumptionsRejected.map((as, idx) => (
-                                <li key={idx} className="text-xs text-red-700 dark:text-red-400 flex items-start gap-2">
-                                  <span className="text-red-500 font-bold shrink-0">✕</span>
+                                <li
+                                  key={idx}
+                                  className="flex items-start gap-2 text-xs text-red-700"
+                                >
+                                  <span className="shrink-0 font-bold text-red-500">✕</span>
                                   <span>{as}</span>
                                 </li>
                               ))}
@@ -495,41 +541,55 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                       )}
 
                       {/* Knowledge Graph Traversed Paths */}
-                      {prec.graphRelationshipsTraversed && prec.graphRelationshipsTraversed.length > 0 && (
-                        <div className="border-t pt-3.5">
-                          <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-2">
-                            KNOWLEDGE GRAPH PATHS TRAVERSED
-                          </span>
-                          <div className="space-y-1">
-                            {prec.graphRelationshipsTraversed.map((path, idx) => (
-                              <div key={idx} className="bg-muted/40 rounded px-2.5 py-1.5 text-[10px] font-mono flex items-center gap-1.5 text-foreground leading-tight">
-                                <Network className="size-3.5 text-muted-foreground shrink-0" />
-                                <span>{path}</span>
-                              </div>
-                            ))}
+                      {prec.graphRelationshipsTraversed &&
+                        prec.graphRelationshipsTraversed.length > 0 && (
+                          <div className="border-t pt-3.5">
+                            <span className="text-muted-foreground mb-2 block font-mono text-[10px] font-semibold">
+                              KNOWLEDGE GRAPH PATHS TRAVERSED
+                            </span>
+                            <div className="space-y-1">
+                              {prec.graphRelationshipsTraversed.map((path, idx) => (
+                                <div
+                                  key={idx}
+                                  className="bg-muted/40 text-foreground flex items-center gap-1.5 rounded px-2.5 py-1.5 font-mono text-[10px] leading-tight"
+                                >
+                                  <Network className="text-muted-foreground size-3.5 shrink-0" />
+                                  <span>{path}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Verifiable Evidence Chains */}
                       {prec.evidenceMetadata && (
                         <div className="border-t pt-3.5">
-                          <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-2">
+                          <span className="text-muted-foreground mb-2 block font-mono text-[10px] font-semibold">
                             VERIFIABLE EVIDENCE CHAINS
                           </span>
                           <div className="space-y-1.5">
                             {prec.evidenceMetadata.documents?.map((doc) => (
-                              <div key={doc} className="flex items-center gap-2 text-xs text-foreground bg-background border rounded px-2.5 py-1.5">
-                                <FileText className="size-3.5 text-blue-500 shrink-0" />
-                                <span className="font-medium truncate">{doc}</span>
-                                <span className="text-[9px] font-mono text-green-600 bg-green-500/10 px-1 py-0.2 rounded ml-auto">VERIFIED</span>
+                              <div
+                                key={doc}
+                                className="text-foreground bg-background flex items-center gap-2 rounded border px-2.5 py-1.5 text-xs"
+                              >
+                                <FileText className="size-3.5 shrink-0 text-blue-500" />
+                                <span className="truncate font-medium">{doc}</span>
+                                <span className="ml-auto rounded bg-green-500/10 px-1 py-0.5 font-mono text-[9px] text-green-600">
+                                  VERIFIED
+                                </span>
                               </div>
                             ))}
                             {prec.evidenceMetadata.standards?.map((std) => (
-                              <div key={std} className="flex items-center gap-2 text-xs text-foreground bg-background border rounded px-2.5 py-1.5">
-                                <GitBranch className="size-3.5 text-purple-500 shrink-0" />
-                                <span className="font-medium truncate">{std}</span>
-                                <span className="text-[9px] font-mono text-purple-600 bg-purple-500/10 px-1 py-0.2 rounded ml-auto font-semibold">STANDARD</span>
+                              <div
+                                key={std}
+                                className="text-foreground bg-background flex items-center gap-2 rounded border px-2.5 py-1.5 text-xs"
+                              >
+                                <GitBranch className="size-3.5 shrink-0 text-purple-500" />
+                                <span className="truncate font-medium">{std}</span>
+                                <span className="ml-auto rounded bg-purple-500/10 px-1 py-0.5 font-mono text-[9px] font-semibold text-purple-600">
+                                  STANDARD
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -539,18 +599,18 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                       {/* Audit Trail */}
                       {prec.auditTrail && prec.auditTrail.length > 0 && (
                         <div className="border-t pt-3.5">
-                          <span className="text-[10px] font-mono font-semibold text-muted-foreground block mb-2">
+                          <span className="text-muted-foreground mb-2 block font-mono text-[10px] font-semibold">
                             AUDIT TRAIL & HISTORY
                           </span>
-                          <div className="relative border-l pl-3 space-y-3.5">
+                          <div className="relative space-y-3.5 border-l pl-3">
                             {prec.auditTrail.map((log) => (
                               <div key={log.id} className="relative text-[11px]">
-                                <div className="absolute -left-[16.5px] top-1 size-2 bg-amber-500 rounded-full border border-background shadow-sm" />
+                                <div className="border-background absolute top-1 -left-[16.5px] size-2 rounded-full border bg-amber-500 shadow-sm" />
                                 <div className="flex flex-col">
-                                  <span className="font-bold text-foreground">
+                                  <span className="text-foreground font-bold">
                                     {log.action.replace("_", " ")}
                                   </span>
-                                  <span className="text-[9px] text-muted-foreground font-mono mt-0.5 flex items-center gap-1">
+                                  <span className="text-muted-foreground mt-0.5 flex items-center gap-1 font-mono text-[9px]">
                                     <Clock className="size-3" />
                                     {new Date(log.createdAt).toLocaleString()}
                                   </span>

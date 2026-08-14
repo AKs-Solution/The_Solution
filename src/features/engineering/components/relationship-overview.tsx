@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { QueryError } from "@/components/ui/query-error";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TypeBadge } from "./type-badge";
 
 interface RelatedEntity {
@@ -73,22 +74,26 @@ const RELATIONSHIP_COLORS: Record<string, string> = {
 };
 
 export function RelationshipOverview({ entityId }: RelationshipOverviewProps) {
-  const router = useRouter();
   const [incoming, setIncoming] = useState<Relationship[]>([]);
   const [outgoing, setOutgoing] = useState<Relationship[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [targetId, setTargetId] = useState("");
   const [relType, setRelType] = useState("REFERENCES");
   const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
+      setIsLoading(true);
+      setLoadError("");
       const result = await fetchRelationships(entityId);
       if (cancelled) return;
       if (!result) {
-        router.push("/entities");
+        setLoadError("Failed to load relationships for this entity.");
+        setIsLoading(false);
         return;
       }
       setIncoming(result.incoming);
@@ -99,7 +104,7 @@ export function RelationshipOverview({ entityId }: RelationshipOverviewProps) {
     return () => {
       cancelled = true;
     };
-  }, [entityId, router]);
+  }, [entityId, reloadKey]);
 
   async function refresh() {
     const result = await fetchRelationships(entityId);
@@ -187,98 +192,111 @@ export function RelationshipOverview({ entityId }: RelationshipOverviewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-foreground text-lg font-semibold">
-          Relationships ({incoming.length + outgoing.length})
-        </h2>
-        <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
-          <Plus className="mr-1.5 size-4" />
-          Add relationship
-        </Button>
-      </div>
+      {loadError ? (
+        <QueryError
+          title="Couldn't load relationships"
+          message={loadError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <h2 className="text-foreground text-lg font-semibold">
+              Relationships ({incoming.length + outgoing.length})
+            </h2>
+            <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
+              <Plus className="mr-1.5 size-4" />
+              Add relationship
+            </Button>
+          </div>
 
-      {showCreate && (
-        <Card>
-          <CardContent className="pt-6">
-            <form onSubmit={handleCreate} className="flex flex-col gap-3">
-              {error && (
-                <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-                  {error}
+          {showCreate && (
+            <Card>
+              <CardContent className="pt-6">
+                <form onSubmit={handleCreate} className="flex flex-col gap-3">
+                  {error && (
+                    <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
+                      {error}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label className="text-muted-foreground text-xs font-medium">
+                        Target entity ID
+                      </label>
+                      <input
+                        value={targetId}
+                        onChange={(e) => setTargetId(e.target.value)}
+                        placeholder="Entity ID..."
+                        className="border-border rounded-md border px-3 py-2 text-sm"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label className="text-muted-foreground text-xs font-medium">
+                        Relationship type
+                      </label>
+                      <select
+                        value={relType}
+                        onChange={(e) => setRelType(e.target.value)}
+                        className="border-border rounded-md border px-3 py-2 text-sm"
+                      >
+                        {Object.entries(RELATIONSHIP_TYPE_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <Button type="submit" size="sm" className="mt-5">
+                      Create
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {isLoading ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : incoming.length === 0 && outgoing.length === 0 ? (
+            <div className="border-border flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
+              <Share2 className="text-muted-foreground mb-3 size-10" />
+              <p className="text-muted-foreground text-sm">No relationships yet</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {outgoing.length > 0 && (
+                <div>
+                  <h3 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+                    Outgoing ({outgoing.length})
+                  </h3>
+                  <div className="divide-border divide-y rounded-lg border">
+                    {outgoing.map((rel) => (
+                      <RelationshipRow key={rel.id} rel={rel} direction="outgoing" />
+                    ))}
+                  </div>
                 </div>
               )}
-              <div className="flex items-center gap-3">
-                <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-muted-foreground text-xs font-medium">
-                    Target entity ID
-                  </label>
-                  <input
-                    value={targetId}
-                    onChange={(e) => setTargetId(e.target.value)}
-                    placeholder="Entity ID..."
-                    className="border-border rounded-md border px-3 py-2 text-sm"
-                    required
-                  />
-                </div>
-                <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-muted-foreground text-xs font-medium">
-                    Relationship type
-                  </label>
-                  <select
-                    value={relType}
-                    onChange={(e) => setRelType(e.target.value)}
-                    className="border-border rounded-md border px-3 py-2 text-sm"
-                  >
-                    {Object.entries(RELATIONSHIP_TYPE_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
+
+              {incoming.length > 0 && (
+                <div>
+                  <h3 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+                    Incoming ({incoming.length})
+                  </h3>
+                  <div className="divide-border divide-y rounded-lg border">
+                    {incoming.map((rel) => (
+                      <RelationshipRow key={rel.id} rel={rel} direction="incoming" />
                     ))}
-                  </select>
+                  </div>
                 </div>
-                <Button type="submit" size="sm" className="mt-5">
-                  Create
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {isLoading ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">Loading relationships...</p>
-      ) : incoming.length === 0 && outgoing.length === 0 ? (
-        <div className="border-border flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-          <Share2 className="text-muted-foreground mb-3 size-10" />
-          <p className="text-muted-foreground text-sm">No relationships yet</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {outgoing.length > 0 && (
-            <div>
-              <h3 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
-                Outgoing ({outgoing.length})
-              </h3>
-              <div className="divide-border divide-y rounded-lg border">
-                {outgoing.map((rel) => (
-                  <RelationshipRow key={rel.id} rel={rel} direction="outgoing" />
-                ))}
-              </div>
+              )}
             </div>
           )}
-
-          {incoming.length > 0 && (
-            <div>
-              <h3 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
-                Incoming ({incoming.length})
-              </h3>
-              <div className="divide-border divide-y rounded-lg border">
-                {incoming.map((rel) => (
-                  <RelationshipRow key={rel.id} rel={rel} direction="incoming" />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        </>
       )}
     </div>
   );

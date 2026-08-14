@@ -218,12 +218,10 @@ const PRESETS = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400",
-  HIGH: "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/30 dark:bg-orange-950/20 dark:text-orange-400",
-  MEDIUM:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-400",
-  LOW: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400",
+  CRITICAL: "border-red-200 bg-red-50 text-red-700",
+  HIGH: "border-orange-200 bg-orange-50 text-orange-700",
+  MEDIUM: "border-amber-200 bg-amber-50 text-amber-700",
+  LOW: "border-blue-200 bg-blue-50 text-blue-700",
 };
 
 export default function WorkspacePage() {
@@ -664,12 +662,12 @@ export default function WorkspacePage() {
   const getVerificationStrength = () => {
     if (!resolution) return { label: "—", color: "text-zinc-500" };
     if (resolution.status === "VERIFIED" || resolution.status === "SUFFICIENT") {
-      return { label: "Strong", color: "text-emerald-600 dark:text-emerald-400" };
+      return { label: "Strong", color: "text-emerald-600" };
     }
     if (resolution.status === "INCOMPLETE" || resolution.status === "NEEDS_REVIEW") {
-      return { label: "Sufficient with gaps", color: "text-amber-600 dark:text-amber-400" };
+      return { label: "Sufficient with gaps", color: "text-amber-600" };
     }
-    return { label: "Weak / Compromised", color: "text-rose-600 dark:text-rose-400" };
+    return { label: "Weak / Compromised", color: "text-rose-600" };
   };
 
   const getVerificationStatusLabel = (status: string) => {
@@ -951,7 +949,7 @@ export default function WorkspacePage() {
                   )}
                   <Badge
                     variant="secondary"
-                    className="border-zinc-200 bg-zinc-100 font-medium text-zinc-800 capitalize dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                    className="border-zinc-200 bg-zinc-100 font-medium text-zinc-800 capitalize"
                   >
                     Status: {getVerificationStatusLabel(resolution.status).toLowerCase()}
                   </Badge>
@@ -965,7 +963,7 @@ export default function WorkspacePage() {
             {/* --- ASSESSMENT SUMMARY & DECISION EXPORT --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Summary Card */}
-              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2 dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <h3 className="text-foreground text-sm font-semibold tracking-wider uppercase">
@@ -1001,9 +999,7 @@ export default function WorkspacePage() {
                         <p
                           className={cn(
                             "mt-1 text-lg font-bold",
-                            resolution.conflicts.length > 0
-                              ? "text-red-600 dark:text-red-400"
-                              : "text-foreground",
+                            resolution.conflicts.length > 0 ? "text-red-600" : "text-foreground",
                           )}
                         >
                           {resolution.conflicts.length}
@@ -1017,7 +1013,7 @@ export default function WorkspacePage() {
                           className={cn(
                             "mt-1 text-lg font-bold",
                             resolution.missingEvidence.length > 0
-                              ? "text-amber-600 dark:text-amber-400"
+                              ? "text-amber-600"
                               : "text-foreground",
                           )}
                         >
@@ -1026,7 +1022,7 @@ export default function WorkspacePage() {
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-150 dark:border-zinc-800" />
+                    <Divider className="border-zinc-200" />
 
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -1048,7 +1044,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Export Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm">
                 <CardContent className="flex h-full flex-col justify-between p-6">
                   <Stack gap={4}>
                     <h3 className="text-foreground text-sm font-semibold tracking-wider uppercase">
@@ -1062,7 +1058,7 @@ export default function WorkspacePage() {
                   <div className="mt-6">
                     <Button
                       onClick={handleExportDecision}
-                      className="flex h-11 w-full items-center justify-center gap-2 bg-zinc-900 font-medium text-zinc-50 shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                      className="flex h-11 w-full items-center justify-center gap-2 bg-zinc-900 font-medium text-zinc-50 shadow hover:bg-zinc-800"
                     >
                       {exportSuccess ? (
                         <>
@@ -1084,7 +1080,7 @@ export default function WorkspacePage() {
             {/* --- EVIDENCE TIMELINE & RELATED DOCUMENTS --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Evidence Timeline */}
-              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2 dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2">
                 <CardContent className="p-6">
                   <Stack gap={6}>
                     <div className="flex flex-col gap-1">
@@ -1101,7 +1097,7 @@ export default function WorkspacePage() {
                         No supporting compliance documents verified.
                       </div>
                     ) : (
-                      <div className="relative ml-2.5 space-y-6 border-l border-zinc-200 pl-5 dark:border-zinc-800">
+                      <div className="relative ml-2.5 space-y-6 border-l border-zinc-200 pl-5">
                         {resolution.supportingEvidence.map((node) => (
                           <div key={node.id} className="group relative">
                             {/* Circle Dot indicator */}
@@ -1114,14 +1110,14 @@ export default function WorkspacePage() {
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="border-zinc-200 bg-zinc-100 px-1.5 py-0 text-[10px] text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
+                                  className="border-zinc-200 bg-zinc-100 px-1.5 py-0 text-[10px] text-zinc-600"
                                 >
                                   {node.entityType ?? node.type}
                                 </Badge>
                               </div>
 
                               <p className="text-muted-foreground text-xs leading-normal">
-                                <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                                <span className="font-semibold text-zinc-700">
                                   Why it is relevant:
                                 </span>{" "}
                                 verified compliance matching requirement constraints.
@@ -1150,7 +1146,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Related Documents */}
-              <Card className="bg-background border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1183,11 +1179,11 @@ export default function WorkspacePage() {
                             <Link
                               key={docId}
                               href={`/documents/${docId}`}
-                              className="group flex items-start gap-2.5 rounded border border-transparent p-2 text-left transition-all hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900"
+                              className="group flex items-start gap-2.5 rounded border border-transparent p-2 text-left transition-all hover:border-zinc-200 hover:bg-zinc-50"
                             >
                               <FileText className="mt-0.5 size-4 shrink-0 text-zinc-400 group-hover:text-zinc-600" />
                               <div className="flex min-w-0 flex-col">
-                                <span className="text-foreground truncate text-xs font-semibold transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                <span className="text-foreground truncate text-xs font-semibold transition-colors group-hover:text-indigo-600">
                                   {docRecord.documentName}
                                 </span>
                                 <span className="mt-0.5 text-[10px] text-zinc-500">
@@ -1208,7 +1204,7 @@ export default function WorkspacePage() {
             {/* --- CONTRADICTIONS & MISSING EVIDENCE --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Contradictions Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1221,7 +1217,7 @@ export default function WorkspacePage() {
                     </div>
 
                     {resolution.conflicts.length === 0 ? (
-                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm dark:border-zinc-800 dark:bg-zinc-950/15">
+                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm">
                         No contradictions or specifications mismatch detected.
                       </div>
                     ) : (
@@ -1280,7 +1276,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Missing Evidence Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="bg-background border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1293,7 +1289,7 @@ export default function WorkspacePage() {
                     </div>
 
                     {resolution.missingEvidence.length === 0 ? (
-                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm dark:border-zinc-800 dark:bg-zinc-950/15">
+                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm">
                         All compliance checklists and certifications are complete.
                       </div>
                     ) : (
@@ -1336,7 +1332,7 @@ export default function WorkspacePage() {
             </div>
 
             {/* --- RELATED HISTORICAL CONTEXT --- */}
-            <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200 dark:border-zinc-800">
+            <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
@@ -1358,12 +1354,12 @@ export default function WorkspacePage() {
                             setSelectedPrecedent(prec);
                             setIsPrecedentModalOpen(true);
                           }}
-                          className="dark:border-zinc-805 cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50/10 p-5 text-left transition-all hover:bg-zinc-100/50 dark:bg-zinc-900/10 dark:hover:bg-zinc-900/20"
+                          className="cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50/10 p-5 text-left transition-all hover:bg-zinc-100/50"
                         >
                           <div className="flex flex-col gap-3">
                             <div className="flex items-start justify-between gap-4">
                               <div>
-                                <h4 className="text-foreground text-sm font-semibold hover:text-zinc-600 dark:hover:text-zinc-300">
+                                <h4 className="text-foreground text-sm font-semibold hover:text-zinc-600">
                                   {prec.title}
                                 </h4>
                                 <span className="text-muted-foreground mt-0.5 block text-[10px]">
@@ -1376,10 +1372,10 @@ export default function WorkspacePage() {
                                   className={cn(
                                     "px-2 py-0.5 text-[10px] font-semibold tracking-wide",
                                     prec.similarityScore >= 80
-                                      ? "border-emerald-250 bg-emerald-50 text-emerald-800 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400"
+                                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                                       : prec.similarityScore >= 50
-                                        ? "border-amber-250 bg-amber-50 text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-400"
-                                        : "border-zinc-200 bg-zinc-100 text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400",
+                                        ? "border-amber-200 bg-amber-50 text-amber-800"
+                                        : "border-zinc-200 bg-zinc-100 text-zinc-800",
                                   )}
                                 >
                                   {prec.similarityScore}% Match
@@ -1393,7 +1389,7 @@ export default function WorkspacePage() {
                                 "Matched via general metadata index."}
                             </p>
 
-                            <div className="grid grid-cols-1 gap-3 rounded border border-zinc-200/80 bg-zinc-50/50 p-3 text-xs sm:grid-cols-2 dark:border-zinc-800/80 dark:bg-zinc-950/25">
+                            <div className="grid grid-cols-1 gap-3 rounded border border-zinc-200/80 bg-zinc-50/50 p-3 text-xs sm:grid-cols-2">
                               <div>
                                 <strong className="text-foreground block font-medium">
                                   Outcome
@@ -1412,7 +1408,7 @@ export default function WorkspacePage() {
                               </div>
                             </div>
 
-                            <div className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                            <div className="text-[10px] text-zinc-400">
                               Supporting Evidence Count: {prec.supportingEvidence?.length || 0}
                             </div>
                           </div>
@@ -1420,7 +1416,7 @@ export default function WorkspacePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-muted-foreground rounded border border-dashed border-zinc-200 py-6 text-center text-sm dark:border-zinc-800">
+                    <div className="text-muted-foreground rounded border border-dashed border-zinc-200 py-6 text-center text-sm">
                       No matching precedents found in organizational memory.
                     </div>
                   )}
@@ -1430,7 +1426,7 @@ export default function WorkspacePage() {
 
             {/* --- FEDERATED INDUSTRY FABRIC INSIGHTS --- */}
             {fabricInsights.length > 0 && (
-              <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200 dark:border-zinc-800">
+              <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1440,7 +1436,7 @@ export default function WorkspacePage() {
                         </h3>
                         <Badge
                           variant="secondary"
-                          className="border-indigo-200 bg-indigo-50 text-indigo-800 dark:border-indigo-900/30 dark:bg-indigo-950/20 dark:text-indigo-400"
+                          className="border-indigo-200 bg-indigo-50 text-indigo-800"
                         >
                           Federated
                         </Badge>
@@ -1455,19 +1451,19 @@ export default function WorkspacePage() {
                       {fabricInsights.map((insight) => (
                         <div
                           key={insight.id}
-                          className="rounded-lg border border-indigo-200/50 bg-indigo-50/5 p-5 dark:border-indigo-900/30 dark:bg-indigo-950/5"
+                          className="rounded-lg border border-indigo-200/50 bg-indigo-50/5 p-5"
                         >
                           <div className="flex flex-col gap-3">
                             <div className="flex items-start justify-between gap-4">
                               <div>
-                                <h4 className="text-sm font-semibold text-indigo-950 dark:text-indigo-300">
+                                <h4 className="text-sm font-semibold text-indigo-950">
                                   {insight.title}
                                 </h4>
                                 <span className="text-muted-foreground mt-0.5 block text-[10px]">
                                   Type: {insight.axiomType} · Context Key: {insight.contextKey}
                                 </span>
                               </div>
-                              <Badge className="border-indigo-200 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
+                              <Badge className="border-indigo-200 bg-indigo-100 text-indigo-800">
                                 Verified Rule
                               </Badge>
                             </div>
@@ -1476,9 +1472,9 @@ export default function WorkspacePage() {
                               {insight.description}
                             </p>
 
-                            <div className="grid grid-cols-1 gap-3 rounded border border-indigo-200/20 bg-indigo-50/20 p-3 text-xs sm:grid-cols-2 dark:border-indigo-900/20 dark:bg-indigo-950/20">
+                            <div className="grid grid-cols-1 gap-3 rounded border border-indigo-200/20 bg-indigo-50/20 p-3 text-xs sm:grid-cols-2">
                               <div>
-                                <strong className="block font-medium text-indigo-900 dark:text-indigo-300">
+                                <strong className="block font-medium text-indigo-900">
                                   Aggregated Metrics
                                 </strong>
                                 <span className="text-muted-foreground mt-0.5 block">
@@ -1488,10 +1484,10 @@ export default function WorkspacePage() {
                                 </span>
                               </div>
                               <div>
-                                <strong className="block font-medium text-indigo-900 dark:text-indigo-300">
+                                <strong className="block font-medium text-indigo-900">
                                   Recommendation
                                 </strong>
-                                <span className="text-muted-foreground mt-0.5 block font-medium text-emerald-700 dark:text-emerald-400">
+                                <span className="text-muted-foreground mt-0.5 block font-medium text-emerald-700">
                                   {insight.recommendation}
                                 </span>
                               </div>
@@ -1507,14 +1503,14 @@ export default function WorkspacePage() {
 
             {/* --- ENGINEER SIGN-OFF & FINAL DECISION CAPTURE --- */}
             {activeDecision && (
-              <Card className="border-zinc-200 bg-zinc-50/10 shadow-lg dark:border-zinc-800 dark:bg-zinc-950/20">
+              <Card className="border-zinc-200 bg-zinc-50/10 shadow-lg">
                 <CardContent className="p-6">
                   <Stack gap={6}>
                     <div className="flex items-center gap-3">
                       {activeDecision.status === "FINALIZED" ? (
-                        <FileCheck2 className="size-6 text-emerald-600 dark:text-emerald-400" />
+                        <FileCheck2 className="size-6 text-emerald-600" />
                       ) : (
-                        <UserCheck className="size-6 text-zinc-600 dark:text-zinc-400" />
+                        <UserCheck className="size-6 text-zinc-600" />
                       )}
                       <div className="flex flex-col">
                         <h3 className="text-foreground text-base font-semibold">
@@ -1530,11 +1526,11 @@ export default function WorkspacePage() {
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-250 dark:border-zinc-800" />
+                    <Divider className="border-zinc-200" />
 
                     {activeDecision.status === "FINALIZED" ? (
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4 dark:bg-zinc-900/10">
+                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4">
                           <div>
                             <span className="text-muted-foreground text-xs font-semibold uppercase">
                               Final Decision Statement
@@ -1553,7 +1549,7 @@ export default function WorkspacePage() {
                           </div>
                         </Stack>
 
-                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4 dark:bg-zinc-900/10">
+                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4">
                           <div>
                             <span className="text-muted-foreground text-xs font-semibold uppercase">
                               Rationale & Mitigation Notes
@@ -1569,7 +1565,7 @@ export default function WorkspacePage() {
                         {/* Validation warning if gaps exist */}
                         {(resolution.conflicts.length > 0 ||
                           resolution.missingEvidence.length > 0) && (
-                          <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/10 dark:text-amber-400">
+                          <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-800">
                             <div className="flex items-start gap-2">
                               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                               <div>
@@ -1598,7 +1594,7 @@ export default function WorkspacePage() {
                             placeholder="e.g. Approve Supplier X fastener usage for cyclic vibration load compliance."
                             value={finalDecisionText}
                             onChange={(e) => setFinalDecisionText(e.target.value)}
-                            className="border-zinc-200 dark:border-zinc-800"
+                            className="border-zinc-200"
                             disabled={isFinalizing}
                           />
                         </div>
@@ -1615,19 +1611,19 @@ export default function WorkspacePage() {
                             placeholder="Document the exact engineering justification, limitations, and mitigations..."
                             value={rationaleText}
                             onChange={(e) => setRationaleText(e.target.value)}
-                            className="border-zinc-250 placeholder:text-muted-foreground focus-visible:ring-ring min-h-[100px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"
+                            className="placeholder:text-muted-foreground focus-visible:ring-ring min-h-[100px] w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isFinalizing}
                           />
                         </div>
 
                         {validationError && (
-                          <div className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                          <div className="text-xs font-semibold text-rose-600">
                             {validationError}
                           </div>
                         )}
 
                         {finalizeSuccess && (
-                          <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          <div className="text-xs font-semibold text-emerald-600">
                             Sign-off completed successfully!
                           </div>
                         )}
@@ -1636,7 +1632,7 @@ export default function WorkspacePage() {
                           <Button
                             onClick={handleFinalizeDecision}
                             disabled={isFinalizing}
-                            className="h-11 bg-zinc-900 px-6 font-semibold text-zinc-50 shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                            className="h-11 bg-zinc-900 px-6 font-semibold text-zinc-50 shadow hover:bg-zinc-800"
                           >
                             {isFinalizing ? "Signing Off..." : "Sign Off & Finalize Decision"}
                           </Button>
@@ -1650,19 +1646,19 @@ export default function WorkspacePage() {
             {/* Precedent Detail Modal Overlay */}
             {isPrecedentModalOpen && selectedPrecedent && (
               <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs transition-opacity duration-300">
-                <div className="animate-in slide-in-from-right flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-6 text-zinc-100 shadow-2xl duration-250">
-                  <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div className="animate-in slide-in-from-right flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-zinc-200 bg-white p-6 text-zinc-900 shadow-sm duration-250">
+                  <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
                     <div>
-                      <span className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">
+                      <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">
                         Historical Context / Precedent Profile
                       </span>
-                      <h2 className="mt-1 text-lg font-bold text-zinc-50">
+                      <h2 className="mt-1 text-lg font-bold text-zinc-900">
                         {selectedPrecedent.title}
                       </h2>
                     </div>
                     <button
                       onClick={() => setIsPrecedentModalOpen(false)}
-                      className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                      className="flex size-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-200"
                     >
                       <XCircle className="size-5" />
                     </button>
@@ -1671,14 +1667,14 @@ export default function WorkspacePage() {
                   <Stack gap={6} className="mt-6">
                     {/* Similarity Score */}
                     {selectedPrecedent.similarityScore !== undefined && (
-                      <div className="rounded-xl border border-emerald-900/30 bg-emerald-950/20 p-4">
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className="size-4 text-emerald-400" />
-                          <span className="text-sm font-semibold text-emerald-400">
+                          <ShieldCheck className="size-4 text-emerald-600" />
+                          <span className="text-sm font-semibold text-emerald-600">
                             Similarity Match: {selectedPrecedent.similarityScore}%
                           </span>
                         </div>
-                        <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+                        <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
                           <strong>Match rationale:</strong>{" "}
                           {selectedPrecedent.matchExplanation?.join("; ")}
                         </p>
@@ -1686,64 +1682,64 @@ export default function WorkspacePage() {
                     )}
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                         Engineering Question
                       </h4>
-                      <p className="mt-1 text-sm font-medium text-zinc-200 italic">
+                      <p className="mt-1 text-sm font-medium text-zinc-700 italic">
                         &quot;{selectedPrecedent.engineeringQuestion}&quot;
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                         Decision Summary
                       </h4>
-                      <p className="border-zinc-850 mt-1 rounded-lg border bg-zinc-950/50 p-3 text-sm leading-relaxed font-normal text-zinc-200">
+                      <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 text-sm leading-relaxed font-normal text-zinc-700">
                         {selectedPrecedent.decisionMade}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                        <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                           Outcome
                         </h4>
-                        <p className="mt-1 text-sm font-semibold text-zinc-300">
+                        <p className="mt-1 text-sm font-semibold text-zinc-600">
                           {selectedPrecedent.outcome}
                         </p>
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                        <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                           Decision Date
                         </h4>
-                        <p className="mt-1 text-sm text-zinc-300">
+                        <p className="mt-1 text-sm text-zinc-600">
                           {new Date(selectedPrecedent.decisionDate).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                         Lessons Learned
                       </h4>
-                      <p className="border-zinc-850/60 mt-1 rounded-lg border bg-zinc-950/20 p-3 text-sm leading-relaxed text-zinc-300">
+                      <p className="mt-1 rounded-lg border border-zinc-200/60 bg-zinc-50/20 p-3 text-sm leading-relaxed text-zinc-600">
                         {selectedPrecedent.lessonsLearned}
                       </p>
                     </div>
 
                     {/* Evidence, Contradictions, Missing */}
-                    <div className="border-zinc-850 border-t pt-4">
-                      <h3 className="text-zinc-205 mb-3 text-sm font-semibold">
+                    <div className="border-t border-zinc-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
                         Verification Details
                       </h3>
                       <Stack gap={4}>
                         <div>
-                          <span className="text-xs font-semibold text-zinc-400">
+                          <span className="text-xs font-semibold text-zinc-500">
                             Supporting Evidence Used
                           </span>
                           {selectedPrecedent.supportingEvidence &&
                           selectedPrecedent.supportingEvidence.length > 0 ? (
-                            <ul className="text-zinc-305 mt-1.5 list-inside list-disc space-y-1 text-xs">
+                            <ul className="mt-1.5 list-inside list-disc space-y-1 text-xs text-zinc-600">
                               {selectedPrecedent.supportingEvidence.map((e, i) => (
                                 <li key={i}>{e}</li>
                               ))}
@@ -1756,7 +1752,7 @@ export default function WorkspacePage() {
                         </div>
 
                         <div>
-                          <span className="text-xs font-semibold text-zinc-400">
+                          <span className="text-xs font-semibold text-zinc-500">
                             Contradictions Encountered
                           </span>
                           {selectedPrecedent.contradictions &&
@@ -1774,12 +1770,12 @@ export default function WorkspacePage() {
                         </div>
 
                         <div>
-                          <span className="text-xs font-semibold text-zinc-400">
+                          <span className="text-xs font-semibold text-zinc-500">
                             Missing Evidence Identified
                           </span>
                           {selectedPrecedent.missingEvidence &&
                           selectedPrecedent.missingEvidence.length > 0 ? (
-                            <ul className="mt-1.5 list-inside list-disc space-y-1 text-xs text-amber-400">
+                            <ul className="mt-1.5 list-inside list-disc space-y-1 text-xs text-amber-600">
                               {selectedPrecedent.missingEvidence.map((m, i) => (
                                 <li key={i}>{m}</li>
                               ))}
@@ -1794,40 +1790,40 @@ export default function WorkspacePage() {
                     </div>
 
                     {/* Linked parameters */}
-                    <div className="border-zinc-850 border-t pt-4">
-                      <h3 className="text-zinc-205 mb-3 text-sm font-semibold">
+                    <div className="border-t border-zinc-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
                         Linked Parameters
                       </h3>
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="block font-semibold text-zinc-400">
+                          <span className="block font-semibold text-zinc-500">
                             Linked Documents
                           </span>
-                          <span className="mt-1 block text-zinc-300">
+                          <span className="mt-1 block text-zinc-600">
                             {selectedPrecedent.relatedDocuments?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-400">
+                          <span className="block font-semibold text-zinc-500">
                             Linked Suppliers
                           </span>
-                          <span className="mt-1 block text-zinc-300">
+                          <span className="mt-1 block text-zinc-600">
                             {selectedPrecedent.relatedSuppliers?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-400">
+                          <span className="block font-semibold text-zinc-500">
                             Linked Requirements
                           </span>
-                          <span className="mt-1 block text-zinc-300">
+                          <span className="mt-1 block text-zinc-600">
                             {selectedPrecedent.relatedRequirements?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-400">
+                          <span className="block font-semibold text-zinc-500">
                             Linked Standards
                           </span>
-                          <span className="mt-1 block text-zinc-300">
+                          <span className="mt-1 block text-zinc-600">
                             {selectedPrecedent.relatedStandards?.join(", ") || "None"}
                           </span>
                         </div>
@@ -1835,24 +1831,24 @@ export default function WorkspacePage() {
                     </div>
 
                     {/* Audit & Version History */}
-                    <div className="border-zinc-850 border-t pt-4">
-                      <h3 className="text-zinc-205 mb-3 text-sm font-semibold">
+                    <div className="border-t border-zinc-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
                         Audit Trail & History
                       </h3>
                       <div className="space-y-4">
                         {selectedPrecedent.versions && selectedPrecedent.versions.length > 0 && (
                           <div>
-                            <span className="mb-1 block text-xs font-semibold text-zinc-400">
+                            <span className="mb-1 block text-xs font-semibold text-zinc-500">
                               Version History
                             </span>
                             <div className="space-y-1.5">
                               {selectedPrecedent.versions.map((v, i) => (
                                 <div
                                   key={i}
-                                  className="flex justify-between rounded border border-zinc-800 bg-zinc-950/30 p-2 text-xs"
+                                  className="flex justify-between rounded border border-zinc-200 bg-zinc-50/30 p-2 text-xs"
                                 >
-                                  <span className="text-zinc-205 font-medium">v{v.version}</span>
-                                  <span className="text-zinc-400">{v.summary}</span>
+                                  <span className="font-medium text-zinc-700">v{v.version}</span>
+                                  <span className="text-zinc-500">{v.summary}</span>
                                   <span className="text-zinc-500">
                                     {new Date(v.createdAt).toLocaleDateString()}
                                   </span>
@@ -1865,16 +1861,16 @@ export default function WorkspacePage() {
                         {selectedPrecedent.auditMetadata &&
                           selectedPrecedent.auditMetadata.length > 0 && (
                             <div>
-                              <span className="mb-1 block text-xs font-semibold text-zinc-400">
+                              <span className="mb-1 block text-xs font-semibold text-zinc-500">
                                 System Audit Logs
                               </span>
                               <div className="space-y-1.5">
                                 {selectedPrecedent.auditMetadata.map((log, i) => (
                                   <div
                                     key={i}
-                                    className="border-zinc-850 rounded border bg-zinc-950/20 p-2 text-[11px] text-zinc-400"
+                                    className="rounded border border-zinc-200 bg-zinc-50/20 p-2 text-[11px] text-zinc-500"
                                   >
-                                    <span className="text-zinc-205 font-semibold">
+                                    <span className="font-semibold text-zinc-700">
                                       {log.action}
                                     </span>{" "}
                                     by {log.performedBy} on{" "}

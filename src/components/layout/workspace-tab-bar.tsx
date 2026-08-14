@@ -40,6 +40,7 @@ export function WorkspaceTabBar() {
     useWorkspaceTabs();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +76,36 @@ export function WorkspaceTabBar() {
 
   const handleTabClick = (tabId: string) => {
     activateTab(tabId);
+  };
+
+  const handleTabKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    tabId: string,
+    index: number,
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      activateTab(tabId);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const direction = e.key === "ArrowRight" ? 1 : -1;
+      const next = (index + direction + tabs.length) % tabs.length;
+      tabRefs.current[next]?.focus();
+    }
+  };
+
+  const handleFocus = (index: number) => {
+    if (scrollRef.current) {
+      const el = tabRefs.current[index];
+      if (el) {
+        const target =
+          el.offsetLeft -
+          scrollRef.current.offsetLeft -
+          scrollRef.current.clientWidth / 2 +
+          el.clientWidth / 2;
+        scrollRef.current.scrollTo({ left: target, behavior: "smooth" });
+      }
+    }
   };
 
   const handleNewTab = () => {
@@ -125,7 +156,7 @@ export function WorkspaceTabBar() {
         className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto py-0.5"
         role="tablist"
       >
-        {tabs.map((tab) => {
+        {tabs.map((tab, index) => {
           const Icon = KIND_ICON_MAP[tab.kind] ?? FileText;
           const isActive =
             tab.id === activeTabId ||
@@ -135,9 +166,15 @@ export function WorkspaceTabBar() {
           return (
             <div
               key={tab.id}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
               role="tab"
+              tabIndex={0}
               aria-selected={isActive}
               onClick={() => handleTabClick(tab.id)}
+              onKeyDown={(e) => handleTabKeyDown(e, tab.id, index)}
+              onFocus={() => handleFocus(index)}
               onMouseDown={(e) => {
                 if (e.button === 1) {
                   e.preventDefault();
@@ -146,7 +183,7 @@ export function WorkspaceTabBar() {
               }}
               title={`${tab.title} (Middle-click to close)`}
               className={cn(
-                "flex flex-shrink-0 cursor-pointer items-center gap-2 transition-colors select-none",
+                "group flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-t-sm transition-colors select-none focus-visible:ring-2 focus-visible:ring-zinc-900/60 focus-visible:outline-none",
                 isActive
                   ? "border-b-2 border-zinc-900 bg-white px-4 py-2 text-xs font-medium text-zinc-900 shadow-sm"
                   : "border-b-2 border-transparent px-4 py-2 text-xs text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-800",
@@ -165,6 +202,7 @@ export function WorkspaceTabBar() {
                 <button
                   type="button"
                   title={tab.pinned ? "Unpin tab" : "Pin tab"}
+                  aria-label={tab.pinned ? `Unpin ${tab.title}` : `Pin ${tab.title}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     togglePin(tab.id);
@@ -178,6 +216,7 @@ export function WorkspaceTabBar() {
                   <button
                     type="button"
                     title="Close tab"
+                    aria-label={`Close ${tab.title}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       closeTab(tab.id);

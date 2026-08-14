@@ -101,7 +101,7 @@ export default function EvidenceSearchPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search human-authored records, RCAs, ECRs by keyword..."
-            className="h-11 border-zinc-200 pl-9 dark:border-zinc-800"
+            className="h-11 border-zinc-200 pl-9"
           />
         </div>
 
@@ -131,15 +131,13 @@ export default function EvidenceSearchPage() {
                       className={`flex cursor-pointer flex-col gap-3 rounded-xl border p-5 text-left transition-all ${
                         selectedRecord?.id === r.id
                           ? "border-indigo-500 bg-indigo-500/[0.02]"
-                          : "border-zinc-200 bg-zinc-50/10 hover:bg-zinc-100/50 dark:border-zinc-800 dark:bg-zinc-900/10"
+                          : "border-zinc-200 bg-zinc-50/10 hover:bg-zinc-100/50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <FileText className="size-4 text-indigo-500" />
-                          <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                            {r.title}
-                          </h3>
+                          <h3 className="text-sm font-bold text-zinc-950">{r.title}</h3>
                         </div>
                         <Badge
                           variant="secondary"
@@ -150,29 +148,25 @@ export default function EvidenceSearchPage() {
                         </Badge>
                       </div>
 
-                      <div className="border-zinc-250 border-l-2 pl-3 font-serif text-xs leading-relaxed text-zinc-700 italic dark:text-zinc-300">
+                      <div className="border-l-2 border-zinc-200 pl-3 font-serif text-xs leading-relaxed text-zinc-700 italic">
                         &ldquo;{r.sentenceText}&rdquo;
                       </div>
 
-                      <Divider className="border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="border-zinc-100" />
 
                       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-500">
                         <div>
                           Document:{" "}
-                          <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                            {r.sourceDocument}
-                          </span>
+                          <span className="font-semibold text-zinc-700">{r.sourceDocument}</span>
                         </div>
                         <div>
                           Author:{" "}
-                          <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                            {r.authorName}
-                          </span>
+                          <span className="font-semibold text-zinc-700">{r.authorName}</span>
                         </div>
                       </div>
 
                       {unattestedCount > 0 && (
-                        <div className="mt-1 flex w-fit items-center gap-1.5 rounded border border-amber-500/10 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-600 dark:text-amber-500">
+                        <div className="mt-1 flex w-fit items-center gap-1.5 rounded border border-amber-500/10 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-600">
                           <AlertTriangle className="size-3 shrink-0" />
                           <span>{unattestedCount} Unattested Link Proposals</span>
                         </div>
@@ -198,11 +192,11 @@ export default function EvidenceSearchPage() {
                         r.recordType === "RCA" &&
                         r.title.includes(selectedRecord.title.split(":")[0]),
                     ) && (
-                      <Card className="border-amber-200 bg-amber-50/5 dark:border-amber-900/30">
+                      <Card className="border-amber-200 bg-amber-50/5">
                         <CardContent className="flex gap-3 p-4 text-xs">
                           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
                           <div className="flex flex-col gap-1">
-                            <span className="font-semibold text-amber-700 dark:text-amber-400">
+                            <span className="font-semibold text-amber-700">
                               First-Class Incompleteness Gap
                             </span>
                             <p className="leading-normal text-zinc-500">
@@ -231,46 +225,46 @@ export default function EvidenceSearchPage() {
                       );
 
                       return (
-                        <Card key={link.id} className="border-zinc-200 dark:border-zinc-800">
+                        <Card key={link.id} className="border-zinc-200">
                           <CardContent className="flex flex-col gap-4 p-5">
                             <div className="flex flex-col gap-1 text-left">
                               <span className="text-[10px] font-semibold text-zinc-400 uppercase">
                                 {link.isAttested ? "Verified Link" : "Machine-Proposed Link"}
                               </span>
-                              <h4 className="text-zinc-850 text-sm font-bold dark:text-zinc-100">
+                              <h4 className="text-sm font-bold text-zinc-800">
                                 {targetRec?.title}
                               </h4>
                             </div>
 
-                            <Divider className="border-zinc-100 dark:border-zinc-900" />
+                            <Divider className="border-zinc-100" />
 
                             <div className="text-left text-xs leading-normal text-zinc-500">
-                              <span className="mb-1 block font-semibold text-zinc-700 dark:text-zinc-300">
+                              <span className="mb-1 block font-semibold text-zinc-700">
                                 Link Rationale:
                               </span>
                               {link.proposedReason}
                             </div>
 
                             {/* CONFIDENCE BREAKDOWN */}
-                            <div className="dark:border-zinc-850 flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 text-left text-[10px] text-zinc-500 dark:bg-zinc-900/50">
-                              <span className="mb-1 block text-[9px] font-bold text-zinc-700 uppercase dark:text-zinc-300">
+                            <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 text-left text-[10px] text-zinc-500">
+                              <span className="mb-1 block text-[9px] font-bold text-zinc-700 uppercase">
                                 Evidence Integrity Matrix
                               </span>
-                              <div className="flex justify-between border-b border-zinc-100 py-0.5 dark:border-zinc-800">
+                              <div className="flex justify-between border-b border-zinc-100 py-0.5">
                                 <span>Recency</span>
-                                <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                                <span className="font-medium text-zinc-800">
                                   {link.recencyDays} Days Old
                                 </span>
                               </div>
-                              <div className="flex justify-between border-b border-zinc-100 py-0.5 dark:border-zinc-800">
+                              <div className="flex justify-between border-b border-zinc-100 py-0.5">
                                 <span>Record Completeness</span>
-                                <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                                <span className="font-medium text-zinc-800">
                                   {Math.round(link.completenessScore * 100)}% Fields Populated
                                 </span>
                               </div>
-                              <div className="flex justify-between border-b border-zinc-100 py-0.5 dark:border-zinc-800">
+                              <div className="flex justify-between border-b border-zinc-100 py-0.5">
                                 <span>Engineering Similarity</span>
-                                <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                                <span className="font-medium text-zinc-800">
                                   {Math.round(link.similarityScore * 100)}% Keyword Overlap
                                 </span>
                               </div>
@@ -286,7 +280,7 @@ export default function EvidenceSearchPage() {
 
                             {/* ATTESTATION STATUS CARD OR FORM */}
                             {link.isAttested ? (
-                              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700 dark:text-emerald-400">
+                              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700">
                                 <ShieldCheck className="size-4 shrink-0" />
                                 <div className="flex flex-col text-left">
                                   <span className="font-semibold">
@@ -299,8 +293,8 @@ export default function EvidenceSearchPage() {
                               </div>
                             ) : (
                               <div className="flex flex-col gap-3 text-left">
-                                <div className="border-zinc-150 flex flex-col gap-2 rounded-lg border bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
-                                  <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                                <div className="flex flex-col gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                                  <span className="text-xs font-semibold text-zinc-800">
                                     Attest this connection
                                   </span>
                                   <Input
@@ -319,7 +313,7 @@ export default function EvidenceSearchPage() {
                                 <Button
                                   onClick={() => handleAttest(link.id)}
                                   disabled={!engineerName || isSubmitting}
-                                  className="w-full bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500"
+                                  className="w-full bg-indigo-600 text-white hover:bg-indigo-700"
                                   size="sm"
                                 >
                                   {isSubmitting
@@ -334,7 +328,7 @@ export default function EvidenceSearchPage() {
                     })}
                 </Stack>
               ) : (
-                <Card className="border-dashed border-zinc-200 bg-zinc-50/10 py-20 text-center dark:border-zinc-800 dark:bg-zinc-900/10">
+                <Card className="border-dashed border-zinc-200 bg-zinc-50/10 py-20 text-center">
                   <CardContent className="p-6">
                     <HelpCircle className="mx-auto mb-3 size-8 text-zinc-400" />
                     <p className="text-sm font-medium text-zinc-500">

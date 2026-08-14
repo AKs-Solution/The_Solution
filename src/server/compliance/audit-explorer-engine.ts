@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { prisma } from "@/server/db";
-import { queryModelMany } from "@/server/precedents/seed-industry-graph";
+import type { AuditLog, EngineeringEntity } from "@prisma/client";
 
 export interface AuditLineageNode {
   id: string;
@@ -40,15 +40,18 @@ function collectHashes(node: AuditLineageNode): string[] {
   return hashes;
 }
 
-function auditNode(log: Record<string, any>): AuditLineageNode {
+function auditNode(log: AuditLog): AuditLineageNode {
   const metadata = (log.metadata ?? {}) as Record<string, unknown>;
   return {
     id: String(log.id),
     type: "AUDIT_EVENT",
     name: `${String(log.action || "AUDIT")}: ${String(log.entityId || "")}`,
-    timestamp: new Date(log.createdAt ? new Date(log.createdAt).getTime() : Date.now()).toISOString(),
+    timestamp: new Date(
+      log.createdAt ? new Date(log.createdAt).getTime() : Date.now(),
+    ).toISOString(),
     author: "Audit Trail",
-    evidenceHash: typeof metadata.hash === "string" ? String(metadata.hash) : sha256(String(log.id)),
+    evidenceHash:
+      typeof metadata.hash === "string" ? String(metadata.hash) : sha256(String(log.id)),
     verificationStatus: "VALID",
   };
 }
@@ -89,37 +92,33 @@ export async function getAuditExplorerView(
   try {
     const [entity, relationships, decisions, proofs, auditLogs, entities] = await Promise.all([
       prisma.engineeringEntity.findUnique({ where: { id: targetEntityId } }).catch(() => null),
-      queryModelMany("engineeringRelationship", { where: { organizationId } }),
-      queryModelMany("engineeringDecision", { where: { organizationId } }),
-      queryModelMany("complianceProof", { where: { organizationId } }),
-      queryModelMany("auditLog", { where: { organizationId } }),
-      queryModelMany("engineeringEntity", { where: { organizationId, deletedAt: null } }),
+      prisma.engineeringRelationship.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.engineeringDecision.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.complianceProof.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.auditLog.findMany({ where: { organizationId } }).catch(() => []),
+      prisma.engineeringEntity
+        .findMany({ where: { organizationId, deletedAt: null } })
+        .catch(() => []),
     ]);
 
     if (!entity) {
       return emptyAuditView(targetEntityId);
     }
 
-    const entityById = new Map((entities as any[]).map((e) => [e.id, e]));
-    const relatedEntityIds = (relationships as any[])
-      .filter(
-        (r) => r.sourceEntityId === targetEntityId || r.targetEntityId === targetEntityId,
-      )
+    const entityById = new Map(entities.map((e) => [e.id, e] as const));
+    const relatedEntityIds = relationships
+      .filter((r) => r.sourceEntityId === targetEntityId || r.targetEntityId === targetEntityId)
       .map((r) => (r.sourceEntityId === targetEntityId ? r.targetEntityId : r.sourceEntityId))
       .slice(0, 4);
 
     const relatedComponents = relatedEntityIds
       .map((id) => entityById.get(id))
-      .filter(Boolean);
+      .filter((e): e is EngineeringEntity => e !== undefined);
 
-    const linkedDecisions = (decisions as any[])
-      .filter(
-        (d) => d.partId === targetEntityId || d.subjectEntityId === targetEntityId,
-      )
-      .slice(0, 6);
+    const linkedDecisions = decisions.filter((d) => d.partId === targetEntityId).slice(0, 6);
 
-    const entityProofs = (proofs as any[]).filter((p) => p.componentId === targetEntityId).slice(0, 3);
-    const entityAudit = (auditLogs as any[])
+    const entityProofs = proofs.filter((p) => p.componentId === targetEntityId).slice(0, 3);
+    const entityAudit = auditLogs
       .filter((l) => l.entity === "COMPONENT" && l.entityId === targetEntityId)
       .slice(-6);
 
@@ -142,16 +141,16 @@ export async function getAuditExplorerView(
     }
 
     for (const decision of linkedDecisions) {
-      const decisionAudit = (auditLogs as any[])
+      const decisionAudit = auditLogs
         .filter((l) => l.entity === "DECISION" && l.entityId === decision.id)
         .slice(-3)
         .map(auditNode);
       children.push({
         id: decision.id,
         type: "DECISION",
-        name: `${decision.decisionType || "DECISION"}: ${
-          String(decision.description || decision.id).slice(0, 80)
-        }`,
+        name: `${decision.decisionType || "DECISION"}: ${String(
+          decision.description || decision.id,
+        ).slice(0, 80)}`,
         timestamp: new Date(
           decision.updatedAt ? new Date(decision.updatedAt).getTime() : Date.now(),
         ).toISOString(),

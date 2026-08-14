@@ -8,14 +8,14 @@
  * hue across every render.
  */
 const CATEGORICAL_SLOTS = [
-  "text-blue-600 dark:text-blue-400",
-  "text-emerald-600 dark:text-emerald-400",
-  "text-amber-600 dark:text-amber-400",
-  "text-violet-600 dark:text-violet-400",
-  "text-rose-600 dark:text-rose-400",
-  "text-cyan-600 dark:text-cyan-400",
-  "text-orange-600 dark:text-orange-400",
-  "text-fuchsia-600 dark:text-fuchsia-400",
+  "text-blue-600",
+  "text-emerald-600",
+  "text-amber-600",
+  "text-violet-600",
+  "text-rose-600",
+  "text-cyan-600",
+  "text-orange-600",
+  "text-fuchsia-600",
 ];
 
 export interface BarChartDatum {

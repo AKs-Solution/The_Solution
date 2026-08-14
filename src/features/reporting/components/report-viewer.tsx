@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ReportTypeBadge } from "./report-type-badge";
 
 interface ReportPayload {
@@ -93,7 +94,52 @@ export function ReportViewer({ reportId }: { reportId: string }) {
   }
 
   if (error) return <p className="text-destructive text-sm">{error}</p>;
-  if (!report) return <p className="text-muted-foreground text-sm">Loading report...</p>;
+  if (!report) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-7 w-72" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-24" />
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-32" />
+              <div className="flex items-center gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-16" />
+                ))}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const { data } = report;
 

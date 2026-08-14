@@ -1,14 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Activity,
-  AlertOctagon,
-  Hash,
-  ShieldAlert,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { Activity, AlertOctagon, Hash, ShieldAlert, TrendingUp, Zap } from "lucide-react";
 import {
   PageContainer,
   Stack,
@@ -53,13 +46,32 @@ const WIDGETS: WidgetConfig[] = [
   },
 ];
 
+interface SentinelAlert {
+  id: string;
+  title: string;
+  type: string;
+  reason: string;
+  timestamp: string;
+  evidenceHashes?: string[];
+}
+
+interface SentinelDashboard {
+  realtimeAlerts?: SentinelAlert[];
+  innovationVelocityIndex?: number;
+  programMaturityScore?: number;
+  activeDecisionsCount?: number;
+  deviatedDecisionsCount?: number;
+  technicalDebtHotspotsCount?: number;
+  agingAssumptionsCount?: number;
+}
+
 export default function SentinelPage() {
-  const [dashboard, setDashboard] = useState<any | null>(null);
+  const [dashboard, setDashboard] = useState<SentinelDashboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
   const { openTab } = useWorkspaceTabs();
 
-  const openInTab = (alert: any) =>
+  const openInTab = (alert: SentinelAlert) =>
     openTab({
       kind: "sentinel",
       ref: alert.id,
@@ -84,11 +96,14 @@ export default function SentinelPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      void loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const alerts = dashboard?.realtimeAlerts ?? [];
-  const selectedAlert = alerts.find((a: any) => a.id === selected) ?? null;
+  const selectedAlert = alerts.find((a) => a.id === selected) ?? null;
 
   return (
     <PageContainer>
@@ -102,7 +117,7 @@ export default function SentinelPage() {
               <h1 className="text-foreground text-2xl font-extrabold tracking-tight md:text-3xl">
                 Decision Sentinel
               </h1>
-              <Badge className="hidden border-rose-500/20 bg-rose-500/10 text-[9px] text-rose-600 sm:inline-flex dark:text-rose-400">
+              <Badge className="hidden border-rose-500/20 bg-rose-500/10 text-[9px] text-rose-600 sm:inline-flex">
                 LIVE
               </Badge>
             </div>
@@ -117,7 +132,7 @@ export default function SentinelPage() {
         <SubTabInspector activeTab="sentinel" className="rounded-xl border" />
 
         {isLoading ? (
-          <div className="border-border bg-background flex items-center justify-center rounded-lg border py-24 text-sm text-muted-foreground">
+          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-lg border py-24 text-sm">
             Establishing sentinel telemetry...
           </div>
         ) : (
@@ -135,7 +150,7 @@ export default function SentinelPage() {
                             No deviations under active surveillance.
                           </p>
                         ) : (
-                          alerts.map((alert: any) => (
+                          alerts.map((alert) => (
                             <button
                               key={alert.id}
                               type="button"
@@ -149,7 +164,7 @@ export default function SentinelPage() {
                               ].join(" ")}
                             >
                               <div className="flex items-center justify-between gap-2">
-                                <span className="border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                                <span className="rounded border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-rose-600 uppercase">
                                   {alert.type.replace("_", " ")}
                                 </span>
                                 <span className="text-muted-foreground font-mono text-[10px]">
@@ -162,10 +177,10 @@ export default function SentinelPage() {
                               <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs leading-relaxed">
                                 {alert.reason}
                               </p>
-                              {alert.evidenceHashes?.length > 0 && (
+                              {alert.evidenceHashes != null && alert.evidenceHashes.length > 0 && (
                                 <span className="bg-muted text-muted-foreground mt-1.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px]">
                                   <Hash className="size-3 text-emerald-500" aria-hidden="true" />
-                                  {alert.evidenceHashes[0].slice(0, 16)}...
+                                  {alert.evidenceHashes?.[0]?.slice(0, 16)}...
                                 </span>
                               )}
                             </button>
@@ -241,7 +256,9 @@ export default function SentinelPage() {
                           {
                             label: "Technical Debt Hotspots",
                             value: dashboard?.technicalDebtHotspotsCount ?? 0,
-                            icon: <AlertOctagon className="size-5 text-rose-500" aria-hidden="true" />,
+                            icon: (
+                              <AlertOctagon className="size-5 text-rose-500" aria-hidden="true" />
+                            ),
                           },
                         ].map((stat) => (
                           <div
@@ -260,9 +277,9 @@ export default function SentinelPage() {
                           </div>
                         ))}
                         <p className="text-muted-foreground text-xs leading-relaxed sm:col-span-2">
-                          Deviation detection compares modeled decision expectations against ingested
-                          evidence. Any mismatch is surfaced here with full traceability to source
-                          hashes.
+                          Deviation detection compares modeled decision expectations against
+                          ingested evidence. Any mismatch is surfaced here with full traceability to
+                          source hashes.
                         </p>
                       </div>
                     </Widget>
@@ -272,17 +289,19 @@ export default function SentinelPage() {
                   return (
                     <Widget key={config.id} config={config}>
                       <div className="flex flex-col gap-2.5">
-                        {[
-                          { status: "RECORDED", count: dashboard?.activeDecisionsCount ?? 0 },
-                          { status: "DERIVED", count: alerts.length },
-                          { status: "INFERRED", count: dashboard?.agingAssumptionsCount ?? 0 },
-                          { status: "GAP", count: dashboard?.deviatedDecisionsCount ?? 0 },
-                        ].map((row) => (
+                        {(
+                          [
+                            { status: "RECORDED", count: dashboard?.activeDecisionsCount ?? 0 },
+                            { status: "DERIVED", count: alerts.length },
+                            { status: "INFERRED", count: dashboard?.agingAssumptionsCount ?? 0 },
+                            { status: "GAP", count: dashboard?.deviatedDecisionsCount ?? 0 },
+                          ] as const
+                        ).map((row) => (
                           <div
                             key={row.status}
                             className="border-border hover:bg-surface-hover flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors"
                           >
-                            <EpistemicBadge status={row.status as any} showDot />
+                            <EpistemicBadge status={row.status} showDot />
                             <span className="text-foreground font-mono text-sm font-bold">
                               {row.count}
                             </span>
@@ -317,9 +336,9 @@ export default function SentinelPage() {
             <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
               {selectedAlert.reason}
             </p>
-            {selectedAlert.evidenceHashes?.length > 0 && (
+            {selectedAlert.evidenceHashes != null && selectedAlert.evidenceHashes.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {selectedAlert.evidenceHashes.map((hash: string) => (
+                {selectedAlert.evidenceHashes?.map((hash) => (
                   <span
                     key={hash}
                     className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"

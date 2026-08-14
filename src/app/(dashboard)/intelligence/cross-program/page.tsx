@@ -32,21 +32,21 @@ export default function CrossProgramInsightsPage() {
   }, [fetchCrossProgram]);
 
   return (
-    <PageContainer className="min-h-screen bg-zinc-950 p-8 text-zinc-100">
+    <PageContainer className="bg-white">
       <Stack gap={8}>
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1 text-left">
             <div className="flex items-center gap-2">
-              <TrendingUp className="size-6 text-emerald-400" />
-              <h1 className="text-2xl font-bold tracking-tight text-white">
+              <TrendingUp className="size-6 text-emerald-600" />
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
                 Cross-Program Intelligence & Pattern Discovery
               </h1>
-              <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] text-emerald-400">
+              <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] text-emerald-700">
                 MACRO REASONING
               </Badge>
             </div>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-zinc-500">
               Discover non-obvious engineering patterns and systemic risk factors aggregated across
               all organization programs.
             </p>
@@ -56,7 +56,7 @@ export default function CrossProgramInsightsPage() {
             onClick={fetchCrossProgram}
             variant="secondary"
             size="sm"
-            className="border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
+            className="border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
           >
             <RefreshCw className="mr-2 size-3.5" /> Refresh Pattern Miner
           </Button>
@@ -64,43 +64,43 @@ export default function CrossProgramInsightsPage() {
 
         {/* METRICS */}
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-4">
-          <Card className="border-zinc-800 bg-zinc-900/40">
+          <Card className="border-zinc-200 bg-zinc-100">
             <CardContent className="flex flex-col gap-1 p-5">
               <span className="text-[10px] font-bold text-zinc-500 uppercase">
                 Programs Analyzed
               </span>
-              <span className="text-3xl font-extrabold text-white">23 Programs</span>
+              <span className="text-3xl font-extrabold text-zinc-900">23 Programs</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-800 bg-zinc-900/40">
+          <Card className="border-zinc-200 bg-zinc-100">
             <CardContent className="flex flex-col gap-1 p-5">
               <span className="text-[10px] font-bold text-zinc-500 uppercase">
                 Decisions Traced
               </span>
-              <span className="text-3xl font-extrabold text-indigo-400">147 Decisions</span>
+              <span className="text-3xl font-extrabold text-indigo-600">147 Decisions</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-800 bg-zinc-900/40">
+          <Card className="border-zinc-200 bg-zinc-100">
             <CardContent className="flex flex-col gap-1 p-5">
               <span className="text-[10px] font-bold text-zinc-500 uppercase">
                 Outcomes Measured
               </span>
-              <span className="text-3xl font-extrabold text-emerald-400">450 Outcomes</span>
+              <span className="text-3xl font-extrabold text-emerald-600">450 Outcomes</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-800 bg-zinc-900/40">
+          <Card className="border-zinc-200 bg-zinc-100">
             <CardContent className="flex flex-col gap-1 p-5">
               <span className="text-[10px] font-bold text-zinc-500 uppercase">
                 Estimated Cost Savings
               </span>
-              <span className="text-3xl font-extrabold text-rose-400">$2.5M - $5M</span>
+              <span className="text-3xl font-extrabold text-rose-600">$2.5M - $5M</span>
             </CardContent>
           </Card>
         </div>
 
         {/* PATTERN FINDINGS LIST */}
         <div className="flex flex-col gap-6 text-left">
-          <span className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+          <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
             Systemic Pattern Discoveries
           </span>
 
@@ -110,34 +110,34 @@ export default function CrossProgramInsightsPage() {
             </div>
           ) : (
             patterns.map((p, idx) => (
-              <Card key={idx} className="border-zinc-800 bg-zinc-900/30 p-6">
+              <Card key={idx} className="border-zinc-200 bg-zinc-100 p-6">
                 <CardContent className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-400">
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-700">
                         <TrendingUp className="size-5" />
                       </div>
-                      <h3 className="text-base font-bold text-white">{p.title}</h3>
+                      <h3 className="text-base font-bold text-zinc-900">{p.title}</h3>
                     </div>
-                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-xs text-emerald-400">
+                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-xs text-emerald-700">
                       {Math.round(p.confidence * 100)}% CONFIDENCE ({p.observations} Observations)
                     </Badge>
                   </div>
 
-                  <Divider className="border-zinc-800" />
+                  <Divider className="border-zinc-200" />
 
-                  <p className="text-xs leading-relaxed text-zinc-300">{p.description}</p>
+                  <p className="text-xs leading-relaxed text-zinc-600">{p.description}</p>
 
-                  <div className="border-zinc-850 flex flex-col gap-1 rounded-xl border bg-zinc-950 p-4 text-xs">
-                    <span className="font-bold text-zinc-400">Historical Impact:</span>
-                    <span className="font-semibold text-amber-400">{p.timeframeOrImpact}</span>
+                  <div className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-xs">
+                    <span className="font-bold text-zinc-500">Historical Impact:</span>
+                    <span className="font-semibold text-amber-600">{p.timeframeOrImpact}</span>
                   </div>
 
                   <div className="flex flex-col gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-xs">
-                    <span className="font-bold text-emerald-400">
+                    <span className="font-bold text-emerald-600">
                       ORGANIZATION POLICY RECOMMENDATION:
                     </span>
-                    <p className="font-medium text-zinc-200">{p.recommendation}</p>
+                    <p className="font-medium text-zinc-700">{p.recommendation}</p>
                   </div>
                 </CardContent>
               </Card>

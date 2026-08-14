@@ -5,7 +5,14 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Activity, ExternalLink, Network, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
+import {
+  Activity,
+  ExternalLink,
+  Network,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { PageContainer, Stack, useWorkspaceTabs, useScopedTabState } from "@/components/layout";
 import { Badge, Button, Card, CardContent, DataTable, Input, Select } from "@/components/ui";
 import { cn } from "@/shared/utils";
@@ -61,7 +68,8 @@ function FailureGraph({
     const edges: Array<{ from: string; to: string }> = [];
     for (const p of precedents.slice(0, 10)) {
       for (const s of p.applicableSystems ?? []) {
-        if (sysNodes.some((n) => n.label === s)) edges.push({ from: `pre:${p.id}`, to: `sys:${s}` });
+        if (sysNodes.some((n) => n.label === s))
+          edges.push({ from: `pre:${p.id}`, to: `sys:${s}` });
       }
     }
     return { sysNodes, preNodes, edges };
@@ -74,7 +82,12 @@ function FailureGraph({
   }, [layout]);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Industry failure graph">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="w-full"
+      role="img"
+      aria-label="Industry failure graph"
+    >
       {layout.edges.map((e, i) => {
         const a = byId.get(e.from);
         const b = byId.get(e.to);
@@ -108,7 +121,7 @@ function FailureGraph({
             textAnchor="middle"
             fontSize="10"
             fontFamily="monospace"
-            className="fill-indigo-600 dark:fill-indigo-400"
+            className="fill-indigo-600"
           >
             {truncate(n.label, 20)}
           </text>
@@ -172,29 +185,28 @@ function FailureGraphWorkspace() {
     }
   }, []);
 
-  const runQuery = useCallback(
-    async (query: string, system: string, confidence: number) => {
-      setIsLoading(true);
-      try {
-        const params = new URLSearchParams();
-        params.set("type", "FAILURE");
-        if (query.trim()) params.set("search", query.trim());
-        if (system && system !== "ALL") params.set("system", system);
-        const res = await fetch(`/api/precedents?${params.toString()}`);
-        if (res.ok) {
-          const json = await res.json();
-          const data = (json.data ?? []).filter((p: any) => (p.confidence ?? p.confidenceScore ?? 0.6) >= confidence);
-          setPrecedents(data);
-          setSelected(data[0] ?? null);
-        }
-      } catch {
-        // Graph stays empty when the precedent engine is unavailable.
-      } finally {
-        setIsLoading(false);
+  const runQuery = useCallback(async (query: string, system: string, confidence: number) => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("type", "FAILURE");
+      if (query.trim()) params.set("search", query.trim());
+      if (system && system !== "ALL") params.set("system", system);
+      const res = await fetch(`/api/precedents?${params.toString()}`);
+      if (res.ok) {
+        const json = await res.json();
+        const data = (json.data ?? []).filter(
+          (p: any) => (p.confidence ?? p.confidenceScore ?? 0.6) >= confidence,
+        );
+        setPrecedents(data);
+        setSelected(data[0] ?? null);
       }
-    },
-    [],
-  );
+    } catch {
+      // Graph stays empty when the precedent engine is unavailable.
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadSystems();
@@ -203,7 +215,10 @@ function FailureGraphWorkspace() {
   }, []);
 
   const slug = useMemo(
-    () => slugify([searchQuery, selectedSystem !== "ALL" ? selectedSystem : ""].filter(Boolean).join(" ")) || "query",
+    () =>
+      slugify(
+        [searchQuery, selectedSystem !== "ALL" ? selectedSystem : ""].filter(Boolean).join(" "),
+      ) || "query",
     [searchQuery, selectedSystem],
   );
 
@@ -236,7 +251,9 @@ function FailureGraphWorkspace() {
     {
       key: "title",
       header: "Failure Precedent",
-      accessor: (p: any) => <span className="text-foreground text-xs font-semibold">{p.title ?? p.description}</span>,
+      accessor: (p: any) => (
+        <span className="text-foreground text-xs font-semibold">{p.title ?? p.description}</span>
+      ),
       sortValue: (p: any) => p.title ?? p.description ?? "",
     },
     {
@@ -245,7 +262,10 @@ function FailureGraphWorkspace() {
       accessor: (p: any) => (
         <span className="flex flex-wrap gap-1">
           {(p.applicableSystems ?? []).slice(0, 3).map((s: string) => (
-            <span key={s} className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
+            <span
+              key={s}
+              className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"
+            >
               {s}
             </span>
           ))}
@@ -257,7 +277,9 @@ function FailureGraphWorkspace() {
       header: "Confidence",
       align: "right" as const,
       accessor: (p: any) => (
-        <span className="font-mono text-xs font-bold">{(p.confidence ?? p.confidenceScore ?? 0.6) * 100}%</span>
+        <span className="font-mono text-xs font-bold">
+          {(p.confidence ?? p.confidenceScore ?? 0.6) * 100}%
+        </span>
       ),
       sortValue: (p: any) => p.confidence ?? p.confidenceScore ?? 0.6,
     },
@@ -275,13 +297,13 @@ function FailureGraphWorkspace() {
               <h1 className="text-foreground text-2xl font-extrabold tracking-tight md:text-3xl">
                 Industry Failure Graph
               </h1>
-              <Badge className="hidden border-amber-500/20 bg-amber-500/10 text-[9px] text-amber-600 sm:inline-flex dark:text-amber-400">
+              <Badge className="hidden border-amber-500/20 bg-amber-500/10 text-[9px] text-amber-600 sm:inline-flex">
                 GRAPH
               </Badge>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Query historical engineering failure precedents across systems, run the query as its own
-              workspace tab, and inspect failure-mode propagation.
+              Query historical engineering failure precedents across systems, run the query as its
+              own workspace tab, and inspect failure-mode propagation.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -333,7 +355,7 @@ function FailureGraphWorkspace() {
                   step="0.05"
                   value={minConfidence}
                   onChange={(e) => setMinConfidence(Number(e.target.value))}
-                  className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border"
+                  className="bg-border h-1.5 w-full cursor-pointer appearance-none rounded-full"
                   aria-label="Minimum confidence"
                 />
               </div>
@@ -341,7 +363,9 @@ function FailureGraphWorkspace() {
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
             <p className="text-muted-foreground text-[11px]">
-              {isLoading ? "Running graph query..." : `${precedents.length} failure precedents in scope`}
+              {isLoading
+                ? "Running graph query..."
+                : `${precedents.length} failure precedents in scope`}
             </p>
             <Button type="submit" size="sm" disabled={isLoading}>
               <RefreshCw className={cn("mr-2 size-3.5", isLoading && "animate-spin")} />
@@ -357,21 +381,23 @@ function FailureGraphWorkspace() {
                 Failure-mode propagation
               </span>
               <span className="text-muted-foreground flex items-center gap-2 text-[10px]">
-                <span className="bg-indigo-500 size-2 rounded-sm" aria-hidden="true" />
+                <span className="size-2 rounded-sm bg-indigo-500" aria-hidden="true" />
                 System
-                <span className="bg-rose-500 size-2 rounded-full" aria-hidden="true" />
+                <span className="size-2 rounded-full bg-rose-500" aria-hidden="true" />
                 Precedent
               </span>
             </div>
             {isLoading ? (
-              <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
+              <div className="text-muted-foreground flex items-center justify-center gap-2 py-16 text-sm">
                 <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
                 Building graph...
               </div>
             ) : precedents.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-16 text-center">
                 <Network className="text-muted-foreground/50 size-6" aria-hidden="true" />
-                <p className="text-muted-foreground text-xs">No failure precedents match this query.</p>
+                <p className="text-muted-foreground text-xs">
+                  No failure precedents match this query.
+                </p>
               </div>
             ) : (
               <FailureGraph precedents={precedents} onSelect={setSelected} />
@@ -384,7 +410,9 @@ function FailureGraphWorkspace() {
             <div className="flex items-center gap-2">
               <Activity className="text-muted-foreground size-4" aria-hidden="true" />
               <span className="text-foreground text-sm font-semibold">Matched precedents</span>
-              <Badge variant="outline" className="font-mono">{precedents.length}</Badge>
+              <Badge variant="outline" className="font-mono">
+                {precedents.length}
+              </Badge>
             </div>
             <DataTable
               data={precedents}
@@ -401,8 +429,13 @@ function FailureGraphWorkspace() {
           <Card>
             <CardContent className="density-p flex flex-col gap-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-foreground text-sm font-bold">{selected.title ?? selected.description}</h3>
-                <Badge variant="outline" className="border-rose-500/30 bg-rose-500/10 font-mono text-rose-600 dark:text-rose-400">
+                <h3 className="text-foreground text-sm font-bold">
+                  {selected.title ?? selected.description}
+                </h3>
+                <Badge
+                  variant="outline"
+                  className="border-rose-500/30 bg-rose-500/10 font-mono text-rose-600"
+                >
                   {(selected.confidence ?? selected.confidenceScore ?? 0.6) * 100}% confidence
                 </Badge>
               </div>
@@ -411,14 +444,22 @@ function FailureGraphWorkspace() {
               </p>
               {selected.rootCause && (
                 <div className="rounded-md border border-rose-500/20 bg-rose-500/5 p-2.5">
-                  <span className="text-muted-foreground block text-[9px] font-semibold uppercase">Root Cause</span>
-                  <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">{selected.rootCause}</p>
+                  <span className="text-muted-foreground block text-[9px] font-semibold uppercase">
+                    Root Cause
+                  </span>
+                  <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">
+                    {selected.rootCause}
+                  </p>
                 </div>
               )}
               {selected.correctiveAction && (
                 <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 p-2.5">
-                  <span className="text-muted-foreground block text-[9px] font-semibold uppercase">Corrective Action</span>
-                  <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">{selected.correctiveAction}</p>
+                  <span className="text-muted-foreground block text-[9px] font-semibold uppercase">
+                    Corrective Action
+                  </span>
+                  <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">
+                    {selected.correctiveAction}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -434,7 +475,7 @@ export default function FailureGraphPage() {
     <Suspense
       fallback={
         <PageContainer>
-          <div className="border-border bg-background flex items-center justify-center rounded-lg border py-24 text-sm text-muted-foreground">
+          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-lg border py-24 text-sm">
             Preparing failure graph...
           </div>
         </PageContainer>

@@ -87,7 +87,7 @@ export default function CompliancePage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ShieldCheck className="size-6 text-emerald-600 dark:text-emerald-400" />
+              <ShieldCheck className="size-6 text-emerald-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Autonomous Certification Ledger
               </h1>
@@ -123,25 +123,23 @@ export default function CompliancePage() {
                     onClick={() => handleVerify(e)}
                     className={`flex cursor-pointer items-center justify-between gap-4 rounded-xl border p-4 text-left transition-all ${
                       selectedEntity?.id === e.id
-                        ? "border-emerald-600 bg-emerald-50/10 dark:border-emerald-500 dark:bg-emerald-950/20"
-                        : "border-zinc-200 bg-zinc-50/10 hover:bg-zinc-100/50 dark:border-zinc-800 dark:bg-zinc-900/10"
+                        ? "border-emerald-600 bg-emerald-50/10"
+                        : "border-zinc-200 bg-zinc-50/10 hover:bg-zinc-100/50"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-zinc-100 p-2.5 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                      <div className="rounded-lg bg-zinc-100 p-2.5 text-zinc-600">
                         <Layers className="size-5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                          {e.name}
-                        </span>
+                        <span className="text-sm font-semibold text-zinc-900">{e.name}</span>
                         <span className="text-[10px] text-zinc-500">
                           ID: {e.identifier} · Type: {e.entityType}
                         </span>
                       </div>
                     </div>
 
-                    <Badge className="border-emerald-250 border bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                    <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-800">
                       Thread Ready
                     </Badge>
                   </div>
@@ -162,10 +160,10 @@ export default function CompliancePage() {
                 {proofs.map((p) => (
                   <div
                     key={p.id}
-                    className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50/5 p-4 dark:border-zinc-800 dark:bg-zinc-950/5"
+                    className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50/5 p-4"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-indigo-700">
                         <FileCheck2 className="size-4" />
                         <span>Airworthiness Certificate Approved</span>
                       </div>
@@ -173,19 +171,19 @@ export default function CompliancePage() {
                         {new Date(p.verifiedAt).toLocaleString()}
                       </span>
                     </div>
-                    <div className="dark:border-zinc-850 rounded border border-zinc-100 bg-zinc-50 p-2 font-mono text-xs break-all text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+                    <div className="rounded border border-zinc-100 bg-zinc-50 p-2 font-mono text-xs break-all text-zinc-600">
                       Proof: {p.proofToken}
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-[10px] text-zinc-500">
                       <div>
                         G-Code Hash:{" "}
-                        <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                        <span className="font-mono text-zinc-700">
                           {p.gcodeHash.slice(0, 10)}...
                         </span>
                       </div>
                       <div>
                         Metrology Hash:{" "}
-                        <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                        <span className="font-mono text-zinc-700">
                           {p.metrologyHash.slice(0, 10)}...
                         </span>
                       </div>
@@ -194,7 +192,7 @@ export default function CompliancePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-muted-foreground rounded border border-dashed border-zinc-200 py-6 text-center text-xs dark:border-zinc-800">
+              <div className="text-muted-foreground rounded border border-dashed border-zinc-200 py-6 text-center text-xs">
                 No compliance proofs issued on ledger yet.
               </div>
             )}
@@ -203,7 +201,7 @@ export default function CompliancePage() {
           {/* VERIFICATION DETAIL SIDEBAR */}
           <div className="lg:col-span-1">
             {selectedEntity ? (
-              <Card className="sticky top-4 border-zinc-200 shadow-sm dark:border-zinc-800">
+              <Card className="sticky top-4 border-zinc-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -213,7 +211,7 @@ export default function CompliancePage() {
                       <h2 className="text-foreground text-base font-bold">{selectedEntity.name}</h2>
                     </div>
 
-                    <Divider className="border-zinc-200 dark:border-zinc-800" />
+                    <Divider className="border-zinc-200" />
 
                     {isVerifying ? (
                       <div className="flex justify-center py-8">
@@ -223,7 +221,7 @@ export default function CompliancePage() {
                       <Stack gap={4}>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-zinc-500">Digital Thread Integrity</span>
-                          <Badge className="border-emerald-250 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800">
                             {complianceCheck.status}
                           </Badge>
                         </div>
@@ -232,10 +230,10 @@ export default function CompliancePage() {
                           {Object.entries(complianceCheck.checks).map(([key, check]: any) => (
                             <div
                               key={key}
-                              className="dark:border-zinc-850 flex flex-col gap-1 rounded border border-zinc-100 bg-zinc-50 p-3 dark:bg-zinc-900"
+                              className="flex flex-col gap-1 rounded border border-zinc-100 bg-zinc-50 p-3"
                             >
                               <div className="flex items-center justify-between text-xs">
-                                <span className="font-semibold text-zinc-800 capitalize dark:text-zinc-200">
+                                <span className="font-semibold text-zinc-800 capitalize">
                                   {key.replace(/([A-Z])/g, " $1")}
                                 </span>
                                 <Badge
@@ -255,7 +253,7 @@ export default function CompliancePage() {
                         <Button
                           onClick={handleIssueProof}
                           disabled={complianceCheck.status !== "VERIFIED" || isCertifying}
-                          className="w-full bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                          className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
                         >
                           {isCertifying ? "Registering Proof..." : "Attest & Issue Proof"}
                         </Button>
@@ -269,7 +267,7 @@ export default function CompliancePage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="sticky top-4 border-dashed border-zinc-200 bg-zinc-50/10 dark:border-zinc-800 dark:bg-zinc-900/10">
+              <Card className="sticky top-4 border-dashed border-zinc-200 bg-zinc-50/10">
                 <CardContent className="p-6 py-20 text-center">
                   <Award className="mx-auto mb-3 size-8 text-zinc-400" />
                   <p className="text-sm font-medium text-zinc-500">

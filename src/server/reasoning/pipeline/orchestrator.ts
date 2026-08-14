@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db";
+import type { Prisma } from "@prisma/client";
 import { REASONING_STAGES } from "../constants";
 import { buildReasoningGraph } from "../reasoning-graph";
 import { ReasoningStageName } from "../types";
@@ -27,7 +28,10 @@ import { logger } from "@/shared/logging";
  * Snapshots the stage entry parameters and evidence references for durable
  * ReasoningStep persistence (input side of the derivation trace).
  */
-function stepInputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext): Record<string, unknown> {
+function stepInputSnapshot(
+  stageName: ReasoningStageName,
+  ctx: PipelineContext,
+): Record<string, unknown> {
   const raw = ctx.rawInputContext ?? {};
   return {
     stageName,
@@ -51,7 +55,10 @@ function stepInputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext):
 /**
  * Snapshots the stage rule outputs (output side of the derivation trace).
  */
-function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext): Record<string, unknown> {
+function stepOutputSnapshot(
+  stageName: ReasoningStageName,
+  ctx: PipelineContext,
+): Record<string, unknown> {
   switch (stageName) {
     case "EVIDENCE_COLLECTION":
       return {
@@ -94,11 +101,18 @@ function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext)
       return { relationshipCount: ctx.relationshipMap.length };
     case "TRADEOFF_EVALUATION":
       return {
-        tradeoffs: ctx.tradeoffs.map((t) => ({ criterion: t.criterion, selectedOption: t.selectedOption })),
+        tradeoffs: ctx.tradeoffs.map((t) => ({
+          criterion: t.criterion,
+          selectedOption: t.selectedOption,
+        })),
       };
     case "ALTERNATIVE_GENERATION":
       return {
-        alternatives: ctx.alternatives.map((a) => ({ name: a.name, score: a.score, status: a.status })),
+        alternatives: ctx.alternatives.map((a) => ({
+          name: a.name,
+          score: a.score,
+          status: a.status,
+        })),
       };
     case "CONFLICT_DETECTION":
       return {
@@ -110,7 +124,10 @@ function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext)
       };
     case "MISSING_EVIDENCE_DETECTION":
       return {
-        missingEvidence: ctx.missingEvidence.map((m) => ({ missingItem: m.missingItem, category: m.category })),
+        missingEvidence: ctx.missingEvidence.map((m) => ({
+          missingItem: m.missingItem,
+          category: m.category,
+        })),
       };
     case "CAUSAL_REASONING":
       return {
@@ -122,7 +139,10 @@ function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext)
       };
     case "REASONING_CHAIN_CONSTRUCTION":
       return {
-        reasoningChains: ctx.reasoningChains.map((c) => ({ stepIndex: c.stepIndex, title: c.title })),
+        reasoningChains: ctx.reasoningChains.map((c) => ({
+          stepIndex: c.stepIndex,
+          title: c.title,
+        })),
       };
     case "CONFIDENCE_CALCULATION":
       return {
@@ -142,19 +162,23 @@ function stepOutputSnapshot(stageName: ReasoningStageName, ctx: PipelineContext)
 }
 
 export async function runReasoningPipeline(sessionId: string): Promise<PipelineContext> {
-  const session = await (prisma as any).reasoningSession?.findUnique({
-    where: { id: sessionId },
-  }).catch(() => null);
+  const session = await prisma.reasoningSession
+    .findUnique({
+      where: { id: sessionId },
+    })
+    .catch(() => null);
 
   if (!session) {
     throw new Error(`ReasoningSession '${sessionId}' not found`);
   }
 
   // Update status to RUNNING
-  await (prisma as any).reasoningSession?.update({
-    where: { id: sessionId },
-    data: { status: "RUNNING", startedAt: new Date() },
-  }).catch(() => null);
+  await prisma.reasoningSession
+    .update({
+      where: { id: sessionId },
+      data: { status: "RUNNING", startedAt: new Date() },
+    })
+    .catch(() => null);
 
   const ctx: PipelineContext = {
     sessionId: session.id,
@@ -207,30 +231,36 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
       const stageName = REASONING_STAGES[i];
 
       // Check cancellation request
-      const checkCancel = await (prisma as any).reasoningSession?.findUnique({
-        where: { id: sessionId },
-        select: { cancelRequested: true },
-      }).catch(() => null);
+      const checkCancel = await prisma.reasoningSession
+        .findUnique({
+          where: { id: sessionId },
+          select: { cancelRequested: true },
+        })
+        .catch(() => null);
 
       if (checkCancel?.cancelRequested) {
-        await (prisma as any).reasoningSession?.update({
-          where: { id: sessionId },
-          data: { status: "CANCELLED", completedAt: new Date() },
-        }).catch(() => null);
+        await prisma.reasoningSession
+          .update({
+            where: { id: sessionId },
+            data: { status: "CANCELLED", completedAt: new Date() },
+          })
+          .catch(() => null);
         return ctx;
       }
 
       const stepStartTime = Date.now();
-      const stepRecord = await (prisma as any).reasoningStep?.create({
-        data: {
-          sessionId,
-          stageIndex: i + 1,
-          stageName,
-          status: "RUNNING",
-          inputData: stepInputSnapshot(stageName, ctx),
-          startedAt: new Date(),
-        },
-      }).catch(() => null);
+      const stepRecord = await prisma.reasoningStep
+        .create({
+          data: {
+            sessionId,
+            stageIndex: i + 1,
+            stageName,
+            status: "RUNNING",
+            inputData: stepInputSnapshot(stageName, ctx) as unknown as Prisma.InputJsonValue,
+            startedAt: new Date(),
+          },
+        })
+        .catch(() => null);
 
       try {
         const handler = stageHandlers[stageName];
@@ -240,15 +270,17 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
 
         const durationMs = Date.now() - stepStartTime;
         if (stepRecord) {
-          await (prisma as any).reasoningStep?.update({
-            where: { id: stepRecord.id },
-            data: {
-              status: "COMPLETED",
-              outputData: stepOutputSnapshot(stageName, ctx),
-              durationMs,
-              completedAt: new Date(),
-            },
-          }).catch(() => null);
+          await prisma.reasoningStep
+            .update({
+              where: { id: stepRecord.id },
+              data: {
+                status: "COMPLETED",
+                outputData: stepOutputSnapshot(stageName, ctx) as unknown as Prisma.InputJsonValue,
+                durationMs,
+                completedAt: new Date(),
+              },
+            })
+            .catch(() => null);
         }
 
         ctx.stepsExecuted.push({
@@ -262,15 +294,17 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
         const durationMs = Date.now() - stepStartTime;
         const errorMessage = err instanceof Error ? err.message : String(err);
         if (stepRecord) {
-          await (prisma as any).reasoningStep?.update({
-            where: { id: stepRecord.id },
-            data: {
-              status: "FAILED",
-              durationMs,
-              errorMessage,
-              completedAt: new Date(),
-            },
-          }).catch(() => null);
+          await prisma.reasoningStep
+            .update({
+              where: { id: stepRecord.id },
+              data: {
+                status: "FAILED",
+                durationMs,
+                errorMessage,
+                completedAt: new Date(),
+              },
+            })
+            .catch(() => null);
         }
         throw err;
       }
@@ -293,147 +327,165 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
     await Promise.all([
       // 1. Evidence Weight Records
       ...ctx.evidenceWeights.map((w) =>
-        (prisma as any).evidenceWeightRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            evidenceId: w.evidenceId,
-            evidenceType: w.evidenceType,
-            title: w.title,
-            verificationLevel: w.verificationLevel,
-            sourceQuality: w.sourceQuality,
-            recencyScore: w.recencyScore,
-            relevanceScore: w.relevanceScore,
-            repeatabilityScore: w.repeatabilityScore,
-            independentConfirmation: w.independentConfirmation,
-            engineeringConfidence: w.engineeringConfidence,
-            historicalAccuracy: w.historicalAccuracy,
-            conflictingScore: w.conflictingScore,
-            finalWeight: w.finalWeight,
-            weightExplanation: w.weightExplanation,
-          },
-        }).catch(() => null),
+        prisma.evidenceWeightRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              evidenceId: w.evidenceId,
+              evidenceType: w.evidenceType,
+              title: w.title,
+              verificationLevel: w.verificationLevel,
+              sourceQuality: w.sourceQuality,
+              recencyScore: w.recencyScore,
+              relevanceScore: w.relevanceScore,
+              repeatabilityScore: w.repeatabilityScore,
+              independentConfirmation: w.independentConfirmation,
+              engineeringConfidence: w.engineeringConfidence,
+              historicalAccuracy: w.historicalAccuracy,
+              conflictingScore: w.conflictingScore,
+              finalWeight: w.finalWeight,
+              weightExplanation: w.weightExplanation,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 2. Constraints
       ...ctx.constraints.map((c) =>
-        (prisma as any).constraintRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            name: c.name,
-            category: c.category,
-            description: c.description,
-            limitValue: c.limitValue,
-            unit: c.unit,
-            isHardConstraint: c.isHardConstraint,
-            isViolated: c.isViolated ?? false,
-            violationDegree: c.violationDegree,
-          },
-        }).catch(() => null),
+        prisma.constraintRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              name: c.name,
+              category: c.category,
+              description: c.description,
+              limitValue: c.limitValue,
+              unit: c.unit,
+              isHardConstraint: c.isHardConstraint,
+              isViolated: c.isViolated ?? false,
+              violationDegree: c.violationDegree,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 3. Assumptions
       ...ctx.assumptions.map((a) =>
-        (prisma as any).assumptionRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            statement: a.statement,
-            justification: a.justification,
-            riskLevel: a.riskLevel,
-            isVerified: a.isVerified,
-            impactIfInvalid: a.impactIfInvalid,
-          },
-        }).catch(() => null),
+        prisma.assumptionRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              statement: a.statement,
+              justification: a.justification,
+              riskLevel: a.riskLevel,
+              isVerified: a.isVerified,
+              impactIfInvalid: a.impactIfInvalid,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 4. Alternatives
       ...ctx.alternatives.map((alt) =>
-        (prisma as any).alternativeRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            name: alt.name,
-            description: alt.description,
-            pros: alt.pros,
-            cons: alt.cons,
-            score: alt.score,
-            status: alt.status,
-            rejectionReason: alt.rejectionReason,
-          },
-        }).catch(() => null),
+        prisma.alternativeRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              name: alt.name,
+              description: alt.description,
+              pros: alt.pros,
+              cons: alt.cons,
+              score: alt.score,
+              status: alt.status,
+              rejectionReason: alt.rejectionReason,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 5. Tradeoffs
       ...ctx.tradeoffs.map((tr) =>
-        (prisma as any).tradeoffRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            criterion: tr.criterion,
-            alternativeAId: tr.alternativeAId,
-            alternativeBId: tr.alternativeBId,
-            comparisonDetails: tr.comparisonDetails,
-            selectedOption: tr.selectedOption,
-          },
-        }).catch(() => null),
+        prisma.tradeoffRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              criterion: tr.criterion,
+              alternativeAId: tr.alternativeAId,
+              alternativeBId: tr.alternativeBId,
+              comparisonDetails: tr.comparisonDetails,
+              selectedOption: tr.selectedOption,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 6. Conflicts
       ...ctx.conflicts.map((cf) =>
-        (prisma as any).conflictRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            conflictType: cf.conflictType,
-            severity: cf.severity,
-            description: cf.description,
-            entitiesInvolved: cf.entitiesInvolved,
-            mitigationRecommendation: cf.mitigationRecommendation,
-            isResolved: cf.isResolved ?? false,
-          },
-        }).catch(() => null),
+        prisma.conflictRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              conflictType: cf.conflictType,
+              severity: cf.severity,
+              description: cf.description,
+              entitiesInvolved: cf.entitiesInvolved,
+              mitigationRecommendation: cf.mitigationRecommendation,
+              isResolved: cf.isResolved ?? false,
+            },
+          })
+          .catch(() => null),
       ),
 
       // 7. Missing Evidence Records
       ...ctx.missingEvidence.map((me) =>
-        (prisma as any).missingEvidenceRecord?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            missingItem: me.missingItem,
-            category: me.category,
-            impact: me.impact,
-            requiredSource: me.requiredSource,
-          },
-        }).catch(() => null),
+        prisma.missingEvidenceRecord
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              missingItem: me.missingItem,
+              category: me.category,
+              impact: me.impact,
+              requiredSource: me.requiredSource,
+            },
+          })
+          .catch(() => null),
       ),
     ]);
 
     // Persist Conclusion
     if (ctx.conclusion) {
-      await (prisma as any).engineeringConclusionRecord?.create({
-        data: {
-          sessionId: ctx.sessionId,
-          statement: ctx.conclusion.statement,
-          confidenceScore: ctx.conclusion.confidenceScore,
-          supportingEvidenceIds: ctx.conclusion.supportingEvidenceIds,
-          appliedPrincipleIds: ctx.conclusion.appliedPrincipleIds,
-          tradeoffIds: ctx.conclusion.tradeoffIds,
-          unresolvedUncertainties: ctx.conclusion.unresolvedUncertainties,
-          isSupportedByEvidence: ctx.conclusion.isSupportedByEvidence,
-          recommendation: ctx.conclusion.recommendation,
-        },
-      }).catch(() => null);
+      await prisma.engineeringConclusionRecord
+        .create({
+          data: {
+            sessionId: ctx.sessionId,
+            statement: ctx.conclusion.statement,
+            confidenceScore: ctx.conclusion.confidenceScore,
+            supportingEvidenceIds: ctx.conclusion.supportingEvidenceIds,
+            appliedPrincipleIds: ctx.conclusion.appliedPrincipleIds,
+            tradeoffIds: ctx.conclusion.tradeoffIds,
+            unresolvedUncertainties: ctx.conclusion.unresolvedUncertainties,
+            isSupportedByEvidence: ctx.conclusion.isSupportedByEvidence,
+            recommendation: ctx.conclusion.recommendation,
+          },
+        })
+        .catch(() => null);
     }
 
     // Persist Graph Nodes & Edges
     const createdNodes = new Map<string, string>();
     for (const node of graph.nodes) {
-      const dbNode = await (prisma as any).reasoningGraphNode?.create({
-        data: {
-          sessionId: ctx.sessionId,
-          organizationId: ctx.organizationId,
-          nodeType: node.nodeType,
-          label: node.label,
-          confidence: node.confidence,
-          weight: node.weight,
-        },
-      }).catch(() => null);
+      const dbNode = await prisma.reasoningGraphNode
+        .create({
+          data: {
+            sessionId: ctx.sessionId,
+            organizationId: ctx.organizationId,
+            nodeType: node.nodeType,
+            label: node.label,
+            confidence: node.confidence,
+            weight: node.weight,
+          },
+        })
+        .catch(() => null);
       if (dbNode) createdNodes.set(node.id, dbNode.id);
     }
 
@@ -441,42 +493,48 @@ export async function runReasoningPipeline(sessionId: string): Promise<PipelineC
       const dbSrc = createdNodes.get(edge.sourceNodeId);
       const dbTgt = createdNodes.get(edge.targetNodeId);
       if (dbSrc && dbTgt) {
-        await (prisma as any).reasoningGraphEdge?.create({
-          data: {
-            sessionId: ctx.sessionId,
-            organizationId: ctx.organizationId,
-            sourceNodeId: dbSrc,
-            targetNodeId: dbTgt,
-            edgeType: edge.edgeType,
-            justification: edge.justification,
-            weight: edge.weight,
-          },
-        }).catch(() => null);
+        await prisma.reasoningGraphEdge
+          .create({
+            data: {
+              sessionId: ctx.sessionId,
+              organizationId: ctx.organizationId,
+              sourceNodeId: dbSrc,
+              targetNodeId: dbTgt,
+              edgeType: edge.edgeType,
+              justification: edge.justification,
+              weight: edge.weight,
+            },
+          })
+          .catch(() => null);
       }
     }
 
     // Update Session to COMPLETED
-    await (prisma as any).reasoningSession?.update({
-      where: { id: sessionId },
-      data: {
-        status: "COMPLETED",
-        summary: ctx.conclusion?.statement,
-        confidenceScore: ctx.confidenceScore,
-        uncertaintyNotes: ctx.unresolvedUncertainties,
-        completedAt: new Date(),
-      },
-    }).catch(() => null);
+    await prisma.reasoningSession
+      .update({
+        where: { id: sessionId },
+        data: {
+          status: "COMPLETED",
+          summary: ctx.conclusion?.statement,
+          confidenceScore: ctx.confidenceScore,
+          uncertaintyNotes: ctx.unresolvedUncertainties,
+          completedAt: new Date(),
+        },
+      })
+      .catch(() => null);
 
     return ctx;
   } catch (error) {
     logger.error("Reasoning pipeline execution error", { sessionId, error });
-    await (prisma as any).reasoningSession?.update({
-      where: { id: sessionId },
-      data: {
-        status: "FAILED",
-        completedAt: new Date(),
-      },
-    }).catch(() => null);
+    await prisma.reasoningSession
+      .update({
+        where: { id: sessionId },
+        data: {
+          status: "FAILED",
+          completedAt: new Date(),
+        },
+      })
+      .catch(() => null);
     throw error;
   }
 }

@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Brain,
   Truck,
+  Menu,
   RotateCw,
   Search,
   Settings,
@@ -203,6 +204,44 @@ export function Header() {
 
       {/* Right: Quick Actions, Search, Status & Profile */}
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+        {/* Mobile Modules Menu */}
+        <DropdownMenu
+          align="end"
+          className="lg:hidden"
+          trigger={
+            <button
+              type="button"
+              title="Open navigation modules"
+              aria-label="Open navigation modules"
+              className="flex size-7.5 cursor-pointer items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            >
+              <Menu className="size-4" />
+            </button>
+          }
+        >
+          <DropdownMenuLabel>Modules</DropdownMenuLabel>
+          <div className="max-h-[60vh] overflow-y-auto">
+            {CORE_MODULES.map((mod) => {
+              const Icon = mod.icon;
+              const active = isModuleActive(pathname, mod.href);
+              return (
+                <DropdownMenuItem key={mod.href} onClick={() => handleModuleClick(mod)}>
+                  <Icon
+                    className={cn("size-4", active ? "text-zinc-900" : "text-zinc-500")}
+                    aria-hidden="true"
+                  />
+                  <span className={active ? "text-zinc-900" : ""}>{mod.label}</span>
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => router.push("/settings")}>
+            <Settings className="mr-2 size-4" aria-hidden="true" />
+            Settings
+          </DropdownMenuItem>
+        </DropdownMenu>
+
         {/* Sync Action Button */}
         <button
           type="button"

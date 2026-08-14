@@ -231,12 +231,20 @@ function NavGroup({
   );
 }
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+export function Sidebar({
+  onNavigate,
+  forceExpanded = false,
+}: {
+  onNavigate?: () => void;
+  forceExpanded?: boolean;
+}) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const isCollapsedEffective = forceExpanded ? false : isCollapsed;
 
   // Initialize and persist collapsed state (default: collapsed)
   useEffect(() => {
@@ -340,19 +348,19 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     <aside
       className={cn(
         "z-10 hidden h-full shrink-0 flex-col items-center justify-between overflow-y-auto border-r border-zinc-200 bg-white p-2 text-zinc-800 transition-all duration-200 ease-in-out select-none md:flex",
-        isCollapsed ? "w-14" : "w-64",
+        isCollapsedEffective ? "w-14" : "w-64",
       )}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto">
-        <div className={cn("flex flex-col gap-1", isCollapsed && "items-center")}>
+        <div className={cn("flex flex-col gap-1", isCollapsedEffective && "items-center")}>
           {/* Top Collapse Button */}
           <div
             className={cn(
               "mb-2 flex items-center justify-between",
-              isCollapsed && "justify-center",
+              isCollapsedEffective && "justify-center",
             )}
           >
-            {!isCollapsed && (
+            {!isCollapsedEffective && (
               <span className="px-1 font-mono text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
                 Navigation
               </span>
@@ -360,13 +368,13 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <button
               type="button"
               onClick={toggleCollapse}
-              title={isCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
+              title={isCollapsedEffective ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
               className={cn(
                 "flex size-6 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900",
-                isCollapsed && "mx-auto size-8",
+                isCollapsedEffective && "mx-auto size-8",
               )}
             >
-              {isCollapsed ? (
+              {isCollapsedEffective ? (
                 <ChevronRight className="size-3.5" />
               ) : (
                 <ChevronLeft className="size-3.5" />
@@ -378,7 +386,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <div
             ref={navRef}
             onKeyDown={handleKeyDown}
-            className={cn("flex flex-col gap-0.5", isCollapsed && "items-center")}
+            className={cn("flex flex-col gap-0.5", isCollapsedEffective && "items-center")}
           >
             {SIDEBAR_NAV.map((entry) =>
               isGroup(entry) ? (
@@ -388,7 +396,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   pathname={pathname}
                   expandedGroups={expandedGroups}
                   autoExpandedGroups={autoExpandedLabels}
-                  isCollapsed={isCollapsed}
+                  isCollapsed={isCollapsedEffective}
                   toggleGroup={toggleGroup}
                   onNavigate={onNavigate}
                 />
@@ -397,7 +405,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   key={entry.href}
                   item={entry}
                   isActive={isItemActive(pathname, entry.href)}
-                  isCollapsed={isCollapsed}
+                  isCollapsed={isCollapsedEffective}
                   onNavigate={onNavigate}
                 />
               ),
@@ -409,10 +417,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div
           className={cn(
             "mt-3 rounded border border-zinc-200 bg-white p-2 font-mono text-[10px] text-zinc-500",
-            isCollapsed && "border-0 bg-transparent p-1.5 text-center",
+            isCollapsedEffective && "border-0 bg-transparent p-1.5 text-center",
           )}
         >
-          {isCollapsed ? (
+          {isCollapsedEffective ? (
             <div className="flex flex-col items-center gap-1 font-mono text-[8px]">
               <span className="size-1.5 rounded-full bg-zinc-400" />
               <span className="text-[8px] font-medium text-zinc-700">OK</span>

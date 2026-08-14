@@ -147,7 +147,10 @@ export default function ExecutiveDashboardPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      void loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   async function handleDismissAnomaly(id: string) {
@@ -175,7 +178,7 @@ export default function ExecutiveDashboardPage() {
               <h1 className="text-foreground text-2xl font-extrabold tracking-tight md:text-3xl">
                 Executive Intelligence &amp; Governance
               </h1>
-              <Badge className="hidden border-blue-500/20 bg-blue-500/10 text-[9px] text-blue-600 sm:inline-flex dark:text-blue-400">
+              <Badge className="hidden border-blue-500/20 bg-blue-500/10 text-[9px] text-blue-600 sm:inline-flex">
                 LIVE
               </Badge>
             </div>
@@ -190,7 +193,7 @@ export default function ExecutiveDashboardPage() {
         <SubTabInspector activeTab="overview" className="rounded-xl border" />
 
         {isLoading ? (
-          <div className="border-border bg-background flex items-center justify-center rounded-lg border py-24 text-sm text-muted-foreground">
+          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-lg border py-24 text-sm">
             Aggregating workspace telemetry...
           </div>
         ) : (
@@ -272,7 +275,7 @@ export default function ExecutiveDashboardPage() {
                               className="border-border hover:bg-surface-hover rounded-lg border p-3 transition-colors"
                             >
                               <div className="flex items-center justify-between gap-2">
-                                <span className="border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                                <span className="rounded border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-rose-600 uppercase">
                                   {alert.type.replace("_", " ")}
                                 </span>
                                 <span className="text-muted-foreground font-mono text-[10px]">
@@ -375,7 +378,7 @@ export default function ExecutiveDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => void handleDismissAnomaly(alert.id)}
-                                className="text-muted-foreground hover:text-foreground shrink-0 rounded border border-border px-2 py-1 text-[10px] font-semibold transition-colors"
+                                className="text-muted-foreground hover:text-foreground border-border shrink-0 rounded border px-2 py-1 text-[10px] font-semibold transition-colors"
                               >
                                 Dismiss
                               </button>
@@ -420,7 +423,7 @@ export default function ExecutiveDashboardPage() {
                                 </div>
                                 <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                                   <div
-                                    className="bg-gradient-to-r from-rose-500/70 to-amber-500 h-full rounded-full"
+                                    className="h-full rounded-full bg-gradient-to-r from-rose-500/70 to-amber-500"
                                     style={{ width: `${Math.round(confidence * 100)}%` }}
                                   />
                                 </div>
@@ -445,10 +448,10 @@ export default function ExecutiveDashboardPage() {
                             className={cn(
                               "font-mono",
                               certification?.prediction === "REQUIRED"
-                                ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                                ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
                                 : certification?.prediction === "NOT_REQUIRED"
-                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                  : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                                  : "border-amber-500/30 bg-amber-500/10 text-amber-600",
                             )}
                           >
                             {certification?.prediction?.replace("_", " ") ?? "UNCERTAIN"}
@@ -456,8 +459,10 @@ export default function ExecutiveDashboardPage() {
                         </div>
                         <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                           <div
-                            className="bg-gradient-to-r from-blue-500 to-emerald-500 h-full rounded-full"
-                            style={{ width: `${Math.round((certification?.confidence ?? 0) * 100)}%` }}
+                            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500"
+                            style={{
+                              width: `${Math.round((certification?.confidence ?? 0) * 100)}%`,
+                            }}
                           />
                         </div>
                         <div className="flex items-center justify-between text-xs">
@@ -545,10 +550,7 @@ export default function ExecutiveDashboardPage() {
                             accent: "border-border bg-muted text-muted-foreground",
                           },
                         ].map((s) => (
-                          <div
-                            key={s.label}
-                            className={cn("rounded-lg border p-4", s.accent)}
-                          >
+                          <div key={s.label} className={cn("rounded-lg border p-4", s.accent)}>
                             <span className="text-muted-foreground block text-[10px] font-semibold tracking-wider uppercase">
                               {s.label}
                             </span>
@@ -564,7 +566,7 @@ export default function ExecutiveDashboardPage() {
                 default:
                   return (
                     <Widget key={config.id} config={config}>
-                      <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center gap-2 py-4 text-xs">
                         <Zap className="size-4" aria-hidden="true" />
                         Widget content unavailable.
                       </div>

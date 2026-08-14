@@ -12,27 +12,24 @@ import {
   Layers,
   ArrowRight,
 } from "lucide-react";
-import {
-  RecordInspector,
-  useRecordScroll,
-  useWorkspaceTabs,
-  tabIdFor,
-} from "@/components/layout";
+import { RecordInspector, useRecordScroll, useWorkspaceTabs, tabIdFor } from "@/components/layout";
 import type { RecordTabItem } from "@/components/layout";
 import { Badge, Card, CardContent, Divider } from "@/components/ui";
 import { EpistemicBadge } from "@/components/ui/epistemic-badge";
 import { cn } from "@/shared/utils";
 
 const CHANGE_TYPE_STYLES: Record<string, string> = {
-  DIMENSION: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  NOTE: "border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
-  MATERIAL: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  TOLERANCE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  CALL: "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400",
+  DIMENSION: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+  NOTE: "border-cyan-500/30 bg-cyan-500/10 text-cyan-600",
+  MATERIAL: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+  TOLERANCE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+  CALL: "border-rose-500/30 bg-rose-500/10 text-rose-600",
 };
 
 function changeTypeBadge(type?: string | null) {
-  const style = CHANGE_TYPE_STYLES[(type ?? "").toUpperCase()] ?? "border-border bg-muted text-muted-foreground";
+  const style =
+    CHANGE_TYPE_STYLES[(type ?? "").toUpperCase()] ??
+    "border-border bg-muted text-muted-foreground";
   return (
     <Badge variant="outline" className={cn("border font-mono", style)}>
       {type ?? "CHANGE"}
@@ -85,19 +82,26 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
     };
   }, [id]);
 
-  const changes = job?.changes ?? [];
+  const changes = useMemo(() => job?.changes ?? [], [job]);
   const dimsCount = changes.filter((c: any) => c.changeType === "DIMENSION").length;
 
   const matchedPrecedents = useMemo(() => {
     if (changes.length === 0) return [];
     const tokens = changes
-      .flatMap((c: any) => [c.category, c.description, c.oldValue, c.newValue, c.manufacturingImpact])
+      .flatMap((c: any) => [
+        c.category,
+        c.description,
+        c.oldValue,
+        c.newValue,
+        c.manufacturingImpact,
+      ])
       .join(" ")
       .toLowerCase()
       .split(/\W+/)
       .filter((t: string) => t.length > 3);
     return precedents.slice(0, 12).map((p: any) => {
-      const haystack = `${p.title ?? ""} ${p.summary ?? ""} ${p.description ?? ""} ${p.applicableSystems?.join(" ") ?? ""}`.toLowerCase();
+      const haystack =
+        `${p.title ?? ""} ${p.summary ?? ""} ${p.description ?? ""} ${p.applicableSystems?.join(" ") ?? ""}`.toLowerCase();
       const hits = tokens.filter((t: string) => haystack.includes(t));
       return {
         precedent: p,
@@ -123,8 +127,18 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
 
   const tabs: RecordTabItem[] = [
     { value: "overview", label: "Overview & Rationale", icon: FileText },
-    { value: "evidence", label: "Evidence & Source Proofs", icon: FileCheck2, count: changes.length },
-    { value: "precedents", label: "Precedent Validity", icon: Network, count: matchedPrecedents.length },
+    {
+      value: "evidence",
+      label: "Evidence & Source Proofs",
+      icon: FileCheck2,
+      count: changes.length,
+    },
+    {
+      value: "precedents",
+      label: "Precedent Validity",
+      icon: Network,
+      count: matchedPrecedents.length,
+    },
     { value: "sentinel", label: "Sentinel History", icon: ShieldAlert, count: alerts.length },
     { value: "trace", label: "Reasoning Trace", icon: GitBranch },
   ];
@@ -141,7 +155,7 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
         activeTab={activeTab}
         onTabChange={setActiveTab}
       >
-        <div className="border-border bg-background flex flex-col items-center gap-2 rounded-lg border py-20 text-sm text-muted-foreground">
+        <div className="border-border bg-background text-muted-foreground flex flex-col items-center gap-2 rounded-lg border py-20 text-sm">
           <Layers className="size-6 opacity-50" aria-hidden="true" />
           <p>Drawing inspection job not found.</p>
         </div>
@@ -167,7 +181,16 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
           </span>
         ) : undefined
       }
-      badges={job ? <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 font-mono text-emerald-600 dark:text-emerald-400">READY</Badge> : undefined}
+      badges={
+        job ? (
+          <Badge
+            variant="outline"
+            className="border-emerald-500/30 bg-emerald-500/10 font-mono text-emerald-600"
+          >
+            READY
+          </Badge>
+        ) : undefined
+      }
       backHref="/drawings"
       backLabel="Drawing Intelligence"
       tabs={tabs}
@@ -175,7 +198,7 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
       onTabChange={setActiveTab}
     >
       {isLoading ? (
-        <div className="border-border bg-background flex items-center justify-center gap-2 rounded-lg border py-20 text-sm text-muted-foreground">
+        <div className="border-border bg-background text-muted-foreground flex items-center justify-center gap-2 rounded-lg border py-20 text-sm">
           <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
           Loading drawing inspection...
         </div>
@@ -201,15 +224,23 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
               <Divider />
               <p className="text-muted-foreground text-xs leading-relaxed">
                 Each detected change is screened against manufacturing capability and inspection
-                requirements. Dimensional changes receive the highest scrutiny due to interface
-                fit risk.
+                requirements. Dimensional changes receive the highest scrutiny due to interface fit
+                risk.
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
                   { label: "Total Changes", value: changes.length, tone: "text-foreground" },
                   { label: "Dimensions", value: dimsCount, tone: "text-indigo-500" },
-                  { label: "Materials", value: changes.filter((c: any) => c.changeType === "MATERIAL").length, tone: "text-amber-500" },
-                  { label: "Notes", value: changes.filter((c: any) => c.changeType === "NOTE").length, tone: "text-cyan-500" },
+                  {
+                    label: "Materials",
+                    value: changes.filter((c: any) => c.changeType === "MATERIAL").length,
+                    tone: "text-amber-500",
+                  },
+                  {
+                    label: "Notes",
+                    value: changes.filter((c: any) => c.changeType === "NOTE").length,
+                    tone: "text-cyan-500",
+                  },
                 ].map((s) => (
                   <div key={s.label} className="border-border rounded-lg border p-3">
                     <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
@@ -247,11 +278,16 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Detected changes as source proofs
             </span>
-            <Badge variant="outline" className="font-mono">{changes.length}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {changes.length}
+            </Badge>
           </div>
           {changes.length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
-              <FileCheck2 className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
+              <FileCheck2
+                className="text-muted-foreground/50 mx-auto mb-2 size-6"
+                aria-hidden="true"
+              />
               <p className="text-muted-foreground text-xs">No drawing changes detected.</p>
             </div>
           ) : (
@@ -266,12 +302,14 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                     <EpistemicBadge status="RECORDED" showDot />
                   </div>
                   <p className="text-muted-foreground text-xs leading-relaxed">{c.description}</p>
-                  <div className="grid grid-cols-2 gap-2 rounded-md border border-border bg-muted/40 p-2.5 font-mono text-xs">
+                  <div className="border-border bg-muted/40 grid grid-cols-2 gap-2 rounded-md border p-2.5 font-mono text-xs">
                     <div>
                       <span className="text-muted-foreground mb-0.5 block text-[9px] uppercase">
                         {job?.revA?.revisionLabel ?? "Rev A"}
                       </span>
-                      <span className="text-muted-foreground line-through">{c.oldValue || "N/A"}</span>
+                      <span className="text-muted-foreground line-through">
+                        {c.oldValue || "N/A"}
+                      </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground mb-0.5 block text-[9px] uppercase">
@@ -309,11 +347,16 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Historical failure precedents screened against change content
             </span>
-            <Badge variant="outline" className="font-mono">{matchedPrecedents.length}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {matchedPrecedents.length}
+            </Badge>
           </div>
           {matchedPrecedents.length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
-              <Network className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
+              <Network
+                className="text-muted-foreground/50 mx-auto mb-2 size-6"
+                aria-hidden="true"
+              />
               <p className="text-muted-foreground text-xs">
                 No failure precedents available to screen against.
               </p>
@@ -329,8 +372,8 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                       className={cn(
                         "font-mono",
                         m.status === "MATCHED"
-                          ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
                       )}
                     >
                       {m.status}
@@ -339,9 +382,11 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                   <p className="text-muted-foreground text-xs leading-relaxed">
                     {m.precedent.summary ?? m.precedent.description}
                   </p>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-[10px]">
                     {m.hits.slice(0, 6).map((h: string) => (
-                      <span key={h} className="bg-muted rounded px-1.5 py-0.5 font-mono">{h}</span>
+                      <span key={h} className="bg-muted rounded px-1.5 py-0.5 font-mono">
+                        {h}
+                      </span>
                     ))}
                     <span className="ml-auto font-mono">{(m.confidence * 100).toFixed(0)}%</span>
                   </div>
@@ -356,11 +401,16 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Active surveillance events
             </span>
-            <Badge variant="outline" className="font-mono">{alerts.length}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {alerts.length}
+            </Badge>
           </div>
           {alerts.length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
-              <ShieldAlert className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
+              <ShieldAlert
+                className="text-muted-foreground/50 mx-auto mb-2 size-6"
+                aria-hidden="true"
+              />
               <p className="text-muted-foreground text-xs">No active sentinel alerts.</p>
             </div>
           ) : (
@@ -368,7 +418,7 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
               <Card key={a.id}>
                 <CardContent className="density-p flex flex-col gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
+                    <span className="rounded border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-rose-600 uppercase">
                       {a.type.replace("_", " ")}
                     </span>
                     <span className="text-muted-foreground font-mono text-[10px]">
@@ -376,7 +426,9 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                     </span>
                   </div>
                   <h3 className="text-foreground text-sm font-semibold">{a.title}</h3>
-                  <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{a.reason}</p>
+                  <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
+                    {a.reason}
+                  </p>
                 </CardContent>
               </Card>
             ))
@@ -388,21 +440,21 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Change Disposition Reasoning Trace
             </span>
-            <div className="relative flex flex-col gap-4 border-l-2 border-border pl-5">
+            <div className="border-border relative flex flex-col gap-4 border-l-2 pl-5">
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-cyan-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-cyan-500" />
                 <div className="flex items-center gap-2">
                   <Layers className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Revision diff captured</span>
                   <EpistemicBadge status="RECORDED" showDot />
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  {job?.revA?.revisionLabel ?? "Rev A"} vs {job?.revB?.revisionLabel ?? "Rev B"} sheets
-                  vectorized and diffed across {changes.length} features.
+                  {job?.revA?.revisionLabel ?? "Rev A"} vs {job?.revB?.revisionLabel ?? "Rev B"}{" "}
+                  sheets vectorized and diffed across {changes.length} features.
                 </p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-emerald-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-emerald-500" />
                 <div className="flex items-center gap-2">
                   <ArrowRight className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Old value → New value</span>
@@ -414,10 +466,12 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                 </p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-amber-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-amber-500" />
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="text-muted-foreground size-3" aria-hidden="true" />
-                  <span className="text-foreground text-xs font-bold">Manufacturing & quality impact</span>
+                  <span className="text-foreground text-xs font-bold">
+                    Manufacturing & quality impact
+                  </span>
                   <EpistemicBadge status="INFERRED" showDot />
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
@@ -426,7 +480,7 @@ export default function DrawingInspectorPage({ params }: { params: Promise<{ id:
                 </p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-rose-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-rose-500" />
                 <div className="flex items-center gap-2">
                   <FileCheck2 className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Disposition pending</span>

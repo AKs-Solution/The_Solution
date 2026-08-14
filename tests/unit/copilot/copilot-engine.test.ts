@@ -3,8 +3,11 @@ import { queryEngineeringCopilot } from "../../../src/server/copilot/copilot-eng
 import { runAutomatedInvestigation } from "../../../src/server/copilot/investigation-engine";
 import { getLiveEngineeringNotebooks } from "../../../src/server/copilot/notebook-engine";
 import { generateEngineeringBriefing } from "../../../src/server/copilot/briefings-engine";
+import { isDatabaseAvailable } from "../../helpers/db-gate";
 
-describe("Phase 7: Engineering Copilot & Autonomous Workspace Test Suite", () => {
+const dbOk = await isDatabaseAvailable();
+
+describe.skipIf(!dbOk)("Phase 7: Engineering Copilot & Autonomous Workspace Test Suite", () => {
   const sampleOrgId = "org-copilot-test-101";
 
   it("answers complex engineering queries with evidence provenance and reasoning chain", async () => {

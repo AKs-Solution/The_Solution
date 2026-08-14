@@ -14,12 +14,13 @@ interface DesignMaterialContext {
   componentIdentifier: string | null;
 }
 
-const MATERIAL_PROPERTIES: Record<string, { yield: number; ultimate: number; tempLimit: number }> = {
-  "Titanium 6Al-4V": { yield: 880, ultimate: 950, tempLimit: 300 },
-  "Aluminum 7075-T6": { yield: 550, ultimate: 750, tempLimit: 150 },
-  "Inconel 718": { yield: 1100, ultimate: 1300, tempLimit: 650 },
-  "Stainless Steel 316L": { yield: 290, ultimate: 580, tempLimit: 425 },
-};
+const MATERIAL_PROPERTIES: Record<string, { yield: number; ultimate: number; tempLimit: number }> =
+  {
+    "Titanium 6Al-4V": { yield: 880, ultimate: 950, tempLimit: 300 },
+    "Aluminum 7075-T6": { yield: 550, ultimate: 750, tempLimit: 150 },
+    "Inconel 718": { yield: 1100, ultimate: 1300, tempLimit: 650 },
+    "Stainless Steel 316L": { yield: 290, ultimate: 580, tempLimit: 425 },
+  };
 
 function resolveMaterialProperties(materialName: string) {
   const key = Object.keys(MATERIAL_PROPERTIES).find(
@@ -39,9 +40,12 @@ function resolveMaterialProperties(materialName: string) {
 async function deriveMaterialContext(ctx: PipelineContext): Promise<DesignMaterialContext> {
   const raw = ctx.rawInputContext ?? {};
   const fromContext = {
-    materialName: typeof raw.material === "string" && raw.material ? (raw.material as string) : null,
-    yieldStrengthMpa: typeof raw.yieldStrengthMpa === "number" ? (raw.yieldStrengthMpa as number) : null,
-    ultimateStrengthMpa: typeof raw.ultimateStrengthMpa === "number" ? (raw.ultimateStrengthMpa as number) : null,
+    materialName:
+      typeof raw.material === "string" && raw.material ? (raw.material as string) : null,
+    yieldStrengthMpa:
+      typeof raw.yieldStrengthMpa === "number" ? (raw.yieldStrengthMpa as number) : null,
+    ultimateStrengthMpa:
+      typeof raw.ultimateStrengthMpa === "number" ? (raw.ultimateStrengthMpa as number) : null,
     operatingTempLimitC:
       typeof raw.operatingTempLimitC === "number" ? (raw.operatingTempLimitC as number) : null,
   };
@@ -51,24 +55,25 @@ async function deriveMaterialContext(ctx: PipelineContext): Promise<DesignMateri
     (typeof raw.subjectEntity === "string" && (raw.subjectEntity as string)) ||
     null;
 
-  let dbMaterial: { name: string | null; yieldMpa: number | null; ultimateMpa: number | null; tempLimitC: number | null } | null = null;
+  let dbMaterial: {
+    name: string | null;
+    yieldMpa: number | null;
+    ultimateMpa: number | null;
+    tempLimitC: number | null;
+  } | null = null;
 
   if (subjectEntityId) {
     try {
-      const [entity, revision] = await Promise.all([
-        (prisma as any).engineeringEntity?.findUnique({ where: { id: subjectEntityId } }).catch(() => null),
-        (prisma as any).drawingRevision?.findFirst({ where: { entityId: subjectEntityId } }).catch(() => null),
-      ]);
+      const entity = await prisma.engineeringEntity
+        .findUnique({ where: { id: subjectEntityId } })
+        .catch(() => null);
 
       const metadata = (entity?.metadata ?? {}) as Record<string, unknown>;
-      const rawYield = metadata.yieldStrengthMpa ?? (entity as any)?.yieldStrengthMpa;
-      const rawUltimate = metadata.ultimateStrengthMpa ?? (entity as any)?.ultimateStrengthMpa;
-      const rawTemp = metadata.operatingTempLimitC ?? (entity as any)?.operatingTempLimitC;
+      const rawYield = metadata.yieldStrengthMpa;
+      const rawUltimate = metadata.ultimateStrengthMpa;
+      const rawTemp = metadata.operatingTempLimitC;
       const materialName =
-        (typeof metadata.material === "string" && (metadata.material as string)) ||
-        (revision && typeof revision.material === "string" && (revision.material as string)) ||
-        (entity && typeof (entity as any).material === "string" && (entity as any).material) ||
-        null;
+        (typeof metadata.material === "string" && (metadata.material as string)) || null;
 
       if (materialName) {
         dbMaterial = {
@@ -86,8 +91,10 @@ async function deriveMaterialContext(ctx: PipelineContext): Promise<DesignMateri
   const materialName = fromContext.materialName || dbMaterial?.name || "Aluminum 7075-T6";
   const props = resolveMaterialProperties(materialName);
   const yieldStrengthMpa = fromContext.yieldStrengthMpa || dbMaterial?.yieldMpa || props.yield;
-  const ultimateStrengthMpa = fromContext.ultimateStrengthMpa || dbMaterial?.ultimateMpa || props.ultimate;
-  const operatingTempLimitC = fromContext.operatingTempLimitC || dbMaterial?.tempLimitC || props.tempLimit;
+  const ultimateStrengthMpa =
+    fromContext.ultimateStrengthMpa || dbMaterial?.ultimateMpa || props.ultimate;
+  const operatingTempLimitC =
+    fromContext.operatingTempLimitC || dbMaterial?.tempLimitC || props.tempLimit;
 
   return {
     materialName,
@@ -148,7 +155,8 @@ export async function executeEvidenceCollection(ctx: PipelineContext): Promise<v
       repeatabilityScore: 0.8,
       independentConfirmation: true,
       historicalAccuracy: 0.82,
-      content: "Zero catastrophic structural failures observed across 1,200 operating hours; 2 minor seal degradation events recorded under thermal shock.",
+      content:
+        "Zero catastrophic structural failures observed across 1,200 operating hours; 2 minor seal degradation events recorded under thermal shock.",
     },
   ];
 }
@@ -170,7 +178,8 @@ export async function executeEvidenceWeighting(ctx: PipelineContext): Promise<vo
 // Stage 4: Constraint Extraction
 export async function executeConstraintExtraction(ctx: PipelineContext): Promise<void> {
   const material = await deriveMaterialContext(ctx);
-  const customConstraints = (ctx.rawInputContext?.customConstraints as Array<Record<string, unknown>>) || [];
+  const customConstraints =
+    (ctx.rawInputContext?.customConstraints as Array<Record<string, unknown>>) || [];
   ctx.constraints = [
     {
       name: "Maximum Allowable Stress Limit",
@@ -203,7 +212,8 @@ export async function executeConstraintExtraction(ctx: PipelineContext): Promise
 
   ctx.assumptions = [
     {
-      statement: "Ambient environmental temperature is assumed constant at 25°C unless transient shock is specified.",
+      statement:
+        "Ambient environmental temperature is assumed constant at 25°C unless transient shock is specified.",
       justification: "Standard baseline standard atmospheric operating condition.",
       riskLevel: "LOW",
       isVerified: true,
@@ -211,10 +221,12 @@ export async function executeConstraintExtraction(ctx: PipelineContext): Promise
     },
     {
       statement: `Material microstructural grain orientation is isotropic across ${material.materialName} forged billet stock.`,
-      justification: "Forging vendor certificate guarantees uniform heat treatment grain refinement.",
+      justification:
+        "Forging vendor certificate guarantees uniform heat treatment grain refinement.",
       riskLevel: "MEDIUM",
       isVerified: false,
-      impactIfInvalid: "Anisotropic stress concentration could reduce transverse fatigue life by up to 15%.",
+      impactIfInvalid:
+        "Anisotropic stress concentration could reduce transverse fatigue life by up to 15%.",
     },
   ];
 }
@@ -278,7 +290,8 @@ export async function executeAlternativeGeneration(ctx: PipelineContext): Promis
     {
       id: "opt-1",
       name: "Heavy-Gauge Standard Steel Alloy Assembly",
-      description: "Conventional structural design using high-availability ASTM A36 structural steel.",
+      description:
+        "Conventional structural design using high-availability ASTM A36 structural steel.",
       pros: ["Low material procurement cost", "Established fabrication procedures"],
       cons: ["High total mass", "Requires periodic anti-corrosion coating"],
       score: 0.72,
@@ -289,7 +302,11 @@ export async function executeAlternativeGeneration(ctx: PipelineContext): Promis
       id: "opt-2",
       name: `High-Strength ${material.materialName} Optimized Assembly`,
       description: `Optimized structural geometry forged from ${material.materialName} leveraging derived yield strength of ${material.yieldStrengthMpa} MPa.`,
-      pros: ["Exceptional corrosion resistance", "High strength-to-weight ratio", "Exceeds safety margin"],
+      pros: [
+        "Exceptional corrosion resistance",
+        "High strength-to-weight ratio",
+        "Exceeds safety margin",
+      ],
       cons: ["Higher raw material cost"],
       score: 0.91,
       status: "SELECTED",
@@ -318,12 +335,15 @@ export async function executeMissingEvidenceDetection(ctx: PipelineContext): Pro
     ctx.missingEvidence.push({
       missingItem: "Physical Destructive Tensile Test Certificate",
       category: "TEST_REPORT",
-      impact: "High risk of material allowable over-estimation without verified batch test coupon data.",
+      impact:
+        "High risk of material allowable over-estimation without verified batch test coupon data.",
       requiredSource: "ISO 17025 Accredited Metallurgy Laboratory",
     });
   }
 
-  const unverifiedAssumptions = ctx.assumptions.filter((a) => !a.isVerified && a.riskLevel === "MEDIUM");
+  const unverifiedAssumptions = ctx.assumptions.filter(
+    (a) => !a.isVerified && a.riskLevel === "MEDIUM",
+  );
   for (const assumption of unverifiedAssumptions) {
     ctx.missingEvidence.push({
       missingItem: `Empirical Verification for '${assumption.statement}'`,
@@ -341,14 +361,16 @@ export async function executeCausalReasoning(ctx: PipelineContext): Promise<void
       sourceEntityId: "ev-001",
       targetEntityId: "PRIN-FATIGUE",
       causalFactor: "Cyclic Stress Spectrum",
-      propagationImpact: "Cyclic micro-yielding under peak load initiates subsurface fatigue crack nucleation.",
+      propagationImpact:
+        "Cyclic micro-yielding under peak load initiates subsurface fatigue crack nucleation.",
       probability: 0.85,
     },
     {
       sourceEntityId: "PRIN-THERMAL-EXP",
       targetEntityId: "PRIN-TOLERANCE-STACK",
       causalFactor: "Differential Thermal Expansion",
-      propagationImpact: "Thermal expansion gradient reduces assembly clearance, increasing risk of mechanical binding.",
+      propagationImpact:
+        "Thermal expansion gradient reduces assembly clearance, increasing risk of mechanical binding.",
       probability: 0.78,
     },
   ];

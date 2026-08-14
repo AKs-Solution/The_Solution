@@ -76,14 +76,14 @@ export default function ReviewQueuePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 bg-zinc-950 p-8 text-zinc-100">
+    <div className="flex min-h-full flex-col gap-6 bg-white p-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-            <UserCheck className="h-6 w-6 text-indigo-400" /> Assessment Approval Queue
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-zinc-900">
+            <UserCheck className="h-6 w-6 text-indigo-600" /> Assessment Approval Queue
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-500">
             Governance review portal for pending engineering assessments
           </p>
         </div>
@@ -99,11 +99,11 @@ export default function ReviewQueuePage() {
           Loading review queue...
         </div>
       ) : reviews.length === 0 ? (
-        <Card className="border-zinc-800 bg-zinc-900/30 p-12 text-center">
+        <Card className="border-zinc-200 bg-zinc-100 p-12 text-center">
           <CardContent className="flex flex-col items-center gap-3">
-            <CheckCircle2 className="h-12 w-12 text-emerald-400" />
-            <h3 className="text-lg font-bold text-white">Review Queue Clear</h3>
-            <p className="text-sm text-zinc-400">
+            <CheckCircle2 className="h-12 w-12 text-emerald-600" />
+            <h3 className="text-lg font-bold text-zinc-900">Review Queue Clear</h3>
+            <p className="text-sm text-zinc-500">
               All submitted engineering assessments have been reviewed and approved.
             </p>
           </CardContent>
@@ -122,20 +122,20 @@ export default function ReviewQueuePage() {
                   className={`flex flex-col gap-2 rounded-xl border p-4 text-left transition-all ${
                     isSelected
                       ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10"
-                      : "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900"
+                      : "border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold tracking-wider text-indigo-300 uppercase">
                       {a.severity}
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] text-amber-400">
+                    <span className="flex items-center gap-1 text-[11px] text-amber-600">
                       <Clock className="h-3 w-3" /> Submitted
                     </span>
                   </div>
-                  <h4 className="text-sm font-bold text-white">{a.title}</h4>
-                  <span className="line-clamp-1 text-xs text-zinc-400">{a.description}</span>
-                  <div className="mt-2 flex items-center justify-between border-t border-zinc-800/60 pt-2 text-[11px] text-zinc-500">
+                  <h4 className="text-sm font-bold text-zinc-900">{a.title}</h4>
+                  <span className="line-clamp-1 text-xs text-zinc-500">{a.description}</span>
+                  <div className="mt-2 flex items-center justify-between border-t border-zinc-200/60 pt-2 text-[11px] text-zinc-500">
                     <span>By: {a.submittedBy?.name || "Engineer"}</span>
                     <span>v{a.version}</span>
                   </div>
@@ -146,13 +146,13 @@ export default function ReviewQueuePage() {
 
           {/* Review Panel */}
           {selectedReview && (
-            <div className="flex flex-col gap-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 shadow-xl lg:col-span-2">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+            <div className="flex flex-col gap-6 rounded-xl border border-zinc-200 bg-zinc-100 p-6 shadow-sm lg:col-span-2">
+              <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">
+                  <h2 className="text-xl font-bold text-zinc-900">
                     {selectedReview.assessment.title}
                   </h2>
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-zinc-500">
                     Project: {selectedReview.assessment.project?.name || "General Engineering"}{" "}
                     &middot; Version {selectedReview.assessment.version}
                   </span>
@@ -164,17 +164,17 @@ export default function ReviewQueuePage() {
 
               {/* Description */}
               <div>
-                <h4 className="mb-1 text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                <h4 className="mb-1 text-xs font-bold tracking-wider text-zinc-500 uppercase">
                   Assessment Description
                 </h4>
-                <p className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-sm leading-relaxed text-zinc-200">
+                <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-700">
                   {selectedReview.assessment.description}
                 </p>
               </div>
 
               {/* Edit History Timeline */}
               <div>
-                <h4 className="mb-2 text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                <h4 className="mb-2 text-xs font-bold tracking-wider text-zinc-500 uppercase">
                   Edit Audit History
                 </h4>
                 <div className="flex max-h-40 flex-col gap-2 overflow-y-auto">
@@ -182,10 +182,10 @@ export default function ReviewQueuePage() {
                     selectedReview.assessment.editHistory.map((item: any) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between rounded border border-zinc-800 bg-zinc-950 p-2.5 text-xs text-zinc-300"
+                        className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 p-2.5 text-xs text-zinc-600"
                       >
                         <span>
-                          Modified <strong className="text-indigo-400">{item.fieldName}</strong> by{" "}
+                          Modified <strong className="text-indigo-600">{item.fieldName}</strong> by{" "}
                           {item.editedBy?.name}
                         </span>
                         <span className="text-[10px] text-zinc-500">
@@ -202,15 +202,15 @@ export default function ReviewQueuePage() {
               </div>
 
               {/* Feedback Input & Decision Actions */}
-              <div className="flex flex-col gap-3 border-t border-zinc-800 pt-4">
-                <label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+              <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4">
+                <label className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                   Reviewer Rationale / Feedback
                 </label>
                 <textarea
                   value={approvalReason}
                   onChange={(e) => setApprovalReason(e.target.value)}
                   placeholder="Provide explicit approval reason or modification details..."
-                  className="min-h-[80px] rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-xs text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  className="min-h-[80px] rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                 />
                 <div className="mt-2 flex items-center justify-end gap-3">
                   <Button
@@ -225,7 +225,7 @@ export default function ReviewQueuePage() {
                     variant="primary"
                     disabled={isSubmitting}
                     onClick={handleApprove}
-                    className="bg-emerald-600 px-6 text-xs font-semibold text-white hover:bg-emerald-700"
+                    className="bg-emerald-600 px-6 text-xs font-semibold text-zinc-900 hover:bg-emerald-700"
                   >
                     <CheckCircle2 className="mr-1 h-4 w-4" /> Approve Assessment
                   </Button>

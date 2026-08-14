@@ -81,13 +81,13 @@ export default function RiskPage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <BarChart2 className="size-6 text-red-600 dark:text-red-400" />
+              <BarChart2 className="size-6 text-red-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Predictive Program Risk Syndication
               </h1>
             </div>
             <Button
-              className="bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
               size="sm"
               onClick={handleSimulate}
               disabled={isLoading}
@@ -123,17 +123,15 @@ export default function RiskPage() {
                     key={r.id}
                     className={`flex flex-col gap-4 rounded-xl border p-5 transition-all ${
                       isMitigated
-                        ? "border-emerald-250 bg-emerald-50/5 dark:border-emerald-900/30"
+                        ? "border-emerald-200 bg-emerald-50/5"
                         : isHighRisk
-                          ? "border-red-200 bg-red-50/5 dark:border-red-900/30"
-                          : "border-zinc-200 bg-zinc-50/10 dark:border-zinc-800 dark:bg-zinc-900/10"
+                          ? "border-red-200 bg-red-50/5"
+                          : "border-zinc-200 bg-zinc-50/10"
                     }`}
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex flex-col">
-                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                          {r.programName}
-                        </h3>
+                        <h3 className="text-sm font-bold text-zinc-900">{r.programName}</h3>
                         <span className="text-[10px] text-zinc-400">
                           Simulation Run: {new Date(r.simulatedAt).toLocaleString()}
                         </span>
@@ -152,27 +150,27 @@ export default function RiskPage() {
                         </div>
 
                         {isMitigated ? (
-                          <Badge className="border-emerald-250 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
+                          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800">
                             Clear
                           </Badge>
                         ) : isHighRisk ? (
-                          <Badge className="border-red-250 bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-400">
+                          <Badge className="border-red-200 bg-red-50 text-red-800">
                             Critical Path Alert
                           </Badge>
                         ) : (
-                          <Badge className="border-amber-250 bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                          <Badge className="border-amber-200 bg-amber-50 text-amber-800">
                             Watchlist
                           </Badge>
                         )}
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-100 dark:border-zinc-900" />
+                    <Divider className="border-zinc-100" />
 
                     <div className="grid grid-cols-1 gap-4 text-xs md:grid-cols-3">
-                      <div className="dark:border-zinc-850 rounded border border-zinc-100 bg-zinc-50 p-4 dark:bg-zinc-900">
+                      <div className="rounded border border-zinc-100 bg-zinc-50 p-4">
                         <span className="mb-1 block text-zinc-400">Identified Bottleneck</span>
-                        <span className="block font-bold text-zinc-800 dark:text-zinc-200">
+                        <span className="block font-bold text-zinc-800">
                           {r.bottlenecks?.supplierName}
                         </span>
                         <span className="mt-1 block text-[10px] text-zinc-500">
@@ -180,10 +178,10 @@ export default function RiskPage() {
                         </span>
                       </div>
 
-                      <div className="dark:border-zinc-850 flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4 dark:bg-zinc-900">
+                      <div className="flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4">
                         <div>
                           <span className="block text-zinc-400">Delay Probability</span>
-                          <span className="mt-1 block text-lg font-bold text-zinc-800 dark:text-zinc-100">
+                          <span className="mt-1 block text-lg font-bold text-zinc-800">
                             {Math.round(r.delayProbability * 100)}%
                           </span>
                         </div>
@@ -192,11 +190,11 @@ export default function RiskPage() {
                         </span>
                       </div>
 
-                      <div className="dark:border-zinc-850 flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4 dark:bg-zinc-900">
+                      <div className="flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4">
                         <div>
                           <span className="block text-zinc-400">Est Schedule Impact</span>
                           <span
-                            className={`mt-1 block text-lg font-bold ${r.bottlenecks?.leadTimeDelayDays > 10 ? "text-red-650" : "text-zinc-800 dark:text-zinc-200"}`}
+                            className={`mt-1 block text-lg font-bold ${r.bottlenecks?.leadTimeDelayDays > 10 ? "text-red-600" : "text-zinc-800"}`}
                           >
                             +{r.bottlenecks?.leadTimeDelayDays} Days
                           </span>
@@ -209,7 +207,7 @@ export default function RiskPage() {
 
                     {isHighRisk && !isMitigated && (
                       <div className="mt-1 flex items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-xs">
-                        <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                        <div className="flex items-center gap-2 text-red-700">
                           <AlertTriangle className="size-4 shrink-0" />
                           <span>
                             Single-point bottleneck detected at Tier-2. Dynamic recovery options
@@ -219,7 +217,7 @@ export default function RiskPage() {
                         <Button
                           onClick={() => handleMitigate(r.id)}
                           disabled={mitigatingId === r.id}
-                          className="flex h-9 items-center gap-1.5 bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                          className="flex h-9 items-center gap-1.5 bg-red-600 text-white hover:bg-red-700"
                         >
                           <ShieldCheck className="size-4" />
                           <span>
@@ -232,7 +230,7 @@ export default function RiskPage() {
                     )}
 
                     {isMitigated && (
-                      <div className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700 dark:text-emerald-400">
+                      <div className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-700">
                         <ShieldCheck className="size-4 shrink-0" />
                         <span>
                           Mitigation complete. Order load re-allocated to Helix Machining

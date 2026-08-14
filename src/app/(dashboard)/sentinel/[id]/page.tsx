@@ -13,26 +13,22 @@ import {
   Activity,
   Boxes,
 } from "lucide-react";
-import {
-  RecordInspector,
-  useRecordScroll,
-  useWorkspaceTabs,
-  tabIdFor,
-} from "@/components/layout";
+import { RecordInspector, useRecordScroll, useWorkspaceTabs, tabIdFor } from "@/components/layout";
 import type { RecordTabItem } from "@/components/layout";
 import { Badge, Card, CardContent, Divider } from "@/components/ui";
 import { EpistemicBadge } from "@/components/ui/epistemic-badge";
 import { cn } from "@/shared/utils";
 
 const TYPE_STYLES: Record<string, string> = {
-  DECISION_INVALIDATED: "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400",
-  SUPPLIER_DEGRADATION: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  PRECEDENT_MATCH: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  EVIDENCE_MISSING: "border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-400",
+  DECISION_INVALIDATED: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+  SUPPLIER_DEGRADATION: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+  PRECEDENT_MATCH: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+  EVIDENCE_MISSING: "border-orange-500/30 bg-orange-500/10 text-orange-600",
 };
 
 function typeBadge(type?: string | null) {
-  const style = TYPE_STYLES[(type ?? "").toUpperCase()] ?? "border-border bg-muted text-muted-foreground";
+  const style =
+    TYPE_STYLES[(type ?? "").toUpperCase()] ?? "border-border bg-muted text-muted-foreground";
   return (
     <Badge variant="outline" className={cn("border font-mono", style)}>
       {(type ?? "ALERT").replace("_", " ")}
@@ -54,7 +50,11 @@ function fallbackAlert(id: string) {
   };
 }
 
-export default function SentinelAlertInspectorPage({ params }: { params: Promise<{ id: string }> }) {
+export default function SentinelAlertInspectorPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { updateTab } = useWorkspaceTabs();
   useRecordScroll("sentinel", id);
@@ -93,15 +93,20 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
     };
   }, []);
 
-  const alert = useMemo(() => alerts.find((a: any) => a.id === id) ?? fallbackAlert(id), [alerts, id]);
+  const alert = useMemo(
+    () => alerts.find((a: any) => a.id === id) ?? fallbackAlert(id),
+    [alerts, id],
+  );
 
   const matchedPrecedents = useMemo(() => {
-    const tokens = `${alert.title ?? ""} ${alert.reason ?? ""} ${alert.affectedSystems?.join(" ") ?? ""}`
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((t: string) => t.length > 3);
+    const tokens =
+      `${alert.title ?? ""} ${alert.reason ?? ""} ${alert.affectedSystems?.join(" ") ?? ""}`
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((t: string) => t.length > 3);
     return precedents.slice(0, 12).map((p: any) => {
-      const haystack = `${p.title ?? ""} ${p.summary ?? ""} ${p.description ?? ""} ${p.applicableSystems?.join(" ") ?? ""}`.toLowerCase();
+      const haystack =
+        `${p.title ?? ""} ${p.summary ?? ""} ${p.description ?? ""} ${p.applicableSystems?.join(" ") ?? ""}`.toLowerCase();
       const hits = tokens.filter((t: string) => haystack.includes(t));
       return {
         precedent: p,
@@ -112,10 +117,7 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
     });
   }, [alert, precedents]);
 
-  const history = useMemo(
-    () => alerts.filter((a: any) => a.id !== id).slice(0, 4),
-    [alerts, id],
-  );
+  const history = useMemo(() => alerts.filter((a: any) => a.id !== id).slice(0, 4), [alerts, id]);
 
   useEffect(() => {
     updateTab(tabIdFor("sentinel", id), {
@@ -127,8 +129,18 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
 
   const tabs: RecordTabItem[] = [
     { value: "overview", label: "Overview & Rationale", icon: FileText },
-    { value: "evidence", label: "Evidence & Source Proofs", icon: FileCheck2, count: alert.evidenceHashes?.length ?? 0 },
-    { value: "precedents", label: "Precedent Validity", icon: Network, count: matchedPrecedents.length },
+    {
+      value: "evidence",
+      label: "Evidence & Source Proofs",
+      icon: FileCheck2,
+      count: alert.evidenceHashes?.length ?? 0,
+    },
+    {
+      value: "precedents",
+      label: "Precedent Validity",
+      icon: Network,
+      count: matchedPrecedents.length,
+    },
     { value: "history", label: "Sentinel History", icon: Activity, count: history.length },
     { value: "trace", label: "Reasoning Trace", icon: GitBranch },
   ];
@@ -154,7 +166,7 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
       onTabChange={setActiveTab}
     >
       {isLoading ? (
-        <div className="border-border bg-background flex items-center justify-center gap-2 rounded-lg border py-20 text-sm text-muted-foreground">
+        <div className="border-border bg-background text-muted-foreground flex items-center justify-center gap-2 rounded-lg border py-20 text-sm">
           <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
           Establishing sentinel telemetry...
         </div>
@@ -213,12 +225,16 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Source proofs referenced by this alert
             </span>
-            <Badge variant="outline" className="font-mono">{alert.evidenceHashes?.length ?? 0}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {alert.evidenceHashes?.length ?? 0}
+            </Badge>
           </div>
           {(alert.evidenceHashes ?? []).length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
               <Hash className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
-              <p className="text-muted-foreground text-xs">No source hashes attached to this alert.</p>
+              <p className="text-muted-foreground text-xs">
+                No source hashes attached to this alert.
+              </p>
             </div>
           ) : (
             alert.evidenceHashes.map((hash: string, i: number) => (
@@ -233,7 +249,9 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
                     </div>
                     <EpistemicBadge status="RECORDED" showDot />
                   </div>
-                  <p className="text-muted-foreground break-all font-mono text-[11px] leading-relaxed">{hash}</p>
+                  <p className="text-muted-foreground font-mono text-[11px] leading-relaxed break-all">
+                    {hash}
+                  </p>
                 </CardContent>
               </Card>
             ))
@@ -245,12 +263,19 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Historical failure precedents matched to this deviation
             </span>
-            <Badge variant="outline" className="font-mono">{matchedPrecedents.length}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {matchedPrecedents.length}
+            </Badge>
           </div>
           {matchedPrecedents.length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
-              <Network className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
-              <p className="text-muted-foreground text-xs">No precedents available to screen against.</p>
+              <Network
+                className="text-muted-foreground/50 mx-auto mb-2 size-6"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground text-xs">
+                No precedents available to screen against.
+              </p>
             </div>
           ) : (
             matchedPrecedents.map((m) => (
@@ -263,8 +288,8 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
                       className={cn(
                         "font-mono",
                         m.status === "MATCHED"
-                          ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
                       )}
                     >
                       {m.status}
@@ -273,9 +298,11 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
                   <p className="text-muted-foreground text-xs leading-relaxed">
                     {m.precedent.summary ?? m.precedent.description}
                   </p>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-[10px]">
                     {m.hits.slice(0, 6).map((h: string) => (
-                      <span key={h} className="bg-muted rounded px-1.5 py-0.5 font-mono">{h}</span>
+                      <span key={h} className="bg-muted rounded px-1.5 py-0.5 font-mono">
+                        {h}
+                      </span>
                     ))}
                     <span className="ml-auto font-mono">{(m.confidence * 100).toFixed(0)}%</span>
                   </div>
@@ -290,19 +317,31 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Related surveillance events
             </span>
-            <Badge variant="outline" className="font-mono">{history.length}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {history.length}
+            </Badge>
           </div>
           {history.length === 0 ? (
             <div className="border-border bg-background rounded-lg border p-8 text-center">
-              <Activity className="text-muted-foreground/50 mx-auto mb-2 size-6" aria-hidden="true" />
-              <p className="text-muted-foreground text-xs">No other alerts in the current surveillance window.</p>
+              <Activity
+                className="text-muted-foreground/50 mx-auto mb-2 size-6"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground text-xs">
+                No other alerts in the current surveillance window.
+              </p>
             </div>
           ) : (
             history.map((a: any) => (
               <Card key={a.id}>
                 <CardContent className="density-p flex flex-col gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className={cn("rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase", TYPE_STYLES[a.type] ?? "")}>
+                    <span
+                      className={cn(
+                        "rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase",
+                        TYPE_STYLES[a.type] ?? "",
+                      )}
+                    >
                       {a.type.replace("_", " ")}
                     </span>
                     <span className="text-muted-foreground font-mono text-[10px]">
@@ -310,7 +349,9 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
                     </span>
                   </div>
                   <h3 className="text-foreground text-sm font-semibold">{a.title}</h3>
-                  <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{a.reason}</p>
+                  <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
+                    {a.reason}
+                  </p>
                 </CardContent>
               </Card>
             ))
@@ -322,21 +363,21 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
             <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               Detection Reasoning Trace
             </span>
-            <div className="relative flex flex-col gap-4 border-l-2 border-border pl-5">
+            <div className="border-border relative flex flex-col gap-4 border-l-2 pl-5">
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-cyan-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-cyan-500" />
                 <div className="flex items-center gap-2">
                   <Boxes className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Expectation modeled</span>
                   <EpistemicBadge status="RECORDED" showDot />
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  Operating envelope for {alert.affectedSystems?.join(", ") ?? "monitored systems"} was
-                  registered in the sentinel model.
+                  Operating envelope for {alert.affectedSystems?.join(", ") ?? "monitored systems"}{" "}
+                  was registered in the sentinel model.
                 </p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-amber-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-amber-500" />
                 <div className="flex items-center gap-2">
                   <Activity className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Observation deviated</span>
@@ -345,18 +386,20 @@ export default function SentinelAlertInspectorPage({ params }: { params: Promise
                 <p className="text-muted-foreground text-xs leading-relaxed">{alert.reason}</p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-emerald-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-emerald-500" />
                 <div className="flex items-center gap-2">
                   <Hash className="text-muted-foreground size-3" aria-hidden="true" />
-                  <span className="text-foreground text-xs font-bold">Evidence hashes attached</span>
+                  <span className="text-foreground text-xs font-bold">
+                    Evidence hashes attached
+                  </span>
                   <EpistemicBadge status="RECORDED" showDot />
                 </div>
-                <p className="text-muted-foreground break-all font-mono text-[11px]">
+                <p className="text-muted-foreground font-mono text-[11px] break-all">
                   {(alert.evidenceHashes ?? ["No source hash attached"]).join("\n")}
                 </p>
               </div>
               <div className="relative flex flex-col gap-1">
-                <span className="absolute top-1 -left-[27px] size-3 rounded-full border-2 border-background bg-rose-500" />
+                <span className="border-background absolute top-1 -left-[27px] size-3 rounded-full border-2 bg-rose-500" />
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="text-muted-foreground size-3" aria-hidden="true" />
                   <span className="text-foreground text-xs font-bold">Escalation recommended</span>

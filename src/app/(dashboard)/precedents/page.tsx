@@ -18,7 +18,14 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
-import { PageContainer, Section, Panel, GridLayout, Stack, SubTabInspector } from "@/components/layout";
+import {
+  PageContainer,
+  Section,
+  Panel,
+  GridLayout,
+  Stack,
+  SubTabInspector,
+} from "@/components/layout";
 import { MetricCard, EmptyState, Button, DataTable } from "@/components/ui";
 import { cn } from "@/shared/utils";
 import { EngineeringPrecedent, PrecedentType } from "@/features/precedents/types";
@@ -269,7 +276,7 @@ export default function PrecedentEnginePage() {
           </div>
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="flex items-center gap-2 self-start rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 md:self-auto dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+            className="flex items-center gap-2 self-start rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 md:self-auto"
           >
             <Plus className="size-4" />
             <span>Record Precedent</span>
@@ -307,7 +314,7 @@ export default function PrecedentEnginePage() {
         </GridLayout>
 
         {/* Dynamic Verification Hub (Interactive Reasoner) */}
-        <div className="border-border rounded-xl border bg-zinc-50/50 p-6 shadow-sm dark:bg-zinc-900/10">
+        <div className="border-border rounded-xl border bg-zinc-50/50 p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Sparkles className="size-4 text-amber-500" />
             <h3 className="text-foreground text-base font-bold tracking-tight">
@@ -401,7 +408,7 @@ export default function PrecedentEnginePage() {
                         {verificationResult.missingEvidence.map((ev, i) => (
                           <li
                             key={i}
-                            className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400"
+                            className="flex items-center gap-1.5 text-[11px] text-amber-600"
                           >
                             <AlertTriangle className="size-3 shrink-0 animate-bounce" />
                             <span>{ev}</span>
@@ -495,7 +502,7 @@ export default function PrecedentEnginePage() {
                           {prec.summary}
                         </span>
                         {prec.engineeringQuestion && (
-                          <div className="mt-2 rounded border border-red-500/10 bg-red-500/5 px-2.5 py-1.5 text-xs text-red-700 dark:text-red-400">
+                          <div className="mt-2 rounded border border-red-500/10 bg-red-500/5 px-2.5 py-1.5 text-xs text-red-700">
                             <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
                               Engineering Question
                             </span>
@@ -504,7 +511,7 @@ export default function PrecedentEnginePage() {
                         )}
                         {prec.decisionMade &&
                           prec.decisionMade !== "N/A - System baseline verified." && (
-                            <div className="mt-1 rounded border border-green-500/10 bg-green-500/5 px-2.5 py-1.5 text-xs text-green-700 dark:text-green-400">
+                            <div className="mt-1 rounded border border-green-500/10 bg-green-500/5 px-2.5 py-1.5 text-xs text-green-700">
                               <span className="mb-0.5 block font-mono text-[9px] font-bold tracking-wider uppercase">
                                 Decision Made
                               </span>
@@ -525,12 +532,12 @@ export default function PrecedentEnginePage() {
                           className={cn(
                             "rounded px-2 py-0.5 font-mono text-[11px] font-semibold tracking-wide",
                             precType === "FAILURE"
-                              ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400"
+                              ? "bg-red-100 text-red-800"
                               : precType === "SUCCESSFUL_DESIGN"
-                                ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400"
+                                ? "bg-green-100 text-green-800"
                                 : precType === "REGULATORY_PRECEDENT"
-                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400"
-                                  : "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400",
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-purple-100 text-purple-800",
                           )}
                         >
                           {precType.replace("_", " ")}
@@ -576,10 +583,10 @@ export default function PrecedentEnginePage() {
                           className={cn(
                             "inline-flex items-center gap-1.5 text-xs font-medium",
                             outcomeStatus === "RESOLVED"
-                              ? "text-green-600 dark:text-green-400"
+                              ? "text-green-600"
                               : outcomeStatus === "MITIGATED"
-                                ? "text-amber-600 dark:text-amber-400"
-                                : "text-zinc-600 dark:text-zinc-400",
+                                ? "text-amber-600"
+                                : "text-zinc-600",
                           )}
                         >
                           <span
@@ -644,12 +651,12 @@ export default function PrecedentEnginePage() {
                       className={cn(
                         "rounded px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide uppercase",
                         (selectedPrecedent.tags?.[0] || "FAILURE") === "FAILURE"
-                          ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400"
+                          ? "bg-red-100 text-red-800"
                           : (selectedPrecedent.tags?.[0] || "FAILURE") === "SUCCESSFUL_DESIGN"
-                            ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400"
+                            ? "bg-green-100 text-green-800"
                             : (selectedPrecedent.tags?.[0] || "FAILURE") === "REGULATORY_PRECEDENT"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400"
-                              : "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-400",
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-purple-100 text-purple-800",
                       )}
                     >
                       {(selectedPrecedent.tags?.[0] || "FAILURE").replace("_", " ")}
@@ -670,7 +677,7 @@ export default function PrecedentEnginePage() {
                         EXPLAINABILITY & RELEVANCE
                       </span>
                       <div className="text-foreground rounded-lg border border-amber-500/10 bg-amber-500/5 p-3 text-xs leading-relaxed">
-                        <span className="mb-1 block font-semibold text-amber-600 dark:text-amber-400">
+                        <span className="mb-1 block font-semibold text-amber-600">
                           Relevance Rationale:
                         </span>
                         {selectedPrecedent.whyRelevant ||
@@ -684,7 +691,7 @@ export default function PrecedentEnginePage() {
                         DETERMINISTIC STRENGTH RATINGS
                       </span>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border bg-zinc-50/50 p-2.5 dark:bg-zinc-900/30">
+                        <div className="rounded-lg border bg-zinc-50/50 p-2.5">
                           <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                             <ShieldCheck className="size-3.5 text-amber-500" />
                             <span>CONFIDENCE</span>
@@ -693,7 +700,7 @@ export default function PrecedentEnginePage() {
                             {(selectedPrecedent.confidence * 100).toFixed(0)}%
                           </span>
                         </div>
-                        <div className="rounded-lg border bg-zinc-50/50 p-2.5 dark:bg-zinc-900/30">
+                        <div className="rounded-lg border bg-zinc-50/50 p-2.5">
                           <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                             <ShieldCheck className="size-3.5 text-blue-500" />
                             <span>EVIDENCE RATIO</span>
@@ -717,7 +724,7 @@ export default function PrecedentEnginePage() {
                               (as, index) => (
                                 <li
                                   key={index}
-                                  className="flex items-start gap-1.5 text-xs text-red-700 dark:text-red-400"
+                                  className="flex items-start gap-1.5 text-xs text-red-700"
                                 >
                                   <span className="mt-0.5 shrink-0 font-bold text-red-500">✕</span>
                                   <span>{as}</span>
@@ -781,11 +788,11 @@ export default function PrecedentEnginePage() {
                           {(selectedPrecedent.relatedDocuments || []).map((doc) => (
                             <div
                               key={doc}
-                              className="text-foreground flex items-center gap-2 rounded border bg-zinc-50 px-2.5 py-1.5 text-xs dark:bg-zinc-900"
+                              className="text-foreground flex items-center gap-2 rounded border bg-zinc-50 px-2.5 py-1.5 text-xs"
                             >
                               <FileText className="size-3.5 text-blue-500" />
                               <span className="truncate font-medium">{doc}</span>
-                              <span className="py-0.2 ml-auto rounded bg-green-500/10 px-1 font-mono text-[9px] text-green-600">
+                              <span className="ml-auto rounded bg-green-500/10 px-1 py-0.5 font-mono text-[9px] text-green-600">
                                 VERIFIED
                               </span>
                             </div>
@@ -850,12 +857,12 @@ export default function PrecedentEnginePage() {
 
             <form onSubmit={handleFormSubmit} className="space-y-4">
               {formError && (
-                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-700 dark:text-red-400">
+                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-700">
                   {formError}
                 </div>
               )}
               {formSuccess && (
-                <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3 text-xs text-green-700 dark:text-green-400">
+                <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3 text-xs text-green-700">
                   ✓ Precedent recorded successfully. Engineering memory updated.
                 </div>
               )}
@@ -871,7 +878,7 @@ export default function PrecedentEnginePage() {
                     placeholder="e.g. Flight 22 Actuator O-Ring Thermal Shrinkage"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
 
@@ -884,7 +891,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value as PrecedentType })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                   >
                     <option value="FAILURE">Failure / Incident Mode</option>
                     <option value="SUCCESSFUL_DESIGN">Successful Design Baseline</option>
@@ -905,7 +912,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, applicableSystemsStr: e.target.value })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
               </div>
@@ -920,7 +927,7 @@ export default function PrecedentEnginePage() {
                   placeholder="Provide a detailed abstract of the engineering precedent."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                  className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                 />
               </div>
 
@@ -935,7 +942,7 @@ export default function PrecedentEnginePage() {
                       placeholder="e.g. Material embrittlement under extreme low temps..."
                       value={formData.rootCause}
                       onChange={(e) => setFormData({ ...formData, rootCause: e.target.value })}
-                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                     />
                   </div>
 
@@ -950,7 +957,7 @@ export default function PrecedentEnginePage() {
                       onChange={(e) =>
                         setFormData({ ...formData, correctiveAction: e.target.value })
                       }
-                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                     />
                   </div>
                 </div>
@@ -964,7 +971,7 @@ export default function PrecedentEnginePage() {
                   <select
                     value={formData.resolutionStatus}
                     onChange={(e) => setFormData({ ...formData, resolutionStatus: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                   >
                     <option value="RESOLVED">Resolved</option>
                     <option value="MITIGATED">Mitigated</option>
@@ -985,7 +992,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, confidenceScore: parseFloat(e.target.value) })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 font-mono text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 font-mono text-sm outline-none"
                   />
                 </div>
 
@@ -998,7 +1005,7 @@ export default function PrecedentEnginePage() {
                     placeholder="e.g. NASA-STD-5001"
                     value={formData.standardsStr}
                     onChange={(e) => setFormData({ ...formData, standardsStr: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none dark:bg-zinc-900"
+                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
               </div>
@@ -1007,10 +1014,7 @@ export default function PrecedentEnginePage() {
                 <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  className="bg-zinc-900 px-5 text-white dark:bg-zinc-50 dark:text-zinc-950"
-                >
+                <Button type="submit" className="bg-zinc-900 px-5 text-white">
                   Confirm & Write
                 </Button>
               </div>

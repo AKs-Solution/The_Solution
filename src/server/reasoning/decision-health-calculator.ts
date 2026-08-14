@@ -30,18 +30,20 @@ export async function calculateDecisionHealth(
   decisionId: string,
 ): Promise<DecisionHealthBreakdown> {
   try {
-    const decision = await (prisma as any).engineeringDecision?.findUnique({
-      where: { id: decisionId },
-      include: {
-        approvals: true,
-      },
-    }).catch(() => null);
+    const decision = await prisma.engineeringDecision
+      .findUnique({
+        where: { id: decisionId },
+        include: {
+          approvals: true,
+        },
+      })
+      .catch(() => null);
 
     if (!decision) {
       throw new Error(`Decision ${decisionId} not found.`);
     }
 
-    const metrics = (decision.qualityMetrics as Record<string, unknown>) || {};
+    const metrics = (decision.qualityMetrics || {}) as Record<string, unknown>;
     const evidenceHashes = (metrics.evidenceHashes as string[]) || [];
 
     // 1. Evidence Completeness

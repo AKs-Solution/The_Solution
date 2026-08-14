@@ -76,7 +76,7 @@ export default function ValidationTimelinePage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Calendar className="text-indigo-650 size-6 dark:text-indigo-400" />
+              <Calendar className="size-6 text-indigo-600" />
               <h1 className="text-foreground text-2xl font-bold tracking-tight">
                 Ingestion & Validation Timeline
               </h1>
@@ -104,7 +104,7 @@ export default function ValidationTimelinePage() {
                 <RefreshCw className="size-6 animate-spin text-zinc-400" />
               </div>
             ) : milestones.length > 0 ? (
-              <div className="dark:border-zinc-850 relative ml-4 flex flex-col gap-6 border-l border-zinc-200 pl-6">
+              <div className="relative ml-4 flex flex-col gap-6 border-l border-zinc-200 pl-6">
                 {milestones.map((m) => {
                   const isActive = m.status === "ACTIVE";
                   const isCompleted = m.status === "COMPLETED";
@@ -118,14 +118,12 @@ export default function ValidationTimelinePage() {
                             ? "border-emerald-500 bg-emerald-500"
                             : isActive
                               ? "animate-pulse border-amber-500 bg-amber-500"
-                              : "border-zinc-300 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
+                              : "border-zinc-300 bg-zinc-100"
                         }`}
                       />
 
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                          {m.stageName}
-                        </h3>
+                        <h3 className="text-sm font-bold text-zinc-950">{m.stageName}</h3>
                         <Badge
                           variant={isCompleted ? "success" : isActive ? "warning" : "secondary"}
                         >
@@ -134,9 +132,9 @@ export default function ValidationTimelinePage() {
                       </div>
 
                       {m.precisionPercent !== null && (
-                        <div className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                        <div className="text-xs font-medium text-zinc-600">
                           Algorithm Measured Precision:{" "}
-                          <span className="text-indigo-650 font-bold dark:text-indigo-400">
+                          <span className="font-bold text-indigo-600">
                             {Math.round(m.precisionPercent * 100)}%
                           </span>{" "}
                           (based on 200 target validation cases)
@@ -153,7 +151,7 @@ export default function ValidationTimelinePage() {
                         )}
                       </div>
 
-                      <Divider className="mt-2 border-zinc-100 dark:border-zinc-900" />
+                      <Divider className="mt-2 border-zinc-100" />
                     </div>
                   );
                 })}
@@ -183,7 +181,7 @@ export default function ValidationTimelinePage() {
                   return (
                     <Card
                       key={c.id}
-                      className={`border ${isResolved ? "border-zinc-200 dark:border-zinc-800" : "border-amber-250"}`}
+                      className={`border ${isResolved ? "border-zinc-200" : "border-amber-200"}`}
                     >
                       <CardContent className="flex flex-col gap-3 p-5">
                         <div className="flex items-center justify-between">
@@ -195,11 +193,11 @@ export default function ValidationTimelinePage() {
                           </Badge>
                         </div>
 
-                        <div className="text-zinc-650 dark:text-zinc-350 text-left text-xs leading-relaxed">
+                        <div className="text-left text-xs leading-relaxed text-zinc-600">
                           {c.description}
                         </div>
 
-                        <Divider className="border-zinc-100 dark:border-zinc-900" />
+                        <Divider className="border-zinc-100" />
 
                         {isResolved ? (
                           <div className="flex flex-col gap-2 text-left text-xs">
@@ -207,13 +205,13 @@ export default function ValidationTimelinePage() {
                               <UserCheck className="size-4" />
                               <span>Resolved by {c.resolvedBy}</span>
                             </div>
-                            <p className="rounded border border-zinc-100 bg-zinc-50 p-2.5 text-[10px] leading-normal text-zinc-500 dark:border-zinc-900 dark:bg-zinc-950">
+                            <p className="rounded border border-zinc-100 bg-zinc-50 p-2.5 text-[10px] leading-normal text-zinc-500">
                               Resolution notes: {c.resolutionNotes}
                             </p>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-3 text-left">
-                            <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                            <span className="text-xs font-semibold text-zinc-800">
                               Submit Resolution Sign-off
                             </span>
                             <Input
@@ -225,13 +223,13 @@ export default function ValidationTimelinePage() {
                             <textarea
                               value={resolutionNotes}
                               onChange={(e) => setResolutionNotes(e.target.value)}
-                              className="bg-background flex h-16 w-full rounded-md border border-zinc-200 px-3 py-2 text-xs focus-visible:outline-none dark:border-zinc-800"
+                              className="bg-background flex h-16 w-full rounded-md border border-zinc-200 px-3 py-2 text-xs focus-visible:outline-none"
                               placeholder="Describe engineering reconciliation notes..."
                             />
                             <Button
                               onClick={() => handleResolve(c.id)}
                               disabled={!engineerName || !resolutionNotes || isSubmitting}
-                              className="w-full bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500"
+                              className="w-full bg-amber-600 text-white hover:bg-amber-700"
                               size="sm"
                             >
                               {isSubmitting ? "Submitting Resolution..." : "Resolve & Log Change"}
