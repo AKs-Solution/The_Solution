@@ -106,10 +106,10 @@ export function LoginForm() {
 
       <div className="relative my-1">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-zinc-800" />
+          <span className="w-full border-t border-zinc-200" />
         </div>
         <div className="relative flex justify-center text-[10px] tracking-wider uppercase">
-          <span className="bg-zinc-950 px-2 text-zinc-500">Or Instant Access</span>
+          <span className="bg-white px-2 text-zinc-500 font-mono">Or Instant Access</span>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export function LoginForm() {
         variant="secondary"
         disabled={isPending}
         onClick={handleDemoLogin}
-        className="w-full border border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-900"
+        className="w-full border border-zinc-200 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 hover:text-zinc-900"
       >
         Continue as Guest (Demo Mode)
       </Button>

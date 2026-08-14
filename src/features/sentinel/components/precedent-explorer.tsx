@@ -72,15 +72,15 @@ export function PrecedentExplorer({ precedents, onSearch }: PrecedentExplorerPro
             </p>
 
             <div className="grid grid-cols-1 gap-3 border-t border-zinc-200 pt-2 text-xs md:grid-cols-2">
-              <div className="space-y-1 rounded-lg border border-rose-500/20 bg-rose-950/20 p-3">
-                <div className="flex items-center gap-1 font-semibold text-rose-400">
+              <div className="space-y-1 rounded-lg border border-rose-200 bg-rose-50 p-3">
+                <div className="flex items-center gap-1 font-semibold text-rose-700">
                   <AlertTriangle className="h-3.5 w-3.5" /> Invalidated Assumption:
                 </div>
                 <div className="text-zinc-700">{p.invalidatedAssumption}</div>
               </div>
 
-              <div className="space-y-1 rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3">
-                <div className="flex items-center gap-1 font-semibold text-emerald-400">
+              <div className="space-y-1 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <div className="flex items-center gap-1 font-semibold text-emerald-700">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Proven Corrective Action:
                 </div>
                 <div className="text-zinc-700">{p.provenCorrectiveAction}</div>
