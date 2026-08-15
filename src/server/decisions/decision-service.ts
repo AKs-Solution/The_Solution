@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/server/db";
-import { NotFoundError, ValidationError } from "@/shared/errors";
+import { ValidationError } from "@/shared/errors";
 import { createPrecedent } from "@/server/precedents/precedent-service";
 
 export interface CreateDecisionInput {

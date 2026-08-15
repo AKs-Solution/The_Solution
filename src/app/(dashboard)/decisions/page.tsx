@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { GitCommit, RefreshCw, FileText, ChevronRight, Plus, Sparkles } from "lucide-react";
+import { GitCommit, RefreshCw, FileText, ChevronRight, Plus } from "lucide-react";
 import {
   PageContainer,
   Stack,
@@ -15,6 +15,7 @@ import {
 import { Button, Badge, Card, CardContent, Divider, Input } from "@/components/ui";
 import { EpistemicBadge } from "@/components/ui/epistemic-badge";
 import { useToast } from "@/components/ui/toaster";
+import { cn } from "@/shared/utils";
 
 export default function DecisionAuditTrailPage() {
   const [decisions, setDecisions] = useState<any[]>([]);
