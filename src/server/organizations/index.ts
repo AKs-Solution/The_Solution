@@ -16,6 +16,7 @@ export {
   removeMember,
   leaveOrganization,
   listPendingInvitations,
+  listOrganizationInvitations,
 } from "./membership-service";
 
 export type { MemberResult, InvitationResult } from "./membership-service";

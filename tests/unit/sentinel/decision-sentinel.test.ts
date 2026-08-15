@@ -3,8 +3,11 @@ import { monitorActiveDecisions } from "../../../src/server/sentinel/decision-se
 import { queryFailurePrecedents } from "../../../src/server/sentinel/precedent-failure-engine";
 import { getEngineeringRecommendations } from "../../../src/server/sentinel/recommendation-engine";
 import { getExecutiveDashboardData } from "../../../src/server/sentinel/executive-dashboard-engine";
+import { isDatabaseAvailable } from "../../helpers/db-gate";
 
-describe("Phase 6: Decision Sentinel & Innovation Acceleration Test Suite", () => {
+const dbOk = await isDatabaseAvailable();
+
+describe.skipIf(!dbOk)("Phase 6: Decision Sentinel & Innovation Acceleration Test Suite", () => {
   const sampleOrgId = "org-sentinel-test-101";
 
   it("monitors active decisions and detects expectation vs observed outcome deviations", async () => {

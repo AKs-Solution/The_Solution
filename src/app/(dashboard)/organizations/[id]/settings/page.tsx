@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { OrganizationSettingsForm, MemberList } from "@/features/organizations/components";
@@ -24,11 +24,23 @@ interface Member {
   joinedAt: string | null;
 }
 
+interface PendingInvitation {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  email: string | null;
+  role: string;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
 export default function OrganizationSettingsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [org, setOrg] = useState<Org | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [currentUserId, setCurrentUserId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,10 +48,11 @@ export default function OrganizationSettingsPage() {
     let cancelled = false;
     async function load() {
       try {
-        const [orgRes, membersRes, meRes] = await Promise.all([
+        const [orgRes, membersRes, meRes, invitesRes] = await Promise.all([
           fetch(`/api/organizations/${params.id}`),
           fetch(`/api/organizations/${params.id}/members`),
           fetch("/api/auth/me"),
+          fetch(`/api/organizations/${params.id}/invitations`),
         ]);
 
         if (!orgRes.ok) {
@@ -59,6 +72,11 @@ export default function OrganizationSettingsPage() {
           const meData = await meRes.json();
           if (!cancelled) setCurrentUserId(meData.data?.id ?? "");
         }
+
+        if (invitesRes.ok) {
+          const invitesData = await invitesRes.json();
+          if (!cancelled) setInvitations(invitesData.data);
+        }
       } catch {
         if (!cancelled) router.push("/organizations");
       } finally {
@@ -70,6 +88,17 @@ export default function OrganizationSettingsPage() {
       cancelled = true;
     };
   }, [params.id, router]);
+
+  const reloadInvitations = useCallback(() => {
+    fetch(`/api/organizations/${params.id}/invitations`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json) setInvitations(json.data);
+      })
+      .catch(() => {
+        // Ignore refresh failures
+      });
+  }, [params.id]);
 
   if (isLoading) {
     return (
@@ -126,8 +155,10 @@ export default function OrganizationSettingsPage() {
           <MemberList
             organizationId={org.id}
             members={members}
+            invitations={invitations}
             currentUserId={currentUserId}
             currentUserRole={org.role}
+            onInviteCreated={reloadInvitations}
           />
         </TabsContent>
       </Tabs>

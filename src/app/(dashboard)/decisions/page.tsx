@@ -3,9 +3,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { GitCommit, RefreshCw, FileText, ChevronRight } from "lucide-react";
+import { GitCommit, RefreshCw, FileText, ChevronRight, Plus } from "lucide-react";
 import {
   PageContainer,
   Stack,
@@ -20,6 +20,11 @@ export default function DecisionAuditTrailPage() {
   const [decisions, setDecisions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { openTab } = useWorkspaceTabs();
+  const proposeFormRef = useRef<HTMLDivElement>(null);
+
+  const focusProposeForm = () => {
+    proposeFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   // Form state (scoped per workspace tab so switching tabs preserves drafts)
   const [decisionType, setDecisionType] = useScopedTabState(
@@ -126,75 +131,25 @@ export default function DecisionAuditTrailPage() {
                 <RefreshCw className="size-6 animate-spin text-zinc-500" />
               </div>
             ) : decisions.length === 0 ? (
-              /* DEMO TIMELINE CARD WHEN EMPTY */
-              <Card className="border-zinc-200 bg-zinc-100 p-6">
-                <CardContent className="flex flex-col gap-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-emerald-700">
-                        <FileText className="size-5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <h3 className="text-base font-bold text-zinc-900">
-                          Tighten bore tolerance ±0.015 → ±0.010
-                        </h3>
-                        <span className="text-xs text-zinc-500">
-                          Wing Root Bracket · Decision ID: dec-8402
-                        </span>
-                      </div>
-                    </div>
-                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-emerald-700">
-                      SUCCESSFUL OUTCOME
-                    </Badge>
+              /* EMPTY STATE CARD */
+              <Card className="border-zinc-200 bg-zinc-100 p-10">
+                <CardContent className="flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="rounded-xl border border-zinc-200 bg-white p-4 text-zinc-400">
+                    <FileText className="size-8" />
                   </div>
-
-                  <Divider className="border-zinc-200" />
-
-                  {/* TIMELINE STEPS */}
-                  <div className="relative flex flex-col gap-4 border-l-2 border-zinc-200 pl-6 text-xs">
-                    <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-indigo-500" />
-                      <span className="font-bold text-indigo-600">
-                        2024-01-15 10:30 AM — DECISION PROPOSED
-                      </span>
-                      <p className="text-zinc-600">By: Sarah Chen (Stress Engineer)</p>
-                      <p className="text-zinc-500">
-                        Reason: Improve fit margin by 30%. No structural load impact.
-                      </p>
-                    </div>
-
-                    <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-emerald-500" />
-                      <span className="font-bold text-emerald-600">
-                        2024-01-16 2:00 PM — DECISION APPROVED
-                      </span>
-                      <p className="text-zinc-600">By: John Smith (Chief Engineer)</p>
-                      <p className="text-zinc-500">
-                        Note: Approved. Supplier TechMach confirmed process capability. Condition:
-                        Require SPC Cpk ≥ 1.67.
-                      </p>
-                    </div>
-
-                    <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-amber-500" />
-                      <span className="font-bold text-amber-600">
-                        2024-02-01 9:15 AM — FIRST ARTICLE MILESTONE
-                      </span>
-                      <p className="text-zinc-600">Result: ✓ PASSED SPC verification (Cpk 1.67)</p>
-                      <p className="text-zinc-500">Cost Impact: +$150/part | Schedule: +3 days</p>
-                    </div>
-
-                    <div className="relative flex flex-col gap-1">
-                      <div className="absolute top-0 -left-[31px] size-4 rounded-full border-4 border-zinc-200 bg-emerald-400" />
-                      <span className="font-bold text-emerald-600">
-                        2024-12-10 4:00 PM — RETROACTIVE FINAL OUTCOME
-                      </span>
-                      <p className="text-zinc-700">
-                        Outcome: SUCCESS · Achieved 30% fit improvement. Zero field failures over
-                        1000+ flight hours.
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-base font-bold text-zinc-900">
+                    No engineering decisions recorded yet
+                  </h3>
+                  <p className="max-w-sm text-sm text-zinc-500">
+                    Decisions proposed in this workspace will appear here with their full audit
+                    trail once recorded.
+                  </p>
+                  <Button
+                    onClick={focusProposeForm}
+                    className="mt-2 bg-emerald-600 text-zinc-50 hover:bg-emerald-700"
+                  >
+                    <Plus className="mr-2 size-3.5" /> Propose Decision
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -230,7 +185,7 @@ export default function DecisionAuditTrailPage() {
 
           {/* RIGHT: PROPOSE DECISION FORM */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 bg-zinc-100">
+            <Card ref={proposeFormRef} className="scroll-mt-24 border-zinc-200 bg-zinc-100">
               <CardContent className="p-6">
                 <form onSubmit={handleCreateDecision}>
                   <Stack gap={4}>

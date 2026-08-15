@@ -18,11 +18,24 @@ interface Member {
   joinedAt: string | null;
 }
 
+interface PendingInvitation {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  email: string | null;
+  role: string;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
 interface MemberListProps {
   organizationId: string;
   members: Member[];
+  invitations: PendingInvitation[];
   currentUserId: string;
   currentUserRole: string;
+  onInviteCreated?: () => void;
 }
 
 function MemberRow({
@@ -97,8 +110,10 @@ function MemberRow({
 export function MemberList({
   organizationId,
   members,
+  invitations,
   currentUserId,
   currentUserRole,
+  onInviteCreated,
 }: MemberListProps) {
   const router = useRouter();
   const [showInvite, setShowInvite] = useState(false);
@@ -125,6 +140,9 @@ export function MemberList({
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-sm">
             {members.length} member{members.length !== 1 ? "s" : ""}
+            {invitations.length > 0
+              ? ` · ${invitations.length} pending invite${invitations.length !== 1 ? "s" : ""}`
+              : ""}
           </p>
           <Can permission="members:invite">
             <Button size="sm" onClick={() => setShowInvite(true)}>
@@ -132,6 +150,35 @@ export function MemberList({
             </Button>
           </Can>
         </div>
+
+        {invitations.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              Pending invitations
+            </span>
+            <div className="divide-border border-border divide-y rounded-lg border border-dashed">
+              {invitations.map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-full text-xs font-medium">
+                      {(inv.email ?? "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-foreground text-sm font-medium">{inv.email}</span>
+                      <span className="text-muted-foreground text-xs">
+                        Invited as {inv.role} · expires{" "}
+                        {new Date(inv.expiresAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-semibold text-amber-700">
+                    PENDING
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="divide-border border-border divide-y rounded-lg border">
           {members.map((member) => (
@@ -150,6 +197,7 @@ export function MemberList({
           organizationId={organizationId}
           open={showInvite}
           onOpenChange={setShowInvite}
+          onInvited={onInviteCreated}
         />
       </div>
     </PermissionProvider>

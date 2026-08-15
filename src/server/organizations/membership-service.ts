@@ -76,6 +76,7 @@ export async function inviteMember(
   organizationId: string,
   email: string,
   role: string = "viewer",
+  name?: string,
 ): Promise<{ invitationId: string }> {
   const session = await validateSession();
   if (!session) throw new ForbiddenError("Not authenticated");
@@ -149,7 +150,7 @@ export async function inviteMember(
     },
   });
 
-  await sendInvitationEmail(normalizedEmail, invitation.organization.name, role);
+  await sendInvitationEmail(normalizedEmail, invitation.organization.name, role, name);
 
   return { invitationId: invitation.id };
 }
@@ -307,6 +308,38 @@ export async function listPendingInvitations(): Promise<InvitationResult[]> {
   const invitations = await prisma.invitation.findMany({
     where: {
       userId: session.userId,
+      status: "pending",
+      expiresAt: { gt: new Date() },
+    },
+    include: {
+      organization: { select: { name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return invitations.map((inv) => ({
+    id: inv.id,
+    organizationId: inv.organizationId,
+    organizationName: inv.organization.name,
+    email: inv.email,
+    role: inv.role,
+    status: inv.status,
+    createdAt: inv.createdAt,
+    expiresAt: inv.expiresAt,
+  }));
+}
+
+export async function listOrganizationInvitations(
+  organizationId: string,
+): Promise<InvitationResult[]> {
+  const session = await validateSession();
+  if (!session) throw new ForbiddenError("Not authenticated");
+
+  await requireOrgAccess(organizationId, session.userId);
+
+  const invitations = await prisma.invitation.findMany({
+    where: {
+      organizationId,
       status: "pending",
       expiresAt: { gt: new Date() },
     },

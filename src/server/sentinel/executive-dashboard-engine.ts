@@ -30,13 +30,17 @@ export async function getExecutiveDashboardData(
 ): Promise<ExecutiveDashboardData> {
   try {
     const [decisions, alerts] = await Promise.all([
-      prisma.engineeringDecision.findMany({
-        where: { organizationId },
-      }),
-      prisma.anomalyAlert.findMany({
-        orderBy: { detectedAt: "desc" },
-        take: 10,
-      }),
+      prisma.engineeringDecision
+        .findMany({
+          where: { organizationId },
+        })
+        .catch(() => []),
+      prisma.anomalyAlert
+        .findMany({
+          orderBy: { detectedAt: "desc" },
+          take: 10,
+        })
+        .catch(() => []),
     ]);
 
     const realtimeAlerts: RealtimeAlertItem[] = alerts.map((a) => ({
@@ -45,70 +49,33 @@ export async function getExecutiveDashboardData(
       title: a.alertType,
       reason: a.description,
       evidenceHashes: [],
-      affectedSystems: [a.recordId || "Propulsion Subsystem"],
+      affectedSystems: a.recordId ? [a.recordId] : [],
       recommendedAction: "Conduct immediate engineering safety review.",
       timestamp: a.detectedAt.toISOString(),
     }));
 
-    if (realtimeAlerts.length === 0) {
-      realtimeAlerts.push(
-        {
-          id: "alert-sentinel-101",
-          type: "PRECEDENT_MATCH",
-          title: "Thermal Boundary Transient Match Precedent NCR-2026-084",
-          reason:
-            "Observed sensor telemetry reached 340C, matching historical thermal distortion failure mode.",
-          evidenceHashes: ["7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b"],
-          affectedSystems: ["FLG-840", "Propulsion Chamber Assembly"],
-          recommendedAction: "Verify material substitution to Titanium 6Al-4V is approved.",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: "alert-sentinel-102",
-          type: "SUPPLIER_DEGRADATION",
-          title: "Supplier Quality Shift Notice",
-          reason: "Raw material batch certification PPM defect rate increased from 0.02% to 0.15%.",
-          evidenceHashes: ["3f4e5d6c7b8a90123456789abcdef0123456789abcdef0123456789abcdef012"],
-          affectedSystems: ["Raw Materials Registry"],
-          recommendedAction:
-            "Reroute Titanium alloy procurement to Titanium Precision Dynamics (SUP-TPD-09).",
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-        },
-      );
-    }
+    const activeDecisionsCount = decisions.length;
 
     return {
-      programMaturityScore: 92,
-      innovationVelocityIndex: 88,
-      activeDecisionsCount: decisions.length || 14,
-      deviatedDecisionsCount: 1,
-      agingAssumptionsCount: 2,
-      technicalDebtHotspotsCount: 3,
+      programMaturityScore: 0,
+      innovationVelocityIndex: 0,
+      activeDecisionsCount,
+      deviatedDecisionsCount: 0,
+      agingAssumptionsCount: 0,
+      technicalDebtHotspotsCount: 0,
       realtimeAlerts,
       evaluatedAt: new Date().toISOString(),
     };
   } catch (err) {
-    console.warn("[ExecutiveDashboardEngine] DB offline fallback execution:", err);
+    console.warn("[ExecutiveDashboardEngine] DB query error:", err);
     return {
-      programMaturityScore: 92,
-      innovationVelocityIndex: 88,
-      activeDecisionsCount: 14,
-      deviatedDecisionsCount: 1,
-      agingAssumptionsCount: 2,
-      technicalDebtHotspotsCount: 3,
-      realtimeAlerts: [
-        {
-          id: "alert-sentinel-101",
-          type: "PRECEDENT_MATCH",
-          title: "Thermal Boundary Transient Match Precedent NCR-2026-084",
-          reason:
-            "Observed sensor telemetry reached 340C, matching historical thermal distortion failure mode.",
-          evidenceHashes: ["7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b"],
-          affectedSystems: ["FLG-840", "Propulsion Chamber Assembly"],
-          recommendedAction: "Verify material substitution to Titanium 6Al-4V is approved.",
-          timestamp: new Date().toISOString(),
-        },
-      ],
+      programMaturityScore: 0,
+      innovationVelocityIndex: 0,
+      activeDecisionsCount: 0,
+      deviatedDecisionsCount: 0,
+      agingAssumptionsCount: 0,
+      technicalDebtHotspotsCount: 0,
+      realtimeAlerts: [],
       evaluatedAt: new Date().toISOString(),
     };
   }

@@ -35,6 +35,7 @@ import {
   ScrollText,
   Activity,
   ShieldCheck,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -61,6 +62,7 @@ const iconMap: Record<string, LucideIcon> = {
   ScrollText,
   Activity,
   ShieldCheck,
+  HelpCircle,
 };
 
 function isItemActive(pathname: string, href: string): boolean {

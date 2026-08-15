@@ -31,6 +31,7 @@ import {
   Settings,
   User,
   LogOut,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -311,6 +312,10 @@ export function Header() {
           <DropdownMenuItem onClick={() => router.push("/organizations")}>
             <User className="mr-2 size-4" aria-hidden="true" />
             Organizations
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/help")}>
+            <HelpCircle className="mr-2 size-4" aria-hidden="true" />
+            Help & Documentation
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => void handleLogout()}>

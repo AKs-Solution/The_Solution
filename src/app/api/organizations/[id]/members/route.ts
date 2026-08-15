@@ -22,7 +22,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params;
     const body = await request.json();
-    const { email, role } = body;
+    const { name, email, role } = body;
 
     if (!email || typeof email !== "string") {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    const result = await inviteMember(id, email, role);
+    const result = await inviteMember(id, email, role, name);
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (error) {
     if (error instanceof ValidationError) {

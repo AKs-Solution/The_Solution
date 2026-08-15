@@ -20,6 +20,7 @@ export const ROUTES = {
   reality: "/reality",
   audit: "/audit",
   precedents: "/precedents",
+  help: "/help",
 } as const;
 
 export interface SidebarNavItem {
@@ -56,9 +57,19 @@ export const SIDEBAR_NAV: SidebarNavEntry[] = [
       { label: "Executive Overview", href: "/executive-dashboard", icon: "BarChart3", badge: "HQ" },
       { label: "Decision Sentinel", href: "/sentinel", icon: "Activity", badge: "LIVE" },
       { label: "Historical Precedents", href: "/precedents", icon: "BookCheck", badge: "510+" },
-      { label: "Failure Graph & Contagion", href: "/failure-graph", icon: "GitBranch", badge: "GRAPH" },
+      {
+        label: "Failure Graph & Contagion",
+        href: "/failure-graph",
+        icon: "GitBranch",
+        badge: "GRAPH",
+      },
       { label: "Decision Ledger", href: "/decisions", icon: "Workflow" },
-      { label: "Reasoning & Contradictions", href: "/contradictions", icon: "AlertTriangle", badge: "ALERTS" },
+      {
+        label: "Reasoning & Contradictions",
+        href: "/contradictions",
+        icon: "AlertTriangle",
+        badge: "ALERTS",
+      },
     ],
   },
   {
@@ -81,6 +92,7 @@ export const SIDEBAR_NAV: SidebarNavEntry[] = [
       { label: "Program Health", href: "/programs", icon: "Activity" },
       { label: "Settings", href: ROUTES.settings, icon: "Settings" },
       { label: "Notifications", href: ROUTES.notifications, icon: "Bell" },
+      { label: "Help & Documentation", href: ROUTES.help, icon: "HelpCircle" },
     ],
   },
 ];

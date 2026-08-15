@@ -71,21 +71,27 @@ export async function sendInvitationEmail(
   to: string,
   organizationName: string,
   role: string,
+  recipientName?: string,
 ): Promise<void> {
   const invitationsUrl = `${appUrl()}/invitations`;
+  const greeting = recipientName?.trim() ? `Hi ${recipientName.trim()},` : "";
   await sendMail({
     to,
     subject: `You're invited to join ${organizationName} on Consecuencia`,
     text: [
+      greeting,
       `You've been invited to join the ${organizationName} workspace on Consecuencia as ${role}.`,
       "",
       `Sign in to review and accept the invitation: ${invitationsUrl}`,
       "",
       "This invitation expires in 7 days.",
-    ].join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
     html: `
       <div style="font-family: ui-sans-serif, system-ui, sans-serif; max-width: 480px; margin: 0 auto; color: #18181b;">
         <h2 style="color: #18181b;">You're invited to ${organizationName}</h2>
+        ${greeting ? `<p style="color: #3f3f46;">${greeting}</p>` : ""}
         <p style="color: #3f3f46;">You've been invited to join the ${organizationName} workspace on Consecuencia as <strong>${role}</strong>.</p>
         <p>
           <a href="${invitationsUrl}" style="display: inline-block; background: #18181b; color: #fafafa; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">Review invitation</a>

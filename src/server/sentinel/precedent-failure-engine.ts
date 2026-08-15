@@ -1,9 +1,5 @@
 import { createHash } from "crypto";
 import { prisma } from "@/server/db";
-import {
-  INDUSTRY_FAILURE_SEEDS,
-  IndustryFailureSeed,
-} from "@/server/precedents/seed-industry-graph";
 
 export interface HistoricalFailurePrecedent {
   id: string;
@@ -22,21 +18,6 @@ function sha256(...parts: string[]): string {
   return createHash("sha256").update(parts.join("|")).digest("hex");
 }
 
-function seedToPrecedent(seed: IndustryFailureSeed): HistoricalFailurePrecedent {
-  return {
-    id: seed.id,
-    componentType: seed.componentType,
-    material: seed.material,
-    failureMode: seed.failureMode,
-    rootCause: seed.rootCause,
-    invalidatedAssumption: seed.invalidatedAssumption,
-    provenCorrectiveAction: seed.provenCorrectiveAction,
-    evidenceHashes: seed.evidenceHashes,
-    programContext: seed.programContext,
-    occurredAt: seed.occurredAt,
-  };
-}
-
 function filterPrecedents(
   precedents: HistoricalFailurePrecedent[],
   searchQuery?: string,
@@ -52,18 +33,12 @@ function filterPrecedents(
   );
 }
 
-function fallbackPrecedents(searchQuery?: string) {
-  const precedents = INDUSTRY_FAILURE_SEEDS.map(seedToPrecedent);
-  return filterPrecedents(precedents, searchQuery);
-}
-
 /**
  * Deterministic Precedent Failure Prediction Engine
  *
  * Queries the Industry Failure Graph (PublicFailureRecord, AirworthinessDirective,
  * ServiceDifficultyReport, NTSBAccident) categorized by componentType, material,
- * and failureMode, merged with organization-scoped quality events. Falls back to
- * the curated seed dataset when the database is unavailable.
+ * and failureMode, merged with organization-scoped quality events.
  */
 export async function queryFailurePrecedents(
   organizationId: string,
@@ -186,15 +161,10 @@ export async function queryFailurePrecedents(
       });
     }
 
-    if (precedents.length === 0) {
-      precedents.push(...INDUSTRY_FAILURE_SEEDS.map(seedToPrecedent));
-    }
-
     const filtered = filterPrecedents(precedents, searchQuery);
     return { precedents: filtered, totalMatches: filtered.length };
   } catch (err) {
-    console.warn("[PrecedentFailureEngine] DB offline fallback execution:", err);
-    const precedents = fallbackPrecedents(searchQuery);
-    return { precedents, totalMatches: precedents.length };
+    console.warn("[PrecedentFailureEngine] DB query error:", err);
+    return { precedents: [], totalMatches: 0 };
   }
 }
