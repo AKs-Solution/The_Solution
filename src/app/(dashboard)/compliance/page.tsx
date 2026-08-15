@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import { Award, RefreshCw, Layers, ShieldCheck, FileCheck2 } from "lucide-react";
 import { PageContainer, Panel, Stack, SubTabInspector } from "@/components/layout";
 import { Button, Badge, Card, CardContent, Divider } from "@/components/ui";
+import { useToast } from "@/components/ui/toaster";
 
 export default function CompliancePage() {
+  const { toast } = useToast();
   const [entities, setEntities] = useState<any[]>([]);
   const [proofs, setProofs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,9 +49,19 @@ export default function CompliancePage() {
       if (res.ok) {
         const json = await res.json();
         setComplianceCheck(json.data);
+        toast({
+          title: "Attestation Scan Complete",
+          description: `Digital thread verified for ${entity.name}.`,
+          variant: "success",
+        });
       }
     } catch (err) {
       console.error(err);
+      toast({
+        title: "Scan Failed",
+        description: "Could not complete compliance scan.",
+        variant: "error",
+      });
     } finally {
       setIsVerifying(false);
     }
@@ -65,12 +77,22 @@ export default function CompliancePage() {
         body: JSON.stringify({ componentId: selectedEntity.id }),
       });
       if (res.ok) {
+        toast({
+          title: "Proof Issued Successfully",
+          description: `SHA-256 airworthiness certificate minted for ${selectedEntity.name}.`,
+          variant: "success",
+        });
         await fetchData();
         setSelectedEntity(null);
         setComplianceCheck(null);
       }
     } catch (err) {
       console.error(err);
+      toast({
+        title: "Issuance Error",
+        description: "Failed to mint cryptographic proof.",
+        variant: "error",
+      });
     } finally {
       setIsCertifying(false);
     }
