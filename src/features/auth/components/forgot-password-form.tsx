@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { CheckCircle2, Mail, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
