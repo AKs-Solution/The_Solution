@@ -1,13 +1,16 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isResetSuccess = searchParams.get("reset") === "true";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -62,6 +65,12 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {isResetSuccess && (
+        <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs font-medium text-emerald-800">
+          <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+          <span>Password reset successfully. You can now sign in with your new credentials.</span>
+        </div>
+      )}
       {error && (
         <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">{error}</div>
       )}
