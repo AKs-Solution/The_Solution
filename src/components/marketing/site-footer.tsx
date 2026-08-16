@@ -33,6 +33,9 @@ export function SiteFooter() {
         <Link href="/vs/predictive-ai" className="text-slate-500 no-underline hover:text-slate-800">
           vs. predictive AI
         </Link>
+        <Link href="/help" className="text-slate-500 no-underline hover:text-slate-800">
+          Help
+        </Link>
       </nav>
       <p className="mt-6 font-mono text-[11px] text-slate-400">{FRESHNESS_LINE}</p>
     </footer>

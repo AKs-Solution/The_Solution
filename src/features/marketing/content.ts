@@ -26,34 +26,34 @@ export const SEO_KEYWORDS = [
 
 export const MARKETING_FAQS: ReadonlyArray<{ question: string; answer: string }> = [
   {
-    question: "How is Consecuencia different from generative AI for aerospace engineering?",
+    question: "How does Consecuencia prevent generative AI hallucinations?",
     answer:
-      "Generative models sample plausible language. Consecuencia evaluates recorded CAD callouts, material specs, and requirements against a closed set of physical invariants. Pass/fail outcomes are derived from those rules, not predicted. There is no generative step between measurement and conclusion, so the engine cannot hallucinate a tolerance or invent a certification path.",
+      "There is no generative step between measurement and conclusion. Recorded CAD callouts, material specs, and requirements are evaluated against a closed set of physical invariants. Pass/fail is derived from those rules, so the engine cannot invent a tolerance or a certification path.",
   },
   {
-    question: "Which CAD and specification formats can be ingested?",
+    question: "What CAD file formats are currently supported for ingestion?",
     answer:
-      "The verification workflow accepts PDF drawing packages, DXF and STEP geometry, and extracted GD&T callouts. Specs and quality procedures can be attached as PDF or structured text. Guest evaluation uses a public aerospace corpus; organization tenants ingest their own controlled artifacts.",
+      "PDF drawing packages, DXF and STEP geometry, and extracted GD&T callouts. Quality procedures can be attached as PDF or structured text. Guest evaluation uses the public aerospace corpus; organization tenants ingest their own controlled artifacts.",
   },
   {
-    question: "Is Consecuencia ready for AS9100 Rev D and FAR Part 25 evidence packages?",
+    question: "Can this software be deployed in air-gapped / on-premise environments?",
     answer:
-      "Yes. Design and development controls map to AS9100 Section 8.3. Equipment, systems, and installations evidence maps to FAR 25.1309. Every finding is bound to a requirement identifier, an evidence hash, and a timestamp so airworthiness and quality teams can export an audit-ready dossier instead of assembling screenshots.",
+      "Yes. Engineering Team is a managed web workspace. Enterprise Defense / OEM includes custom tenant isolation, on-premise or air-gapped deployment, dedicated ITAR compliance guarantees, and custom DSL rule engines.",
   },
   {
-    question: "How is program data secured, including ITAR-controlled information?",
+    question: "How is epistemic certainty (RECORDED, DERIVED, INFERRED, UNKNOWN) calculated?",
     answer:
-      "Organization workspaces are tenant-isolated. Guest mode never sees customer artifacts—only curated public NTSB, AD, and SDR records. Enterprise Defense / OEM deployments support dedicated tenancy and air-gapped options for ITAR-controlled programs. Cryptographic evidence chains are SHA-256 hashed so exported packages can be independently verified.",
+      "RECORDED is an ingested artifact. DERIVED is a deterministic rule result over recorded inputs. INFERRED is a bounded graph conclusion that still cites its premises. UNKNOWN / GAP is a missing required input. Status is never sampled from a language model.",
   },
   {
-    question: "What does a typical evaluation and deployment path look like?",
+    question: "What compliance standards are built into the automated reporting?",
     answer:
-      "Teams start in the guest sandbox for instant browser evaluation, then run a 30-day program pilot on a bounded assembly, then move to production with Sentinel surveillance and full export dossiers. Engineering Team is seat-priced; Enterprise Defense / OEM is custom, including on-premise options.",
+      "AS9100 Rev D Section 8.3 design and development controls, FAR 25.1309 equipment, systems, and installations, and ISO 9001 documented-information alignment. Reports bind findings to requirement IDs, timestamps, and SHA-256 evidence hashes.",
   },
   {
-    question: "Can we run Consecuencia on-premise or in an air-gapped network?",
+    question: "How does the guest sandbox differ from full enterprise deployment?",
     answer:
-      "Yes. The Engineering Team tier is a managed web workspace. Enterprise Defense / OEM includes custom tenant isolation, on-premise or air-gapped deployment, dedicated ITAR compliance guarantees, and custom DSL rule engines for program-specific invariants.",
+      "Guest mode is instant browser evaluation on public NTSB, AD, and SDR records, with no credit card and a session that ends when the browser closes. Enterprise adds tenant isolation, private CAD ingest, Sentinel surveillance, export dossiers, and optional air-gapped deployment.",
   },
 ];
 
