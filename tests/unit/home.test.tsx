@@ -16,10 +16,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/DemoLoginButton", () => ({
-  DemoLoginButton: ({ children, ...props }: any) => <button {...props}>{children || "Launch Demo Workspace"}</button>,
-}));
-
 import Home from "@/app/page";
 
 describe("Home Page", () => {

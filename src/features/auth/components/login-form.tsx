@@ -52,25 +52,6 @@ export function LoginForm() {
     }
   }
 
-  async function handleDemoLogin() {
-    setError("");
-    setIsPending(true);
-    try {
-      const res = await fetch("/api/auth/demo", { method: "POST" });
-      if (!res.ok) {
-        const err = await res.json();
-        setError(err.error || "Demo login failed");
-        return;
-      }
-      router.push(postLoginDestination());
-      router.refresh();
-    } catch {
-      setError("An unexpected error occurred during demo login");
-    } finally {
-      setIsPending(false);
-    }
-  }
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {isResetSuccess && (
@@ -117,27 +98,8 @@ export function LoginForm() {
         />
         Remember me
       </label>
-      <Button type="submit" disabled={isPending} className="w-full">
+      <Button type="submit" disabled={isPending} className="mt-1 w-full">
         {isPending ? "Signing in..." : "Sign in"}
-      </Button>
-
-      <div className="relative my-1">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-zinc-200" />
-        </div>
-        <div className="relative flex justify-center text-[10px] tracking-wider uppercase">
-          <span className="bg-white px-2 font-mono text-zinc-500">Or Instant Access</span>
-        </div>
-      </div>
-
-      <Button
-        type="button"
-        variant="secondary"
-        disabled={isPending}
-        onClick={handleDemoLogin}
-        className="w-full border border-zinc-200 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 hover:text-zinc-900"
-      >
-        Continue as Guest (Demo Mode)
       </Button>
     </form>
   );

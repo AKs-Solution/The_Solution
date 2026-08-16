@@ -14,7 +14,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     }
 
     const { id } = await params;
-    const auditTrail = await getDecisionAuditTrail(id);
+    const auditTrail = await getDecisionAuditTrail(id, session.organizationId);
 
     if (!auditTrail) {
       return NextResponse.json({ error: "Decision not found" }, { status: 404 });
@@ -53,6 +53,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const result = await approveDecision({
         decisionId: id,
         approverId: session.userId,
+        organizationId: session.organizationId,
         approvalType: approvalType || "APPROVED",
         comment,
         conditions,
@@ -63,6 +64,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (action === "milestone") {
       const result = await addDecisionMilestone({
         decisionId: id,
+        organizationId: session.organizationId,
         milestoneType: milestoneType || "FIRST_ARTICLE",
         status: status || "COMPLETE",
         actualOutcome,

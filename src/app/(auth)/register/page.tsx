@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RegisterForm } from "@/features/auth/components";
 
 export default function RegisterPage() {
@@ -6,16 +7,14 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">Create an account</h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Get started with The Morningstar Solution
-          </p>
+          <p className="text-muted-foreground mt-2 text-sm">Get started with Consecuencia by AK</p>
         </div>
         <RegisterForm />
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Already have an account?{" "}
-          <a href="/login" className="text-foreground font-medium hover:underline">
+          <Link href="/login" className="text-foreground font-medium hover:underline">
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

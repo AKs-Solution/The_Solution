@@ -12,8 +12,6 @@ import {
   Layers,
   Cpu,
 } from "lucide-react";
-import { DemoLoginButton } from "@/components/DemoLoginButton";
-import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const pillars = [
@@ -59,6 +57,12 @@ export default function Home() {
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-x-hidden overflow-y-auto bg-zinc-50 font-sans text-zinc-900 selection:bg-zinc-900 selection:text-zinc-50">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-zinc-900 focus:px-3 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Skip to content
+      </a>
       {/* Light Aerospace Background Meshes */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] bg-[size:3.5rem_3.5rem] opacity-40" />
       <div className="pointer-events-none absolute top-0 left-1/2 h-[600px] w-[1100px] -translate-x-1/2 rounded-full bg-gradient-to-b from-sky-200/40 via-indigo-200/30 to-transparent blur-3xl" />
@@ -80,32 +84,28 @@ export default function Home() {
               </span>
             </div>
           </div>
-          <nav className="flex items-center gap-3 sm:gap-4">
-            <DemoLoginButton
-              variant="secondary"
-              className="cursor-pointer border border-zinc-300 bg-zinc-100 text-xs font-semibold text-zinc-800 hover:bg-zinc-200"
+          <nav className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/login"
+              className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900"
             >
-              Guest Demo Access
-            </DemoLoginButton>
-            <Link href="/login" className="no-underline">
-              <Button
-                variant="ghost"
-                className="text-xs font-medium text-zinc-600 transition-colors hover:text-zinc-900"
-              >
-                Sign In
-              </Button>
+              Sign In
             </Link>
-            <Link href="/register" className="no-underline">
-              <Button className="border border-zinc-700 bg-zinc-900 text-xs font-semibold text-zinc-50 hover:bg-zinc-800">
-                Register
-              </Button>
+            <Link
+              href="/register"
+              className="inline-flex h-9 items-center rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-xs font-semibold text-zinc-50 no-underline hover:bg-zinc-800"
+            >
+              Register
             </Link>
           </nav>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-6 py-16 text-center lg:py-24">
+      <main
+        id="main"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-6 py-16 text-center lg:py-24"
+      >
         {/* Banner Announcement */}
         <div className="mb-6 flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-xs font-medium text-zinc-600 shadow-sm">
           <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -132,35 +132,26 @@ export default function Home() {
         </p>
 
         {/* Action Buttons */}
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <DemoLoginButton
-            variant="primary"
-            className="flex cursor-pointer items-center gap-2 border border-zinc-900 bg-zinc-900 px-8 py-2.5 text-sm font-semibold text-zinc-50 hover:bg-zinc-800"
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/register"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-8 text-sm font-semibold text-zinc-50 no-underline hover:bg-zinc-800"
           >
-            Enter Mission Console <ArrowRight className="h-4 w-4" />
-          </DemoLoginButton>
-          <Link href="/login" className="no-underline">
-            <Button
-              variant="secondary"
-              size="lg"
-              className="border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-            >
-              Sign In
-            </Button>
+            Create workspace <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-5 text-sm font-medium text-zinc-700 no-underline hover:bg-zinc-100 hover:text-zinc-900"
+          >
+            Sign In
           </Link>
           <a
             href="https://github.com/AKSCI/Consecuencia"
             target="_blank"
             rel="noopener noreferrer"
-            className="no-underline"
+            className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-5 font-mono text-xs font-medium text-zinc-700 no-underline hover:bg-zinc-100 hover:text-zinc-900"
           >
-            <Button
-              variant="secondary"
-              size="lg"
-              className="border border-zinc-200 bg-white font-mono text-xs text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-            >
-              API Spec
-            </Button>
+            Repository
           </a>
         </div>
 

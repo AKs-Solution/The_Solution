@@ -140,7 +140,7 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="no-scrollbar z-20 flex h-10 w-full flex-shrink-0 items-center gap-1 overflow-x-auto border-b border-zinc-200 bg-zinc-100/80 px-4 text-zinc-500 select-none">
+    <div className="z-20 flex h-10 w-full flex-shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200 bg-zinc-100/70 px-3 text-zinc-500 select-none">
       {/* Scroll Left */}
       <button
         type="button"
@@ -184,10 +184,10 @@ export function WorkspaceTabBar() {
               }}
               title={`${tab.title} (Middle-click to close)`}
               className={cn(
-                "group flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-t-sm transition-colors select-none focus-visible:ring-2 focus-visible:ring-zinc-900/60 focus-visible:outline-none",
+                "group flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-t px-3.5 py-1.5 text-xs transition-colors select-none focus-visible:ring-2 focus-visible:ring-zinc-900/60 focus-visible:outline-none",
                 isActive
-                  ? "border-b-2 border-zinc-900 bg-white px-4 py-2 text-xs font-medium text-zinc-900 shadow-sm"
-                  : "border-b-2 border-transparent px-4 py-2 text-xs text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-800",
+                  ? "border-b-2 border-zinc-900 bg-white font-medium text-zinc-900 shadow-xs"
+                  : "border-b-2 border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900",
               )}
             >
               <Icon
@@ -223,8 +223,7 @@ export function WorkspaceTabBar() {
                       closeTab(tab.id);
                     }}
                     className={cn(
-                      "rounded p-0.5 text-zinc-400 transition-colors hover:bg-rose-100 hover:text-rose-600",
-                      !isActive && "opacity-60 hover:opacity-100",
+                      "rounded p-0.5 text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-rose-100 hover:text-rose-600",
                     )}
                   >
                     <X className="size-2.5" />

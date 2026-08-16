@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { ResetPasswordForm } from "@/features/auth/components";
 
 function ResetPasswordPageInner() {
@@ -11,9 +12,9 @@ function ResetPasswordPageInner() {
         </div>
         <ResetPasswordForm />
         <p className="text-muted-foreground mt-6 text-center text-sm">
-          <a href="/login" className="text-foreground font-medium hover:underline">
+          <Link href="/login" className="text-foreground font-medium hover:underline">
             Back to sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

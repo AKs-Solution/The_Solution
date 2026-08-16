@@ -165,7 +165,7 @@ describe("workspace tabs engine", () => {
     });
 
     it("deriveTabFromPathname returns null for non-workspace routes", () => {
-      expect(deriveTabFromPathname("/rules")).toBeNull();
+      expect(deriveTabFromPathname("/settings")).toBeNull();
       expect(deriveTabFromPathname("/")).toBeNull();
     });
   });

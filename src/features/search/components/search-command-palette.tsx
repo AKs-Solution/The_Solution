@@ -117,6 +117,38 @@ const QUICK_ACTIONS: SearchResult[] = [
     href: "/failure-graph",
     icon: "GitBranch",
   },
+  {
+    id: "qa-ingestion",
+    type: "page",
+    label: "Ingestion Pipeline",
+    subtitle: "Document intake, parsers, and provenance jobs",
+    href: "/ingestion",
+    icon: "FileText",
+  },
+  {
+    id: "qa-graph",
+    type: "page",
+    label: "Knowledge Graph Explorer",
+    subtitle: "Traceable engineering relationships and subgraphs",
+    href: "/knowledge-graph",
+    icon: "GitBranch",
+  },
+  {
+    id: "qa-rules",
+    type: "page",
+    label: "Deterministic Rules Engine",
+    subtitle: "Condition DSL evaluation and topological rule runs",
+    href: "/rules",
+    icon: "FileCheck",
+  },
+  {
+    id: "qa-orchestrator",
+    type: "page",
+    label: "Pipeline Orchestrator",
+    subtitle: "Synchronous sequencing of verification engines",
+    href: "/orchestrator",
+    icon: "Activity",
+  },
 ];
 
 export function SearchCommandPalette() {
@@ -155,6 +187,7 @@ export function SearchCommandPalette() {
         if (!query.trim()) {
           setResults(QUICK_ACTIONS);
           setError(null);
+          setIsLoading(false);
           return;
         }
 

@@ -16,15 +16,19 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
       <div
         ref={ref}
         className={cn(
-          "flex flex-col items-center justify-center gap-3 py-16 text-center",
+          "flex flex-col items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-6 py-16 text-center shadow-xs",
           className,
         )}
         {...props}
       >
-        {icon && <div className="text-muted-foreground">{icon}</div>}
-        <div>
-          <p className="text-foreground text-sm font-medium">{title}</p>
-          {description && <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
+        {icon && (
+          <div className="flex size-12 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500">
+            {icon}
+          </div>
+        )}
+        <div className="max-w-md">
+          <p className="text-sm font-semibold text-zinc-900">{title}</p>
+          {description && <p className="mt-1 text-sm text-zinc-500">{description}</p>}
         </div>
         {action && <div className="mt-2">{action}</div>}
       </div>

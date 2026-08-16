@@ -30,7 +30,7 @@ export function OrganizationSelector() {
         if (res.ok) {
           const { data, activeOrganizationId } = await res.json();
           if (!cancelled) {
-            setOrgs(data);
+            setOrgs(Array.isArray(data) ? data : []);
             setActiveOrgId(activeOrganizationId ?? null);
           }
         }

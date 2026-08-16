@@ -5,7 +5,7 @@ describe("PasswordService", () => {
   it("generates a hash from a password", () => {
     const hash = hashPassword("test-password-123");
     expect(hash).toBeTruthy();
-    expect(hash).toContain(":");
+    expect(hash.startsWith("$2")).toBe(true);
   });
 
   it("verifies correct password", () => {

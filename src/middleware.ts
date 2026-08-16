@@ -3,15 +3,17 @@ import type { NextRequest } from "next/server";
 import { buildContentSecurityPolicy, generateNonce } from "@/server/security/csp";
 import { isSameOriginRequest } from "@/server/security/csrf";
 import { logger } from "@/shared/logging";
+import { COOKIE_NAME, verifyAuthToken } from "@/server/auth/jwt";
 
-const COOKIE_NAME = "consecuencia_session";
 const REQUEST_ID_HEADER = "x-request-id";
 const NONCE_HEADER = "x-nonce";
 
-const publicPaths = [
-  "/api/auth/",
-  "/api/copilot/",
-  "/api/enterprise/",
+const publicPathPrefixes = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+  "/api/auth/logout",
   "/api/health",
   "/login",
   "/register",
@@ -21,7 +23,13 @@ const publicPaths = [
   "/favicon.ico",
 ];
 
-const publicPageExactPaths = new Set(["/", "/login", "/register"]);
+const publicPageExactPaths = new Set([
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+]);
 
 function applySecurityHeaders(response: NextResponse, nonce: string, isProd: boolean): void {
   response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(nonce, isProd));
@@ -37,6 +45,11 @@ function applySecurityHeaders(response: NextResponse, nonce: string, isProd: boo
   }
 }
 
+function isPublicPath(pathname: string): boolean {
+  if (publicPageExactPaths.has(pathname)) return true;
+  return publicPathPrefixes.some((path) => pathname === path || pathname.startsWith(path));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProd = process.env.NODE_ENV === "production";
@@ -50,7 +63,8 @@ export async function middleware(request: NextRequest) {
   const proto =
     request.headers.get("x-forwarded-proto") ??
     (request.nextUrl.protocol ? request.nextUrl.protocol.replace(":", "") : "http");
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
+  const host =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
   const expectedOrigin = `${proto}://${host}`;
 
   if (
@@ -75,11 +89,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const isPublic =
-    publicPaths.some((path) => pathname.startsWith(path) || pathname === path) ||
-    publicPageExactPaths.has(pathname);
-
-  if (isPublic) {
+  if (isPublicPath(pathname)) {
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set(REQUEST_ID_HEADER, requestId);
     applySecurityHeaders(response, nonce, isProd);
@@ -87,7 +97,9 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) {
+  const payload = token ? await verifyAuthToken(token) : null;
+
+  if (!payload) {
     if (pathname.startsWith("/api/")) {
       const response = NextResponse.json(
         { error: "Not authenticated", code: "UNAUTHORIZED" },
@@ -97,13 +109,15 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    // Redirect unauthenticated page requests to login, preserving the intended destination
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     const response = NextResponse.redirect(loginUrl);
     applySecurityHeaders(response, nonce, isProd);
     return response;
   }
+
+  requestHeaders.set("x-user-id", payload.userId);
+  requestHeaders.set("x-organization-id", payload.organizationId);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(REQUEST_ID_HEADER, requestId);

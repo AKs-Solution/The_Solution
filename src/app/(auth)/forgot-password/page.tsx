@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ForgotPasswordForm } from "@/features/auth/components";
 
 export default function ForgotPasswordPage() {
@@ -12,9 +13,9 @@ export default function ForgotPasswordPage() {
         </div>
         <ForgotPasswordForm />
         <p className="text-muted-foreground mt-6 text-center text-sm">
-          <a href="/login" className="text-foreground font-medium hover:underline">
+          <Link href="/login" className="text-foreground font-medium hover:underline">
             Back to sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

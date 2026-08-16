@@ -8,6 +8,7 @@ import {
   type SidebarNavItem,
 } from "@/shared/constants";
 import { cn } from "@/shared/utils";
+import { Tooltip } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -36,6 +37,7 @@ import {
   Activity,
   ShieldCheck,
   HelpCircle,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -91,28 +93,29 @@ function NavItem({
 
   if (isCollapsed) {
     return (
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        title={item.label}
-        aria-current={isActive ? "page" : undefined}
-        className={cn(
-          "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
-          isActive
-            ? "bg-zinc-900 text-zinc-50"
-            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
-        )}
-      >
-        <Icon
+      <Tooltip content={item.label} side="right" delay={120}>
+        <Link
+          href={item.href}
+          onClick={onNavigate}
+          aria-current={isActive ? "page" : undefined}
           className={cn(
-            "size-4 shrink-0",
-            isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
+            "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
+            isActive
+              ? "bg-zinc-900 text-zinc-50"
+              : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
           )}
-        />
-        {item.badge && (
-          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-zinc-400" />
-        )}
-      </Link>
+        >
+          <Icon
+            className={cn(
+              "size-4 shrink-0",
+              isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
+            )}
+          />
+          {item.badge && (
+            <span className="absolute top-1 right-1 size-1.5 rounded-full bg-zinc-400" />
+          )}
+        </Link>
+      </Tooltip>
     );
   }
 
@@ -236,17 +239,20 @@ function NavGroup({
 export function Sidebar({
   onNavigate,
   forceExpanded = false,
+  mobileOpen = false,
 }: {
   onNavigate?: () => void;
   forceExpanded?: boolean;
+  mobileOpen?: boolean;
 }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
+  const keyedNavRef = useRef(false);
 
-  const isCollapsedEffective = forceExpanded ? false : isCollapsed;
+  const isCollapsedEffective = mobileOpen || forceExpanded ? false : isCollapsed;
 
   // Initialize and persist collapsed state (default: collapsed)
   useEffect(() => {
@@ -317,6 +323,15 @@ export function Sidebar({
     });
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onNavigate?.();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen, onNavigate]);
+
   // Keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const focusable = navRef.current?.querySelectorAll<HTMLElement>(
@@ -326,20 +341,25 @@ export function Sidebar({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
+      keyedNavRef.current = true;
       setFocusedIndex((i) => Math.min(i + 1, focusable.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
+      keyedNavRef.current = true;
       setFocusedIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Home") {
       e.preventDefault();
+      keyedNavRef.current = true;
       setFocusedIndex(0);
     } else if (e.key === "End") {
       e.preventDefault();
+      keyedNavRef.current = true;
       setFocusedIndex(focusable.length - 1);
     }
   }, []);
 
   useEffect(() => {
+    if (!keyedNavRef.current) return;
     const focusable = navRef.current?.querySelectorAll<HTMLElement>(
       "a[href], button[aria-expanded]",
     );
@@ -349,8 +369,12 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "z-10 hidden h-full shrink-0 flex-col items-center justify-between overflow-y-auto border-r border-zinc-200 bg-white p-2 text-zinc-800 transition-all duration-200 ease-in-out select-none md:flex",
-        isCollapsedEffective ? "w-14" : "w-64",
+        "z-50 h-full shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white p-2 text-zinc-800 transition-all duration-200 ease-in-out select-none",
+        mobileOpen
+          ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:shadow-none"
+          : "hidden md:flex",
+        isCollapsedEffective ? "md:w-14" : "md:w-64",
+        mobileOpen && "md:w-64",
       )}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto">
@@ -367,21 +391,36 @@ export function Sidebar({
                 Navigation
               </span>
             )}
-            <button
-              type="button"
-              onClick={toggleCollapse}
-              title={isCollapsedEffective ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
-              className={cn(
-                "flex size-6 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900",
-                isCollapsedEffective && "mx-auto size-8",
+            <div className="flex items-center gap-1">
+              {mobileOpen && (
+                <button
+                  type="button"
+                  onClick={onNavigate}
+                  title="Close navigation"
+                  aria-label="Close navigation"
+                  className="flex size-8 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900 md:hidden"
+                >
+                  <X className="size-3.5" />
+                </button>
               )}
-            >
-              {isCollapsedEffective ? (
-                <ChevronRight className="size-3.5" />
-              ) : (
-                <ChevronLeft className="size-3.5" />
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                title={
+                  isCollapsedEffective ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"
+                }
+                className={cn(
+                  "hidden size-6 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900 md:flex",
+                  isCollapsedEffective && "mx-auto size-8",
+                )}
+              >
+                {isCollapsedEffective ? (
+                  <ChevronRight className="size-3.5" />
+                ) : (
+                  <ChevronLeft className="size-3.5" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Navigation Items */}

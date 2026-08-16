@@ -49,6 +49,7 @@ function isHomeTab(id: string): boolean {
 
 export function isWorkspaceRoute(pathname: string): boolean {
   return (
+    pathname === "/dashboard" ||
     pathname === "/decisions" ||
     pathname.startsWith("/decisions/") ||
     pathname === "/sentinel" ||
@@ -58,11 +59,33 @@ export function isWorkspaceRoute(pathname: string): boolean {
     pathname === "/failure-graph" ||
     pathname === "/executive-dashboard" ||
     pathname === "/precedents" ||
-    pathname === "/certification"
+    pathname === "/certification" ||
+    pathname === "/compliance" ||
+    pathname === "/copilot" ||
+    pathname.startsWith("/copilot/") ||
+    pathname === "/suppliers" ||
+    pathname.startsWith("/suppliers/") ||
+    pathname === "/ingestion" ||
+    pathname.startsWith("/ingestion/") ||
+    pathname === "/knowledge-graph" ||
+    pathname === "/rules" ||
+    pathname.startsWith("/rules/") ||
+    pathname === "/orchestrator" ||
+    pathname.startsWith("/orchestrator/") ||
+    pathname === "/reality" ||
+    pathname.startsWith("/reality/") ||
+    pathname === "/reports" ||
+    pathname.startsWith("/reports/") ||
+    pathname === "/entities" ||
+    pathname.startsWith("/entities/") ||
+    pathname === "/documents" ||
+    pathname === "/contradictions" ||
+    pathname.startsWith("/contradictions/")
   );
 }
 
 const LEDGER_TABS: Array<{ path: string; title: string }> = [
+  { path: "/dashboard", title: "Mission Console" },
   { path: "/executive-dashboard", title: "Executive Dashboard" },
   { path: "/precedents", title: "Precedent Engine" },
   { path: "/certification", title: "Certification Readiness" },
@@ -70,6 +93,18 @@ const LEDGER_TABS: Array<{ path: string; title: string }> = [
   { path: "/sentinel", title: "Decision Sentinel" },
   { path: "/drawings", title: "Drawing Intelligence" },
   { path: "/failure-graph", title: "Failure Graph & Contagion" },
+  { path: "/compliance", title: "Compliance Dossier" },
+  { path: "/copilot", title: "Engineering Copilot" },
+  { path: "/suppliers", title: "Suppliers & Parts" },
+  { path: "/ingestion", title: "Ingestion Pipeline" },
+  { path: "/knowledge-graph", title: "Knowledge Graph" },
+  { path: "/rules", title: "Rules Engine" },
+  { path: "/orchestrator", title: "Orchestrator" },
+  { path: "/reality", title: "Reality Assessments" },
+  { path: "/reports", title: "Reports" },
+  { path: "/entities", title: "Entities" },
+  { path: "/documents", title: "Documents" },
+  { path: "/contradictions", title: "Contradictions" },
 ];
 
 /**
@@ -282,13 +317,28 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
   // record from a ledger automatically surfaces it in the workspace bar.
   useEffect(() => {
     const derived = deriveTabFromPathname(pathname);
-    if (!derived) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTabId(null);
+    if (derived) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- route is the source of truth for the tab model
+      setTabs((prev) => (prev.some((t) => t.id === derived.id) ? prev : [...prev, derived]));
+      setActiveTabId(derived.id);
       return;
     }
-    setTabs((prev) => (prev.some((t) => t.id === derived.id) ? prev : [...prev, derived]));
-    setActiveTabId(derived.id);
+
+    const matchingTab = tabsRef.current.find(
+      (tab) => tab.href === pathname || (tab.href !== "/" && pathname.startsWith(`${tab.href}/`)),
+    );
+    if (matchingTab) {
+      setActiveTabId(matchingTab.id);
+      return;
+    }
+
+    if (pathname === "/dashboard") {
+      setTabs((prev) => (prev.some((t) => t.id === HOME_TAB.id) ? prev : [HOME_TAB, ...prev]));
+      setActiveTabId(HOME_TAB.id);
+      return;
+    }
+
+    setActiveTabId(null);
   }, [pathname]);
 
   // Capture scroll depth continuously so switching tabs can restore it.

@@ -1,27 +1,33 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { timingSafeEqual, scryptSync } from "crypto";
+import bcrypt from "bcryptjs";
 
-const KEY_LENGTH = 64;
-const SALT_LENGTH = 32;
-const SCRYPT_PARAMS =
-  process.env.NODE_ENV === "test" ? { N: 512, r: 8, p: 1 } : { N: 16384, r: 8, p: 1 };
-
-function serializeHash(hash: Buffer, salt: Buffer): string {
-  return `${salt.toString("hex")}:${hash.toString("hex")}`;
-}
-
-function parseHash(stored: string): { salt: Buffer; hash: Buffer } {
-  const [saltHex, hashHex] = stored.split(":");
-  return { salt: Buffer.from(saltHex!, "hex"), hash: Buffer.from(hashHex!, "hex") };
-}
+const BCRYPT_ROUNDS = process.env.NODE_ENV === "test" ? 4 : 12;
 
 export function hashPassword(password: string): string {
-  const salt = randomBytes(SALT_LENGTH);
-  const hash = scryptSync(password, salt, KEY_LENGTH, SCRYPT_PARAMS);
-  return serializeHash(hash, salt);
+  return bcrypt.hashSync(password, BCRYPT_ROUNDS);
+}
+
+function verifyLegacyScrypt(password: string, stored: string): boolean {
+  const [saltHex, hashHex] = stored.split(":");
+  if (!saltHex || !hashHex) return false;
+  try {
+    const salt = Buffer.from(saltHex, "hex");
+    const storedHash = Buffer.from(hashHex, "hex");
+    const params =
+      process.env.NODE_ENV === "test" ? { N: 512, r: 8, p: 1 } : { N: 16384, r: 8, p: 1 };
+    const hash = scryptSync(password, salt, storedHash.length, params);
+    return timingSafeEqual(hash, storedHash);
+  } catch {
+    return false;
+  }
 }
 
 export function verifyPassword(password: string, stored: string): boolean {
-  const { salt, hash: storedHash } = parseHash(stored);
-  const hash = scryptSync(password, salt, KEY_LENGTH, SCRYPT_PARAMS);
-  return timingSafeEqual(hash, storedHash);
+  if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+    return bcrypt.compareSync(password, stored);
+  }
+  if (stored.includes(":")) {
+    return verifyLegacyScrypt(password, stored);
+  }
+  return false;
 }

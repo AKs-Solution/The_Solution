@@ -85,11 +85,25 @@ export const SIDEBAR_NAV: SidebarNavEntry[] = [
     ],
   },
   {
+    label: "Knowledge & Pipelines",
+    icon: "GitBranch",
+    items: [
+      { label: "Ingestion Pipeline", href: ROUTES.ingestion, icon: "UploadCloud" },
+      { label: "Knowledge Graph", href: ROUTES["knowledge-graph"], icon: "GitBranch" },
+      { label: "Rules Engine", href: ROUTES.rules, icon: "BookCheck" },
+      { label: "Entities", href: ROUTES.entities, icon: "Tags" },
+      { label: "Orchestrator", href: ROUTES.orchestrator, icon: "Workflow" },
+      { label: "Reality Assessments", href: ROUTES.reality, icon: "FlaskConical" },
+      { label: "Reports", href: ROUTES.reports, icon: "BarChart3" },
+    ],
+  },
+  {
     label: "Platform Governance",
     icon: "ShieldCheck",
     items: [
       { label: "Audit Log (SHA-256)", href: ROUTES.audit, icon: "ScrollText" },
       { label: "Program Health", href: "/programs", icon: "Activity" },
+      { label: "Organizations", href: ROUTES.organizations, icon: "Building2" },
       { label: "Settings", href: ROUTES.settings, icon: "Settings" },
       { label: "Notifications", href: ROUTES.notifications, icon: "Bell" },
       { label: "Help & Documentation", href: ROUTES.help, icon: "HelpCircle" },

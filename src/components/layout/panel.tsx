@@ -7,9 +7,9 @@ export interface PanelProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles = {
-  default: "bg-background",
-  bordered: "border border-border bg-background rounded-lg",
-  muted: "bg-muted rounded-lg",
+  default: "bg-white",
+  bordered: "rounded-lg border border-zinc-200 bg-white shadow-xs",
+  muted: "rounded-lg bg-zinc-50",
 };
 
 const paddingStyles = {

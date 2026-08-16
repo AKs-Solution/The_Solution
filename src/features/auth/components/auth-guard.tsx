@@ -20,7 +20,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
-          router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+          router.push(`/login?next=${encodeURIComponent(pathname)}`);
         }
       })
       .catch(() => {

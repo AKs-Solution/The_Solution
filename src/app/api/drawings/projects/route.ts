@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db";
 import { validateSession } from "@/server/auth/session-service";
@@ -10,10 +9,15 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projects = await (prisma as any).drawingProject?.findMany({
-      where: { ownerId: session.userId },
+    const orgId = session.organizationId;
+    if (!orgId) {
+      return NextResponse.json({ error: "No active organization" }, { status: 400 });
+    }
+
+    const projects = await prisma.drawingProject.findMany({
+      where: { organizationId: orgId },
       orderBy: { createdAt: "desc" },
-    }).catch(() => []);
+    });
 
     return NextResponse.json({ data: projects || [] });
   } catch (error) {
@@ -38,13 +42,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Project name is required" }, { status: 400 });
     }
 
-    const project = await (prisma as any).drawingProject?.create({
+    const orgId = session.organizationId;
+    if (!orgId) {
+      return NextResponse.json({ error: "No active organization" }, { status: 400 });
+    }
+
+    const project = await prisma.drawingProject.create({
       data: {
         name: name.trim(),
         description: description?.trim() || null,
         ownerId: session.userId,
+        organizationId: orgId,
       },
-    }).catch(() => null);
+    });
 
     if (!project) {
       return NextResponse.json({ error: "Failed to create drawing project" }, { status: 500 });

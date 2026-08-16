@@ -22,8 +22,9 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.7",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "jose": "^6.2.9",
     "lucide-react": "^1.24.0",
     "mammoth": "^1.12.0",
     "motion": "^12.42.2",
@@ -41,6 +42,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -1,45 +1,29 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { prisma } from "@/server/db";
-import { validateSession } from "@/server/auth/session-service";
+import { createSession, validateSession } from "@/server/auth/session-service";
 import { ForbiddenError } from "@/shared/errors";
 
-const ACTIVE_ORG_COOKIE = "consecuencia_org";
-
 export async function getActiveOrganizationId(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get(ACTIVE_ORG_COOKIE)?.value ?? null;
+  const session = await validateSession();
+  return session?.organizationId ?? null;
 }
 
 export async function setActiveOrganizationId(organizationId: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(ACTIVE_ORG_COOKIE, organizationId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-  });
+  const session = await validateSession();
+  if (!session) {
+    throw new ForbiddenError("Not authenticated");
+  }
+  await createSession(session.userId, organizationId);
 }
 
 export async function clearActiveOrganizationId(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(ACTIVE_ORG_COOKIE, "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
+  const session = await validateSession();
+  if (!session) return;
+  await createSession(session.userId, session.organizationId);
 }
 
 export async function requireActiveOrganization(): Promise<string> {
-  const orgId = await getActiveOrganizationId();
-  if (!orgId) {
-    throw new ForbiddenError("No active organization selected");
-  }
-
   const session = await validateSession();
   if (!session) {
     throw new ForbiddenError("Not authenticated");
@@ -48,18 +32,17 @@ export async function requireActiveOrganization(): Promise<string> {
   const membership = await prisma.organizationMember.findUnique({
     where: {
       organizationId_userId: {
-        organizationId: orgId,
+        organizationId: session.organizationId,
         userId: session.userId,
       },
     },
   });
 
   if (!membership || membership.status !== "active") {
-    await clearActiveOrganizationId();
     throw new ForbiddenError("Access to this organization denied");
   }
 
-  return orgId;
+  return session.organizationId;
 }
 
 export async function resolveActiveOrganization(): Promise<{
@@ -67,16 +50,13 @@ export async function resolveActiveOrganization(): Promise<{
   name: string;
   slug: string;
 } | null> {
-  const orgId = await getActiveOrganizationId();
-  if (!orgId) return null;
-
   const session = await validateSession();
   if (!session) return null;
 
   const membership = await prisma.organizationMember.findUnique({
     where: {
       organizationId_userId: {
-        organizationId: orgId,
+        organizationId: session.organizationId,
         userId: session.userId,
       },
     },

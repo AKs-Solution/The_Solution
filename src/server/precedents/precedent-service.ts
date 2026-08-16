@@ -7,248 +7,17 @@ import {
   PrecedentType,
   PrecedentMatchContext,
 } from "@/features/precedents/types";
-import { logger } from "@/shared/logging";
 import { ValidationError } from "@/shared/errors";
-
-// High-fidelity seed data reflecting real historical engineering rationale, failures, and wisdom.
-const INITIAL_PRECEDENTS = [
-  {
-    id: "prec-1",
-    title: "Ariane 5 Flight 501 Software Failure",
-    summary:
-      "Loss of launcher orientation after aerodynamic load overload due to guidance system calculation error.",
-    engineeringQuestion:
-      "Can software variables in aerospace modules operate without protective operand boundary checkers?",
-    decisionMade:
-      "Mandated protective casting handlers for all variables and HIL hardware-in-the-loop simulation runs.",
-    supportingEvidence: ["HIL Simulation Run #A501-S3", "Software Verification Test Plan"],
-    contradictions: ["Guidance system calculation mismatch warnings"],
-    missingEvidence: [],
-    outcome: "Ariane 5 platform subsequent flights successfully validated guidance stability.",
-    lessonsLearned:
-      "Include protective handlers for all variable casting; run full end-to-end hardware-in-the-loop simulation of flight software.",
-    relatedProjects: ["Ariane 5"],
-    relatedSuppliers: ["Arianespace"],
-    relatedRequirements: ["DO-178C Section 6.4"],
-    relatedDocuments: ["Ariane 5 Inquiry Board Report"],
-    relatedComponents: ["Guidance & Control", "Software System"],
-    relatedStandards: ["IEEE 754 Floating Point Standard", "DO-178C"],
-    relatedCertifications: [],
-    confidence: 1.0,
-    tags: ["software", "failure", "guidance", "overflow"],
-  },
-  {
-    id: "prec-2",
-    title: "Titanium Alloy Grade 5 Stress Corrosion Cracking (SCC) in Saltwater",
-    summary:
-      "Rapid brittle fracture of high-tension structural fasteners observed during deep-water endurance trials.",
-    engineeringQuestion:
-      "Can titanium fasteners be safely used in deep-water crevices under high mechanical tension?",
-    decisionMade:
-      "Mandated Super Duplex Stainless Steel (PREN > 40) fasteners and cadmium-free galvanic plating.",
-    supportingEvidence: ["Salt Spray Lab Test #9822", "Material Integrity Report"],
-    contradictions: ["Titanium stress concentration values in saline crevices"],
-    missingEvidence: ["Anodic Polarization Test Report"],
-    outcome:
-      "Super Duplex fasteners exhibited zero cracking during 12 months of saltwater exposure.",
-    lessonsLearned:
-      "Chloride-induced stress corrosion cracking occurs in crevices with oxygen depletion under mechanically applied high stress.",
-    relatedProjects: ["Deepsea Intake Phase 2"],
-    relatedSuppliers: ["Titan Material Group"],
-    relatedRequirements: ["REQ-MAT-4.8 Crevice Safety"],
-    relatedDocuments: ["Deep-Water Endurance Summary Report"],
-    relatedComponents: ["Structure", "Material Selection", "Fasteners"],
-    relatedStandards: ["ASTM G48 Crevice Corrosion Standard"],
-    relatedCertifications: ["NACE MR0175/ISO 15156"],
-    confidence: 0.95,
-    tags: ["material", "corrosion", "fracture", "saltwater"],
-  },
-  {
-    id: "prec-3",
-    title: "Composite Fuel Tank Micro-Cracking under Cryogenic Cycling",
-    summary:
-      "Leakage of liquid hydrogen fuel during multiple fueling thermal load simulation cycles.",
-    engineeringQuestion:
-      "Do carbon fiber fuel tank matrices maintain structural barrier properties at -183°C under cyclic loads?",
-    decisionMade:
-      "Integrated inner elastomeric membrane liner and upgraded resin to cyanate ester matrix.",
-    supportingEvidence: ["Thermal Vacuum Deflection Analysis #V12"],
-    contradictions: ["Coefficient of thermal expansion mismatch warnings"],
-    missingEvidence: ["Cryogenic Permeability Test Log"],
-    outcome: "Upgraded tanks completed 100 cryogenic load cycles with zero leakage.",
-    lessonsLearned:
-      "Thermal expansion coefficient mismatch between carbon fiber weave and the epoxy resin matrix cures matrix micro-cracking.",
-    relatedProjects: ["Apollo Propulsion Rev C"],
-    relatedSuppliers: ["Composite Tech Inc"],
-    relatedRequirements: ["REQ-PROP-2.4 Cryo Containment"],
-    relatedDocuments: ["Cryogenic Structural Integrity Review"],
-    relatedComponents: ["Propulsion", "Fuel System", "Composite Materials"],
-    relatedStandards: ["ISO 11114 Transportable Gas Cylinders"],
-    relatedCertifications: [],
-    confidence: 0.9,
-    tags: ["cryo", "composite", "fuel-tank", "thermal"],
-  },
-  {
-    id: "prec-4",
-    title: "Dual-Redundant Fly-by-Wire Hydraulic Actuation Integration",
-    summary:
-      "A highly resilient control system surface actuation design utilizing decoupled split hydraulics and electrical control paths.",
-    engineeringQuestion:
-      "Does split hydraulic feedback ensure fly-by-wire flight control survival under double structural losses?",
-    decisionMade:
-      "Designed independent hydraulic channels with decoupled split-loop control paths and mechanical firewalls.",
-    supportingEvidence: [
-      "Failure Mode Effects Analysis (FMEA) Report #8",
-      "Decoupled Actuator Run Logs",
-    ],
-    contradictions: [],
-    missingEvidence: [],
-    outcome:
-      "System qualified through structural impact tests, surviving triple electrical failures.",
-    lessonsLearned:
-      "Decoupling feedback control lines keeps hydraulic systems operational under physical component loss.",
-    relatedProjects: ["Aviation Flight System Integration"],
-    relatedSuppliers: ["FlyByWire Systems"],
-    relatedRequirements: ["REQ-FBW-9.1 Double Redundancy"],
-    relatedDocuments: ["Aviation Flight System Integration Manual"],
-    relatedComponents: ["Flight Controls", "Hydraulics"],
-    relatedStandards: ["MIL-H-5440 Hydraulic System Design Standard"],
-    relatedCertifications: ["FAA Part 25 Certification"],
-    confidence: 0.98,
-    tags: ["redundancy", "hydraulics", "controls", "safety"],
-  },
-  {
-    id: "prec-5",
-    title: "MIL-STD-810H Temperature & Structural Vibration Compliance Standards",
-    summary:
-      "Standardized environmental testing criteria to qualify engineering models against mission profiles.",
-    engineeringQuestion:
-      "Do standard laboratory room vibration profiles satisfy launch environment qualifications?",
-    decisionMade:
-      "Mandated multi-axis launch vibration profile tests according to MIL-STD-810H standard.",
-    supportingEvidence: ["Environmental Lab Vibration Test #776", "Launch Acceleration Profiles"],
-    contradictions: [],
-    missingEvidence: ["Thermal Cycling Test Report"],
-    outcome:
-      "Qualification testing successfully flagged structural weld fractures prior to assembly.",
-    lessonsLearned: "Static room vibration testing misses high-acceleration multi-axis resonances.",
-    relatedProjects: ["Qual-Test 2025"],
-    relatedSuppliers: ["Aᴷ Qualification Labs"],
-    relatedRequirements: ["REQ-ENV-810 Vibration Limits"],
-    relatedDocuments: ["MIL-STD-810H Official Handbook"],
-    relatedComponents: ["Testing & Verification", "Structure"],
-    relatedStandards: ["MIL-STD-810H", "Department of Defense Test Method Standard"],
-    relatedCertifications: ["Environmental Quality Seal"],
-    confidence: 1.0,
-    tags: ["testing", "vibration", "standards", "qualification"],
-  },
-  {
-    id: "prec-6",
-    title: "Fastener Lot #9822 Yield Strength Failure (Supplier: Alpha Bolt)",
-    summary:
-      "A lot of structural shear bolts exhibited tensile failure below the 120 ksi specification constraint during intake lot checks.",
-    engineeringQuestion:
-      "Can incoming supplier shear bolts be approved without local metallurgical batch tests?",
-    decisionMade:
-      "Imposed 100% receiving-inspection hardness lot tests and placed supplier on active inspection probation.",
-    supportingEvidence: ["Metallurgical Analysis Report #M-0442", "Intake Hardness Logs"],
-    contradictions: ["Alpha Bolt certificate of conformity values vs. local tensile testing"],
-    missingEvidence: [],
-    outcome:
-      "Reconciliation of shear bolt batches resulted in supplier replacing the entire lot #9822.",
-    lessonsLearned:
-      "Inadequate cooling rate matching during quench-hardening cycles creates micro-voids in fastener ferrite layers.",
-    relatedProjects: ["Structural Intake Inspection"],
-    relatedSuppliers: ["Alpha Bolt"],
-    relatedRequirements: ["REQ-STR-1.2 Fastener Tensile"],
-    relatedDocuments: ["Receiving Quality Report for Lot #9822"],
-    relatedComponents: ["Structural Fasteners", "Fasteners", "Supply Chain"],
-    relatedStandards: ["ISO 898 Fasteners Mechanical Properties"],
-    relatedCertifications: ["Alpha Bolt Certificate of Conformity"],
-    confidence: 0.88,
-    tags: ["supplier", "failure", "metallurgy", "fasteners"],
-  },
-];
 
 /**
  * Self-healing seeder for historical precedents in the database
  */
 export async function ensurePrecedentsSeeded(
-  organizationId: string,
-  userId?: string,
+  _organizationId?: string,
+  _userId?: string,
 ): Promise<void> {
-  try {
-    let creatorId = userId || null;
-    if (!creatorId) {
-      const member = await (prisma as any).organizationMember?.findFirst({
-        where: { organizationId },
-      }).catch(() => null);
-      creatorId = member?.userId || null;
-    }
-
-    for (const p of INITIAL_PRECEDENTS) {
-      const existing = await (prisma as any).historicalPrecedent?.findFirst({
-        where: { organizationId, id: p.id },
-      }).catch(() => null);
-
-      if (!existing) {
-        const precedent = await (prisma as any).historicalPrecedent?.create({
-          data: {
-            id: p.id,
-            organizationId,
-            title: p.title,
-            summary: p.summary,
-            engineeringQuestion: p.engineeringQuestion,
-            decisionMade: p.decisionMade,
-            supportingEvidence: p.supportingEvidence as any,
-            contradictions: p.contradictions as any,
-            missingEvidence: p.missingEvidence as any,
-            outcome: p.outcome,
-            lessonsLearned: p.lessonsLearned,
-            relatedProjects: p.relatedProjects as any,
-            relatedSuppliers: p.relatedSuppliers as any,
-            relatedRequirements: p.relatedRequirements as any,
-            relatedDocuments: p.relatedDocuments as any,
-            relatedComponents: p.relatedComponents as any,
-            relatedStandards: p.relatedStandards as any,
-            relatedCertifications: p.relatedCertifications as any,
-            confidence: p.confidence,
-            tags: p.tags as any,
-            decisionOwnerId: creatorId,
-            auditMetadata: [
-              {
-                action: "INITIAL_SEED",
-                performedBy: "Precedent Seeding Engine",
-                timestamp: new Date().toISOString(),
-                details: { source: "Ariane/Titan/Cryo historical archives" },
-              },
-            ] as any,
-          },
-        }).catch(() => null);
-
-        if (precedent) {
-          // Version History creation
-          await (prisma as any).historicalPrecedentVersion?.create({
-            data: {
-              precedentId: precedent.id,
-              version: 1,
-              title: precedent.title,
-              summary: precedent.summary,
-              decisionMade: precedent.decisionMade,
-              outcome: precedent.outcome,
-              lessonsLearned: precedent.lessonsLearned,
-              snapshot: precedent as any,
-              changeDescription: "Initial seed data load",
-              createdById: creatorId,
-            },
-          }).catch(() => null);
-        }
-      }
-    }
-    logger.info("Historical Precedent Seeding Completed", { organizationId });
-  } catch (err) {
-    logger.error("Failed to seed historical precedents", { organizationId, err });
-  }
+  void _organizationId;
+  void _userId;
 }
 
 /**
@@ -417,17 +186,18 @@ export async function getPrecedents(query: PrecedentQuery & { organizationId?: s
   const skip = (page - 1) * pageSize;
 
   // Auto seed default data if DB is empty
-  const count = await (prisma as any).historicalPrecedent?.count({
-    where: { organizationId: orgId, deletedAt: null },
-  }).catch(() => 0) ?? 0;
+  const count =
+    (await (prisma as any).historicalPrecedent
+      ?.count({
+        where: { organizationId: orgId, deletedAt: null },
+      })
+      .catch(() => 0)) ?? 0;
   if (count === 0) {
     await ensurePrecedentsSeeded(orgId);
   }
 
   // Construct filters
-  const andFilters: any[] = [
-    { organizationId: orgId, deletedAt: null },
-  ];
+  const andFilters: any[] = [{ organizationId: orgId, deletedAt: null }];
 
   if (query.search) {
     const term = query.search.toLowerCase();
@@ -547,21 +317,26 @@ export async function getPrecedents(query: PrecedentQuery & { organizationId?: s
   }
 
   // Query matching records
-  const dbRecords = await (prisma as any).historicalPrecedent?.findMany({
-    where,
-    orderBy,
-    include: {
-      decisionOwner: true,
-      versions: { orderBy: { version: "desc" } },
-    },
-  }).catch(() => []) ?? [];
+  const dbRecords =
+    (await (prisma as any).historicalPrecedent
+      ?.findMany({
+        where,
+        orderBy,
+        include: {
+          decisionOwner: true,
+          versions: { orderBy: { version: "desc" } },
+        },
+      })
+      .catch(() => [])) ?? [];
 
   let data = dbRecords.map(mapToEngineeringPrecedent);
 
   // Filter by legacy system if passed
   if (query.system && query.system !== "ALL") {
     const sysLower = query.system.toLowerCase();
-    data = data.filter((p: any) => p.relatedComponents.some((c: any) => c.toLowerCase().includes(sysLower)));
+    data = data.filter((p: any) =>
+      p.relatedComponents.some((c: any) => c.toLowerCase().includes(sysLower)),
+    );
   }
 
   // Filter by legacy type if passed
@@ -587,13 +362,15 @@ export async function getPrecedentById(
   id: string,
   organizationId: string,
 ): Promise<EngineeringPrecedent | null> {
-  const dbPrecedent = await (prisma as any).historicalPrecedent?.findFirst({
-    where: { id, organizationId, deletedAt: null },
-    include: {
-      decisionOwner: true,
-      versions: { orderBy: { version: "desc" } },
-    },
-  }).catch(() => null);
+  const dbPrecedent = await (prisma as any).historicalPrecedent
+    ?.findFirst({
+      where: { id, organizationId, deletedAt: null },
+      include: {
+        decisionOwner: true,
+        versions: { orderBy: { version: "desc" } },
+      },
+    })
+    .catch(() => null);
 
   if (!dbPrecedent) return null;
   return mapToEngineeringPrecedent(dbPrecedent);
@@ -632,13 +409,15 @@ export async function createPrecedent(input: {
   }
 
   // Avoid exact duplication on Title within the same organization
-  const duplicate = await (prisma as any).historicalPrecedent?.findFirst({
-    where: {
-      organizationId: orgId,
-      title: input.title,
-      deletedAt: null,
-    },
-  }).catch(() => null);
+  const duplicate = await (prisma as any).historicalPrecedent
+    ?.findFirst({
+      where: {
+        organizationId: orgId,
+        title: input.title,
+        deletedAt: null,
+      },
+    })
+    .catch(() => null);
 
   if (duplicate) {
     throw new Error(`A historical precedent with the title "${input.title}" already exists.`);
@@ -681,20 +460,22 @@ export async function createPrecedent(input: {
   });
 
   // Create first version history
-  await (prisma as any).historicalPrecedentVersion?.create({
-    data: {
-      precedentId: precedent?.id || `prec-${Date.now()}`,
-      version: 1,
-      title: precedent?.title || input.title,
-      summary: precedent?.summary || input.summary,
-      decisionMade: precedent?.decisionMade || input.decisionMade,
-      outcome: precedent?.outcome || input.outcome,
-      lessonsLearned: precedent?.lessonsLearned || input.lessonsLearned,
-      snapshot: precedent as any,
-      changeDescription: "Initial version",
-      createdById: input.userId || null,
-    },
-  }).catch(() => null);
+  await (prisma as any).historicalPrecedentVersion
+    ?.create({
+      data: {
+        precedentId: precedent?.id || `prec-${Date.now()}`,
+        version: 1,
+        title: precedent?.title || input.title,
+        summary: precedent?.summary || input.summary,
+        decisionMade: precedent?.decisionMade || input.decisionMade,
+        outcome: precedent?.outcome || input.outcome,
+        lessonsLearned: precedent?.lessonsLearned || input.lessonsLearned,
+        snapshot: precedent as any,
+        changeDescription: "Initial version",
+        createdById: input.userId || null,
+      },
+    })
+    .catch(() => null);
 
   return mapToEngineeringPrecedent(precedent || input);
 }
@@ -728,12 +509,14 @@ export async function updatePrecedent(
     userId?: string | null;
   },
 ): Promise<EngineeringPrecedent> {
-  const existing = await (prisma as any).historicalPrecedent?.findFirst({
-    where: { id, organizationId, deletedAt: null },
-    include: {
-      versions: { orderBy: { version: "desc" }, take: 1 },
-    },
-  }).catch(() => null);
+  const existing = await (prisma as any).historicalPrecedent
+    ?.findFirst({
+      where: { id, organizationId, deletedAt: null },
+      include: {
+        versions: { orderBy: { version: "desc" }, take: 1 },
+      },
+    })
+    .catch(() => null);
 
   if (!existing) {
     throw new Error(`Precedent not found or unauthorized: ${id}`);
@@ -813,20 +596,22 @@ export async function updatePrecedent(
   });
 
   // Log new version history
-  await (prisma as any).historicalPrecedentVersion?.create({
-    data: {
-      precedentId: updatedPrecedent?.id || id,
-      version: nextVersion,
-      title: updatedPrecedent?.title || existing.title,
-      summary: updatedPrecedent?.summary || existing.summary,
-      decisionMade: updatedPrecedent?.decisionMade || existing.decisionMade,
-      outcome: updatedPrecedent?.outcome || existing.outcome,
-      lessonsLearned: updatedPrecedent?.lessonsLearned || existing.lessonsLearned,
-      snapshot: updatedPrecedent as any,
-      changeDescription: input.changeDescription || `Updated to version ${nextVersion}`,
-      createdById: input.userId || null,
-    },
-  }).catch(() => null);
+  await (prisma as any).historicalPrecedentVersion
+    ?.create({
+      data: {
+        precedentId: updatedPrecedent?.id || id,
+        version: nextVersion,
+        title: updatedPrecedent?.title || existing.title,
+        summary: updatedPrecedent?.summary || existing.summary,
+        decisionMade: updatedPrecedent?.decisionMade || existing.decisionMade,
+        outcome: updatedPrecedent?.outcome || existing.outcome,
+        lessonsLearned: updatedPrecedent?.lessonsLearned || existing.lessonsLearned,
+        snapshot: updatedPrecedent as any,
+        changeDescription: input.changeDescription || `Updated to version ${nextVersion}`,
+        createdById: input.userId || null,
+      },
+    })
+    .catch(() => null);
 
   return mapToEngineeringPrecedent(updatedPrecedent || existing);
 }
@@ -839,9 +624,11 @@ export async function deletePrecedent(
   organizationId: string,
   userId?: string,
 ): Promise<boolean> {
-  const existing = await (prisma as any).historicalPrecedent?.findFirst({
-    where: { id, organizationId, deletedAt: null },
-  }).catch(() => null);
+  const existing = await (prisma as any).historicalPrecedent
+    ?.findFirst({
+      where: { id, organizationId, deletedAt: null },
+    })
+    .catch(() => null);
 
   if (!existing) {
     throw new Error(`Precedent not found or unauthorized: ${id}`);
@@ -855,13 +642,15 @@ export async function deletePrecedent(
     details: { reason: "Soft-deleted by user request" },
   });
 
-  await (prisma as any).historicalPrecedent?.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-      auditMetadata: auditMetadata as any,
-    },
-  }).catch(() => null);
+  await (prisma as any).historicalPrecedent
+    ?.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        auditMetadata: auditMetadata as any,
+      },
+    })
+    .catch(() => null);
 
   return true;
 }
@@ -1001,23 +790,32 @@ export async function getPrecedentsBySimilarity(
 
       if (p.relatedSuppliers && p.relatedSuppliers.length > 0) {
         // Find suppliers by name
-        const suppliers = await (prisma as any).supplier?.findMany({
-          where: { organizationId, name: { in: p.relatedSuppliers } },
-          select: { id: true },
-        }).catch(() => []) ?? [];
+        const suppliers =
+          (await (prisma as any).supplier
+            ?.findMany({
+              where: { organizationId, name: { in: p.relatedSuppliers } },
+              select: { id: true },
+            })
+            .catch(() => [])) ?? [];
         const supplierIds = suppliers.map((s: any) => s.id);
 
         if (supplierIds.length > 0) {
           // Count Quality Events (NCRs)
-          totalNCRs = await (prisma as any).qualityEvent?.count({
-            where: { organizationId, supplierId: { in: supplierIds } },
-          }).catch(() => 0) ?? 0;
+          totalNCRs =
+            (await (prisma as any).qualityEvent
+              ?.count({
+                where: { organizationId, supplierId: { in: supplierIds } },
+              })
+              .catch(() => 0)) ?? 0;
 
           // Get Manufacturing Events to calculate scrap rate
-          const mfgEvents = await (prisma as any).manufacturingEvent?.findMany({
-            where: { organizationId, supplierId: { in: supplierIds } },
-            select: { quantityProduced: true, quantityScrapped: true },
-          }).catch(() => []) ?? [];
+          const mfgEvents =
+            (await (prisma as any).manufacturingEvent
+              ?.findMany({
+                where: { organizationId, supplierId: { in: supplierIds } },
+                select: { quantityProduced: true, quantityScrapped: true },
+              })
+              .catch(() => [])) ?? [];
 
           let totalProduced = 0;
           let totalScrapped = 0;

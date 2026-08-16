@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       passwordResetRateLimiter.record(ipAddress);
     }
 
-    await requestPasswordReset(email.toLowerCase().trim(), ipAddress);
+    await requestPasswordReset(email.toLowerCase().trim());
 
     return NextResponse.json({
       data: { message: "If the email exists, a reset link has been sent" },

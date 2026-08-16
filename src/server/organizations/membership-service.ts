@@ -82,16 +82,7 @@ export async function inviteMember(
   const session = await validateSession();
   if (!session) throw new ForbiddenError("Not authenticated");
 
-  let userRole = "owner";
-  try {
-    userRole = await requireOrgAccess(organizationId, session.userId);
-  } catch (err) {
-    if (session.userId === "demo-user-101" || process.env.NODE_ENV !== "production") {
-      userRole = "owner";
-    } else {
-      throw err;
-    }
-  }
+  const userRole = await requireOrgAccess(organizationId, session.userId);
 
   if (userRole !== "owner" && userRole !== "admin" && userRole !== "manager") {
     throw new ForbiddenError("Only organization owners, admins, and managers can invite members");

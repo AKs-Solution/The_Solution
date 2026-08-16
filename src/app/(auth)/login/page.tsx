@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LoginForm } from "@/features/auth/components";
 
 export default function LoginPage() {
@@ -11,9 +12,9 @@ export default function LoginPage() {
         <LoginForm />
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <a href="/register" className="text-foreground font-medium hover:underline">
+          <Link href="/register" className="text-foreground font-medium hover:underline">
             Create one
-          </a>
+          </Link>
         </p>
       </div>
     </div>
