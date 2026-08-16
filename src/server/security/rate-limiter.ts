@@ -91,3 +91,9 @@ export const passwordResetRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   maxAttempts: 5,
 });
+
+export const contactInquiryRateLimiter = createRateLimiter({
+  namespace: "contact-inquiry",
+  windowMs: 15 * 60 * 1000,
+  maxAttempts: 5,
+});

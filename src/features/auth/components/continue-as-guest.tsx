@@ -10,11 +10,13 @@ export function ContinueAsGuest({
   buttonClassName,
   label = "Continue as Guest",
   compact = false,
+  variant = "secondary",
 }: {
   className?: string;
   buttonClassName?: string;
   label?: string;
   compact?: boolean;
+  variant?: "primary" | "secondary";
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -43,7 +45,7 @@ export function ContinueAsGuest({
       {error && <p className="mb-2 text-center text-xs text-rose-600">{error}</p>}
       <Button
         type="button"
-        variant="secondary"
+        variant={variant}
         className={cn("w-full", buttonClassName)}
         disabled={pending}
         onClick={() => void handleGuest()}

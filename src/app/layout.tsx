@@ -1,14 +1,51 @@
 import type { Metadata } from "next";
 import { AppProvider } from "@/providers";
+import { RootStructuredData } from "@/components/seo/structured-data";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  SEO_KEYWORDS,
+  SITE_NAME,
+  SITE_URL,
+  TITLE_TEMPLATE,
+} from "@/features/marketing/content";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Consecuencia by AK — Aerospace Intelligence",
-    template: "%s — Consecuencia Aerospace Intelligence",
+    default: DEFAULT_TITLE,
+    template: TITLE_TEMPLATE,
   },
-  description:
-    "Engineering Reality Platform — verifying engineering truth through deterministic, evidence-based reasoning",
+  description: DEFAULT_DESCRIPTION,
+  keywords: [...SEO_KEYWORDS],
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: DEFAULT_TITLE,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -21,7 +58,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full font-sans antialiased">
-      <body className="m-0 flex h-screen w-screen flex-col overflow-hidden bg-zinc-50 p-0 text-zinc-900">
+      <body className="m-0 min-h-screen bg-white p-0 text-slate-900">
+        <RootStructuredData />
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

@@ -16,10 +16,19 @@ const publicPathPrefixes = [
   "/api/auth/reset-password",
   "/api/auth/logout",
   "/api/health",
+  "/api/contact",
   "/login",
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/demo",
+  "/contact",
+  "/pricing",
+  "/use-cases",
+  "/vs",
+  "/og-image.png",
+  "/robots.txt",
+  "/sitemap.xml",
   "/_next/",
   "/favicon.ico",
 ];
@@ -30,6 +39,9 @@ const publicPageExactPaths = new Set([
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/demo",
+  "/contact",
+  "/pricing",
 ]);
 
 function applySecurityHeaders(response: NextResponse, nonce: string, isProd: boolean): void {
