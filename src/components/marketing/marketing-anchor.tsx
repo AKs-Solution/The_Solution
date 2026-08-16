@@ -7,12 +7,21 @@ const HEADER_OFFSET = 88;
 
 export function scrollToHash(hash: string) {
   const id = hash.replace(/^#/, "");
+  if (!id) return false;
   const el = document.getElementById(id);
   if (!el) return false;
   const top = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  history.replaceState(null, "", `#${id}`);
+  if (window.location.hash !== `#${id}`) {
+    history.replaceState(null, "", `#${id}`);
+  }
   return true;
+}
+
+function retryScrollToHash(hash: string, attempts = 12) {
+  if (scrollToHash(hash)) return;
+  if (attempts <= 0) return;
+  window.setTimeout(() => retryScrollToHash(hash, attempts - 1), 50);
 }
 
 export function MarketingAnchor({
@@ -42,7 +51,7 @@ export function MarketingAnchor({
     const onHome = window.location.pathname === "/" || window.location.pathname === "";
     if (path === "/" && onHome) {
       event.preventDefault();
-      scrollToHash(hash);
+      retryScrollToHash(hash);
       onNavigate?.();
       return;
     }
@@ -64,12 +73,12 @@ export function MarketingAnchor({
 
 export function HashRestore() {
   useEffect(() => {
-    const hash = window.location.hash;
-    if (!hash) return;
-    const timer = window.setTimeout(() => {
-      scrollToHash(hash);
-    }, 40);
-    return () => window.clearTimeout(timer);
+    const run = () => {
+      if (window.location.hash) retryScrollToHash(window.location.hash);
+    };
+    run();
+    window.addEventListener("hashchange", run);
+    return () => window.removeEventListener("hashchange", run);
   }, []);
   return null;
 }

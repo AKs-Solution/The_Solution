@@ -209,12 +209,19 @@
   --density-row: 3.25rem;
 }
 
-html,
+html {
+  min-height: 100%;
+  scroll-padding-top: 5.5rem;
+  overflow-x: clip;
+  overflow-y: auto;
+  background-color: #f8fafc;
+}
+
 body {
   min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   background-color: #f8fafc;
   color: var(--foreground);
   font-family:

@@ -22,6 +22,27 @@ export function Shell({ children }: ShellProps) {
   const showSidebar = layoutMode !== "minimal-focus";
 
   useEffect(() => {
+    const html = document.documentElement;
+    const { body } = document;
+    const previous = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      htmlHeight: html.style.height,
+      bodyHeight: body.style.height,
+    };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.style.height = "100%";
+    body.style.height = "100%";
+    return () => {
+      html.style.overflow = previous.htmlOverflow;
+      body.style.overflow = previous.bodyOverflow;
+      html.style.height = previous.htmlHeight;
+      body.style.height = previous.bodyHeight;
+    };
+  }, []);
+
+  useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 768) setMobileNavOpen(false);
     };
@@ -39,7 +60,7 @@ export function Shell({ children }: ShellProps) {
   }, [mobileNavOpen]);
 
   return (
-    <div className="m-0 flex h-screen w-screen flex-col overflow-hidden bg-slate-50 p-0 text-slate-900 antialiased">
+    <div className="m-0 flex h-dvh w-full max-w-full flex-col overflow-hidden bg-slate-50 p-0 text-slate-900 antialiased">
       <Header onOpenMobileNav={() => setMobileNavOpen(true)} />
       {isGuest && (
         <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 px-6 py-2 text-center text-xs leading-relaxed text-slate-600">
