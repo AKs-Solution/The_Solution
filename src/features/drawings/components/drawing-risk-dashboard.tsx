@@ -41,18 +41,18 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
   } = assessment;
 
   return (
-    <div className="flex flex-col gap-6 text-zinc-900">
+    <div className="flex flex-col gap-6 text-slate-900">
       {/* 1. TOP TITLE BLOCK METADATA CARD */}
-      <Card className="border-indigo-500/20 bg-zinc-100 backdrop-blur-md">
+      <Card className="border-indigo-500/20 bg-slate-100 backdrop-blur-md">
         <CardContent className="p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-700">
                 <FileText className="size-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold tracking-tight text-zinc-900">
+                  <h2 className="text-lg font-bold tracking-tight text-slate-900">
                     {metadata.partNumber}
                   </h2>
                   <Badge className="border-indigo-500/30 bg-indigo-500/10 font-mono text-indigo-700">
@@ -62,7 +62,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                     {metadata.materialFamily}
                   </Badge>
                 </div>
-                <p className="mt-0.5 text-xs text-zinc-500">
+                <p className="mt-0.5 text-xs text-slate-500">
                   {metadata.material} • Standard: {metadata.drawingStandard}
                 </p>
               </div>
@@ -70,7 +70,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
 
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-xs font-semibold text-zinc-500">OVERALL RISK SCORE</div>
+                <div className="text-xs font-semibold text-slate-500">OVERALL RISK SCORE</div>
                 <div className="text-2xl font-black tracking-tight text-amber-600">
                   {assessments.overallAssessment.score} / 100
                 </div>
@@ -93,31 +93,31 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
           {/* METADATA GRID */}
           <div className="grid grid-cols-2 gap-4 pt-4 text-xs sm:grid-cols-4 lg:grid-cols-6">
             <div>
-              <span className="block text-zinc-500">Finish:</span>
-              <span className="font-semibold text-zinc-700">{metadata.finish || "None"}</span>
+              <span className="block text-slate-500">Finish:</span>
+              <span className="font-semibold text-slate-700">{metadata.finish || "None"}</span>
             </div>
             <div>
-              <span className="block text-zinc-500">Datums:</span>
+              <span className="block text-slate-500">Datums:</span>
               <span className="font-mono font-semibold text-indigo-600">
                 {metadata.datums.map((d) => `[${d}]`).join(" ")}
               </span>
             </div>
             <div>
-              <span className="block text-zinc-500">Units:</span>
-              <span className="font-semibold text-zinc-700 uppercase">{metadata.units}</span>
+              <span className="block text-slate-500">Units:</span>
+              <span className="font-semibold text-slate-700 uppercase">{metadata.units}</span>
             </div>
             <div>
-              <span className="block text-zinc-500">Scale:</span>
-              <span className="font-semibold text-zinc-700">{metadata.scale || "1:1"}</span>
+              <span className="block text-slate-500">Scale:</span>
+              <span className="font-semibold text-slate-700">{metadata.scale || "1:1"}</span>
             </div>
             <div>
-              <span className="block text-zinc-500">Threads Extracted:</span>
-              <span className="font-semibold text-zinc-700">
+              <span className="block text-slate-500">Threads Extracted:</span>
+              <span className="font-semibold text-slate-700">
                 {metadata.threads.length > 0 ? metadata.threads[0] : "None"}
               </span>
             </div>
             <div>
-              <span className="block text-zinc-500">Rules Triggered:</span>
+              <span className="block text-slate-500">Rules Triggered:</span>
               <span className="font-semibold text-amber-600">
                 {triggeredRules.length} Manufacturing Rules
               </span>
@@ -142,11 +142,11 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                 Score: {assessments.engineeringAssessment.score}/100
               </Badge>
             </div>
-            <p className="text-xs leading-relaxed text-zinc-600">
+            <p className="text-xs leading-relaxed text-slate-600">
               {assessments.engineeringAssessment.summary}
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-indigo-500/20 pt-3 text-[11px]">
-              <span className="text-zinc-500">Engineering Confidence:</span>
+              <span className="text-slate-500">Engineering Confidence:</span>
               <span className="font-bold text-indigo-600">
                 {Math.round(confidenceMetrics.engineeringConfidence * 100)}% (
                 {assessments.engineeringAssessment.confidenceLabel})
@@ -169,11 +169,11 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                 Score: {assessments.historicalAssessment.score}/100
               </Badge>
             </div>
-            <p className="text-xs leading-relaxed text-zinc-600">
+            <p className="text-xs leading-relaxed text-slate-600">
               {assessments.historicalAssessment.summary}
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-emerald-500/20 pt-3 text-[11px]">
-              <span className="text-zinc-500">Historical Confidence:</span>
+              <span className="text-slate-500">Historical Confidence:</span>
               <span className="font-bold text-emerald-600">
                 {Math.round(confidenceMetrics.historicalConfidence * 100)}% (
                 {assessments.historicalAssessment.confidenceLabel})
@@ -196,11 +196,11 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                 Score: {assessments.overallAssessment.score}/100
               </Badge>
             </div>
-            <p className="text-xs leading-relaxed text-zinc-600">
+            <p className="text-xs leading-relaxed text-slate-600">
               {assessments.overallAssessment.summary}
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-amber-500/20 pt-3 text-[11px]">
-              <span className="text-zinc-500">Overall Fused Confidence:</span>
+              <span className="text-slate-500">Overall Fused Confidence:</span>
               <span className="font-bold text-amber-600">
                 {Math.round(confidenceMetrics.overallConfidence * 100)}% (
                 {assessments.overallAssessment.confidenceLabel})
@@ -212,7 +212,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
 
       {/* 3. EIGHT RISK CATEGORIES BREAKDOWN */}
       <div>
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold tracking-wider text-zinc-500 uppercase">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold tracking-wider text-slate-500 uppercase">
           <ShieldAlert className="size-4 text-indigo-600" />
           Risk Category Ratings (8 Dimensions)
         </h3>
@@ -220,10 +220,10 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
           {categoryBreakdown.map((cat) => (
             <div
               key={cat.category}
-              className="flex flex-col justify-between gap-2 rounded-xl border border-zinc-200 bg-zinc-100 p-3.5"
+              className="flex flex-col justify-between gap-2 rounded-xl border border-slate-200 bg-slate-100 p-3.5"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-zinc-600">{cat.category}</span>
+                <span className="text-xs font-medium text-slate-600">{cat.category}</span>
                 <span
                   className={cn(
                     "rounded px-1.5 py-0.5 text-[10px] font-bold",
@@ -238,8 +238,8 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                 </span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-extrabold text-zinc-900">{cat.score}</span>
-                <span className="text-[10px] text-zinc-500">/ 100</span>
+                <span className="text-xl font-extrabold text-slate-900">{cat.score}</span>
+                <span className="text-[10px] text-slate-500">/ 100</span>
               </div>
             </div>
           ))}
@@ -249,7 +249,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
       {/* 4. EXPANDABLE TOLERANCE CALLOUT EXPLANATIONS */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-sm font-bold tracking-wider text-zinc-500 uppercase">
+          <h3 className="flex items-center gap-2 text-sm font-bold tracking-wider text-slate-500 uppercase">
             <Wrench className="size-4 text-indigo-600" />
             Tolerance & GD&T Risk Reasoning ({explainability.length} Callouts Evaluated)
           </h3>
@@ -261,7 +261,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
             return (
               <div
                 key={item.id}
-                className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 transition-colors hover:border-zinc-400"
+                className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 transition-colors hover:border-slate-400"
               >
                 {/* CARD HEADER */}
                 <button
@@ -274,13 +274,13 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                       <AlertTriangle className="size-4" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+                      <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
                         <span>{item.featureCallout}</span>
                         <Badge className="border-amber-500/30 bg-amber-500/10 font-mono text-[10px] text-amber-700">
                           {item.ruleTriggered}
                         </Badge>
                       </div>
-                      <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">{item.why}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">{item.why}</p>
                     </div>
                   </div>
 
@@ -296,22 +296,22 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                       Confidence: {Math.round(item.overallConfidence * 100)}%
                     </Badge>
                     {isExpanded ? (
-                      <ChevronUp className="size-4 text-zinc-500" />
+                      <ChevronUp className="size-4 text-slate-500" />
                     ) : (
-                      <ChevronDown className="size-4 text-zinc-500" />
+                      <ChevronDown className="size-4 text-slate-500" />
                     )}
                   </div>
                 </button>
 
                 {/* EXPANDABLE CONTENT */}
                 {isExpanded && (
-                  <div className="flex flex-col gap-4 border-t border-zinc-200 bg-zinc-100 p-5 text-xs">
+                  <div className="flex flex-col gap-4 border-t border-slate-200 bg-slate-100 p-5 text-xs">
                     {/* WHY REASONING */}
                     <div>
                       <span className="mb-1 block font-bold tracking-wider text-indigo-600 uppercase">
                         Manufacturing Physics Reasoning (Why)
                       </span>
-                      <p className="rounded-lg border border-zinc-200 bg-zinc-100 p-3 leading-relaxed text-zinc-700">
+                      <p className="rounded-lg border border-slate-200 bg-slate-100 p-3 leading-relaxed text-slate-700">
                         {item.why}
                       </p>
                     </div>
@@ -319,10 +319,10 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {/* EVIDENCE */}
                       <div>
-                        <span className="mb-1 block font-bold tracking-wider text-zinc-500 uppercase">
+                        <span className="mb-1 block font-bold tracking-wider text-slate-500 uppercase">
                           Extracted Evidence
                         </span>
-                        <div className="rounded border border-zinc-200 bg-zinc-100 p-2.5 font-mono text-zinc-600">
+                        <div className="rounded border border-slate-200 bg-slate-100 p-2.5 font-mono text-slate-600">
                           {item.evidence}
                         </div>
                       </div>
@@ -332,7 +332,7 @@ export function DrawingRiskDashboard({ assessment }: DrawingRiskDashboardProps) 
                         <span className="mb-1 block font-bold tracking-wider text-emerald-600 uppercase">
                           Historical Assessment
                         </span>
-                        <div className="rounded border border-zinc-200 bg-zinc-100 p-2.5 leading-relaxed text-zinc-600">
+                        <div className="rounded border border-slate-200 bg-slate-100 p-2.5 leading-relaxed text-slate-600">
                           {item.historicalPrecedentUsed}
                         </div>
                       </div>

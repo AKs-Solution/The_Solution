@@ -36,7 +36,7 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="tracking-tight text-zinc-500 transition-colors hover:text-zinc-900"
+                  className="tracking-tight text-slate-500 transition-colors hover:text-slate-900"
                 >
                   {item.label}
                 </Link>

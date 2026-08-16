@@ -278,19 +278,19 @@ export function SearchCommandPalette() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-zinc-900/40 px-4 pt-[10vh] backdrop-blur-md transition-all">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 px-4 pt-[10vh] backdrop-blur-md transition-all">
       <div className="fixed inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Workspace Command Palette"
-        className="relative z-50 w-full max-w-2xl overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-900 shadow-xl"
+        className="relative z-50 w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl"
         onKeyDown={handleKeyDown}
       >
         {/* Search Header */}
-        <div className="flex items-center gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3.5">
-          <div className="flex size-7 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-50">
+        <div className="flex items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3.5">
+          <div className="flex size-7 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-50">
             <Command className="size-4" />
           </div>
           <input
@@ -300,14 +300,14 @@ export function SearchCommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command, component ID, blueprint name, or jump to route..."
-            className="flex-1 bg-transparent text-sm font-medium text-zinc-900 outline-none placeholder:text-zinc-400"
+            className="flex-1 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
             aria-label="Search workspace"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="rounded p-1 text-xs text-zinc-400 hover:text-zinc-700"
+              className="rounded p-1 text-xs text-slate-400 hover:text-slate-700"
             >
               Clear
             </button>
@@ -315,7 +315,7 @@ export function SearchCommandPalette() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
             aria-label="Close search"
           >
             <X className="size-4" />
@@ -323,7 +323,7 @@ export function SearchCommandPalette() {
         </div>
 
         {/* Filter Category Pills */}
-        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto border-b border-zinc-200 bg-zinc-50 px-4 py-2">
+        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto border-b border-slate-200 bg-slate-50 px-4 py-2">
           {(["ALL", "PAGES", "DECISIONS", "ENTITIES", "DOCUMENTS"] as FilterCategory[]).map(
             (cat) => (
               <button
@@ -333,8 +333,8 @@ export function SearchCommandPalette() {
                 className={cn(
                   "cursor-pointer rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors select-none",
                   category === cat
-                    ? "border border-zinc-900 bg-zinc-900 text-zinc-50"
-                    : "border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
+                    ? "border border-slate-900 bg-slate-900 text-slate-50"
+                    : "border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-900",
                 )}
               >
                 {cat}
@@ -351,7 +351,7 @@ export function SearchCommandPalette() {
           role="listbox"
         >
           {isLoading && (
-            <div className="px-4 py-8 text-center font-mono text-xs text-zinc-400">
+            <div className="px-4 py-8 text-center font-mono text-xs text-slate-400">
               Querying Knowledge Graph & Truth Pipeline...
             </div>
           )}
@@ -359,7 +359,7 @@ export function SearchCommandPalette() {
             <div className="px-4 py-6 text-center font-mono text-xs text-rose-600">{error}</div>
           )}
           {!isLoading && !error && filteredResults.length === 0 && (
-            <div className="px-4 py-8 text-center text-xs text-zinc-400">
+            <div className="px-4 py-8 text-center text-xs text-slate-400">
               No matching aerospace assets found for &ldquo;{query}&rdquo;
             </div>
           )}
@@ -367,7 +367,7 @@ export function SearchCommandPalette() {
           {!isLoading && !error && filteredResults.length > 0 && (
             <ul className="flex flex-col gap-1">
               {!query.trim() && (
-                <div className="px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
+                <div className="px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                   Quick Navigation Console
                 </div>
               )}
@@ -388,35 +388,35 @@ export function SearchCommandPalette() {
                       className={cn(
                         "group flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors",
                         isSelected
-                          ? "border-zinc-900 bg-zinc-100 text-zinc-900"
-                          : "border-transparent text-zinc-700 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900",
+                          ? "border-slate-900 bg-slate-100 text-slate-900"
+                          : "border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900",
                       )}
                     >
                       <div
                         className={cn(
                           "flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
                           isSelected
-                            ? "border-zinc-900 bg-zinc-900 text-zinc-50"
-                            : "border-zinc-200 bg-white text-zinc-500 group-hover:text-zinc-700",
+                            ? "border-slate-900 bg-slate-900 text-slate-50"
+                            : "border-slate-200 bg-white text-slate-500 group-hover:text-slate-700",
                         )}
                       >
                         <Icon className="size-4" />
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-xs font-semibold text-zinc-900">
+                        <span className="truncate text-xs font-semibold text-slate-900">
                           {result.label}
                         </span>
-                        <span className="mt-0.5 truncate text-[11px] text-zinc-500">
+                        <span className="mt-0.5 truncate text-[11px] text-slate-500">
                           {result.subtitle}
                         </span>
                       </div>
-                      <span className="rounded border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[9px] font-bold text-zinc-500 uppercase">
+                      <span className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 uppercase">
                         {result.type}
                       </span>
                       <ArrowRight
                         className={cn(
                           "size-3.5 transition-transform",
-                          isSelected ? "translate-x-0.5 text-zinc-900" : "text-transparent",
+                          isSelected ? "translate-x-0.5 text-slate-900" : "text-transparent",
                         )}
                       />
                     </button>
@@ -428,28 +428,30 @@ export function SearchCommandPalette() {
         </div>
 
         {/* Footer Navigation Hints */}
-        <div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50 px-4 py-2.5 font-mono text-[11px] text-zinc-500">
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-2.5 font-mono text-[11px] text-slate-500">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <kbd className="rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] text-zinc-600">
+              <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600">
                 ↑↓
               </kbd>
               Navigate
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] text-zinc-600">
+              <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600">
                 ↵
               </kbd>
               Execute
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] text-zinc-600">
+              <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600">
                 ESC
               </kbd>
               Dismiss
             </span>
           </div>
-          <span className="text-[10px] font-semibold text-zinc-500">CONSECUENCIA COMMAND v1.0</span>
+          <span className="text-[10px] font-semibold text-slate-500">
+            CONSECUENCIA COMMAND v1.0
+          </span>
         </div>
       </div>
     </div>

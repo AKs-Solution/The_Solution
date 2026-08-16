@@ -56,10 +56,10 @@ export default function MetrologyRegistryPage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Metrology Registry</span>
+            <span className="font-medium text-slate-800">Metrology Registry</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -87,7 +87,7 @@ export default function MetrologyRegistryPage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : telemetry.length > 0 ? (
               <div className="flex flex-col gap-4">
@@ -103,15 +103,15 @@ export default function MetrologyRegistryPage() {
                           ? "border-emerald-200 bg-emerald-50/5"
                           : limitCrossed
                             ? "border-amber-200 bg-amber-50/5"
-                            : "border-zinc-200 bg-zinc-50/10"
+                            : "border-slate-200 bg-slate-50/10"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <Cpu className="size-5 text-indigo-600" />
                           <div className="flex flex-col text-left">
-                            <span className="text-sm font-bold text-zinc-900">{t.machineId}</span>
-                            <span className="text-[10px] text-zinc-400">
+                            <span className="text-sm font-bold text-slate-900">{t.machineId}</span>
+                            <span className="text-[10px] text-slate-400">
                               Recorded: {new Date(t.timestamp).toLocaleTimeString()}
                             </span>
                           </div>
@@ -126,35 +126,35 @@ export default function MetrologyRegistryPage() {
                             Tolerance Alert
                           </Badge>
                         ) : (
-                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800">
+                          <Badge className="border-slate-200 bg-slate-100 text-slate-800">
                             Nominal
                           </Badge>
                         )}
                       </div>
 
-                      <Divider className="border-zinc-100" />
+                      <Divider className="border-slate-100" />
 
                       <div className="grid grid-cols-2 gap-4 text-left text-xs sm:grid-cols-4">
                         <div>
-                          <span className="block text-zinc-400">Spindle Speed</span>
-                          <span className="font-semibold text-zinc-800">
+                          <span className="block text-slate-400">Spindle Speed</span>
+                          <span className="font-semibold text-slate-800">
                             {t.spindleSpeedRPM.toLocaleString()} RPM
                           </span>
                         </div>
                         <div>
-                          <span className="block text-zinc-400">Feed Rate</span>
-                          <span className="font-semibold text-zinc-800">
+                          <span className="block text-slate-400">Feed Rate</span>
+                          <span className="font-semibold text-slate-800">
                             {t.feedRateMMPM.toLocaleString()} mm/min
                           </span>
                         </div>
                         <div>
-                          <span className="block text-zinc-400">Sensor G-Force</span>
-                          <span className="font-semibold text-zinc-800">{t.vibrationG} G</span>
+                          <span className="block text-slate-400">Sensor G-Force</span>
+                          <span className="font-semibold text-slate-800">{t.vibrationG} G</span>
                         </div>
                         <div>
-                          <span className="block text-zinc-400">Measured Deviation</span>
+                          <span className="block text-slate-400">Measured Deviation</span>
                           <span
-                            className={`font-bold ${limitCrossed && !isAttested ? "text-amber-600" : "text-zinc-800"}`}
+                            className={`font-bold ${limitCrossed && !isAttested ? "text-amber-600" : "text-slate-800"}`}
                           >
                             {t.deviationMM} mm
                           </span>
@@ -202,24 +202,24 @@ export default function MetrologyRegistryPage() {
 
           {/* POLICY LIMITS */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-semibold text-zinc-400 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
                       Quality Policy
                     </span>
                     <h2 className="text-foreground text-base font-bold">Tolerance Guidelines</h2>
                   </div>
 
-                  <Divider className="border-zinc-200" />
+                  <Divider className="border-slate-200" />
 
                   <div className="flex flex-col gap-2 text-left text-xs">
-                    <div className="rounded border border-zinc-200 bg-zinc-50 p-3">
-                      <span className="mb-1 block font-semibold text-zinc-800">
+                    <div className="rounded border border-slate-200 bg-slate-50 p-3">
+                      <span className="mb-1 block font-semibold text-slate-800">
                         Standard Limits:
                       </span>
-                      <p className="text-[11px] leading-relaxed text-zinc-500">
+                      <p className="text-[11px] leading-relaxed text-slate-500">
                         Any structural deviation exceeding ±0.05mm must be manually audited and
                         signed off by a named lead engineer before final assembly integration.
                       </p>

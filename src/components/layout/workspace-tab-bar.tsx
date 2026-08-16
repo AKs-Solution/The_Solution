@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import {
   FileText,
   Activity,
@@ -34,10 +33,7 @@ function openSearchPalette() {
 }
 
 export function WorkspaceTabBar() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { tabs, activeTabId, activateTab, closeTab, closeTabs, togglePin, openTab } =
-    useWorkspaceTabs();
+  const { tabs, activeTabId, activateTab, closeTab, closeTabs, togglePin } = useWorkspaceTabs();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -54,13 +50,7 @@ export function WorkspaceTabBar() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.key.toLowerCase() === "n") {
         e.preventDefault();
-        openTab({
-          kind: "ledger",
-          ref: "/dashboard",
-          title: "Mission Console",
-          href: "/dashboard",
-        });
-        router.push("/dashboard");
+        openSearchPalette();
       }
     };
 
@@ -72,14 +62,10 @@ export function WorkspaceTabBar() {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showMenu, openTab, router]);
+  }, [showMenu]);
 
-  const handleTabClick = (tabId: string, href: string) => {
+  const handleTabClick = (tabId: string) => {
     activateTab(tabId);
-    if (typeof window !== "undefined") {
-      const current = `${window.location.pathname}${window.location.search}`;
-      if (current !== href) router.push(href);
-    }
   };
 
   const handleTabKeyDown = (
@@ -146,13 +132,13 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="no-scrollbar z-20 flex h-10 w-full flex-shrink-0 items-center gap-1.5 overflow-x-auto border-b border-slate-200 bg-slate-100/80 px-3 text-slate-500 select-none">
+    <div className="z-20 flex h-10 w-full min-w-0 flex-shrink-0 items-center gap-1.5 overflow-hidden border-b border-slate-200 bg-slate-100/80 px-3 text-slate-500 select-none">
       {/* Scroll Left */}
       <button
         type="button"
         onClick={scrollLeft}
         title="Scroll tabs left"
-        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900 sm:flex"
+        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-900 sm:flex"
       >
         <ChevronLeft className="size-3.5" />
       </button>
@@ -160,15 +146,12 @@ export function WorkspaceTabBar() {
       {/* Tabs Container */}
       <div
         ref={scrollRef}
-        className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto py-0.5"
+        className="no-scrollbar flex min-w-0 flex-1 flex-nowrap items-center gap-1 overflow-x-auto overflow-y-hidden py-0.5"
         role="tablist"
       >
         {tabs.map((tab, index) => {
           const Icon = KIND_ICON_MAP[tab.kind] ?? FileText;
-          const isActive =
-            tab.id === activeTabId ||
-            pathname === tab.href ||
-            (tab.href !== "/" && pathname?.startsWith(`${tab.href}/`));
+          const isActive = tab.id === activeTabId;
 
           return (
             <div
@@ -179,7 +162,7 @@ export function WorkspaceTabBar() {
               role="tab"
               tabIndex={0}
               aria-selected={isActive}
-              onClick={() => handleTabClick(tab.id, tab.href)}
+              onClick={() => handleTabClick(tab.id)}
               onKeyDown={(e) => handleTabKeyDown(e, tab.id, index)}
               onFocus={() => handleFocus(index)}
               onMouseDown={(e) => {
@@ -197,12 +180,12 @@ export function WorkspaceTabBar() {
               )}
             >
               <Icon
-                className={cn("size-3.5 shrink-0", isActive ? "text-zinc-900" : "text-zinc-500")}
+                className={cn("size-3.5 shrink-0", isActive ? "text-slate-900" : "text-slate-500")}
               />
               <span className="max-w-[140px] truncate tracking-tight">{tab.title}</span>
 
               {tab.pinned && (
-                <Pin className="ml-0.5 size-2.5 shrink-0 text-zinc-400" aria-label="Pinned Tab" />
+                <Pin className="ml-0.5 size-2.5 shrink-0 text-slate-400" aria-label="Pinned Tab" />
               )}
 
               <div className="ml-1 flex items-center gap-0.5">
@@ -255,7 +238,7 @@ export function WorkspaceTabBar() {
         type="button"
         onClick={scrollRight}
         title="Scroll tabs right"
-        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900 sm:flex"
+        className="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-900 sm:flex"
       >
         <ChevronRight className="size-3.5" />
       </button>
@@ -266,24 +249,24 @@ export function WorkspaceTabBar() {
           type="button"
           onClick={() => setShowMenu((prev) => !prev)}
           title="Tab options"
-          className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/50 hover:text-zinc-900"
+          className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-900"
         >
           <MoreVertical className="size-3.5" />
         </button>
 
         {showMenu && (
-          <div className="absolute top-8 right-0 z-50 w-44 rounded-md border border-zinc-200 bg-white p-1 text-xs shadow-sm">
+          <div className="absolute top-8 right-0 z-50 w-44 rounded-md border border-slate-200 bg-white p-1 text-xs shadow-sm">
             <button
               type="button"
               onClick={closeOthers}
-              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
             >
               Close Other Tabs
             </button>
             <button
               type="button"
               onClick={closeUnpinned}
-              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+              className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
             >
               Close Unpinned Tabs
             </button>

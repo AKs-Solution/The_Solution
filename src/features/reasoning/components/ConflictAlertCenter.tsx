@@ -22,7 +22,7 @@ const severityColors: Record<
     border: "border-amber-500/40",
     badge: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
   },
-  LOW: { bg: "bg-white", border: "border-zinc-200", badge: "bg-zinc-100 text-zinc-500" },
+  LOW: { bg: "bg-white", border: "border-slate-200", badge: "bg-slate-100 text-slate-500" },
 };
 
 export function ConflictAlertCenter({ conflicts, uncertainties }: Props) {
@@ -30,18 +30,18 @@ export function ConflictAlertCenter({ conflicts, uncertainties }: Props) {
     <div className="space-y-6">
       {/* Detected Conflicts */}
       <div>
-        <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-3">
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900">
+        <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
             <span className="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
             Conflict Detection & Contradiction Alerts
           </h3>
-          <span className="font-mono text-xs text-zinc-500">
+          <span className="font-mono text-xs text-slate-500">
             {conflicts.length} Active Conflicts Detected
           </span>
         </div>
 
         {conflicts.length === 0 ? (
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center text-xs text-zinc-500">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-500">
             No contradictory evidence, circular reasoning, or principle violations detected.
           </div>
         ) : (
@@ -55,7 +55,7 @@ export function ConflictAlertCenter({ conflicts, uncertainties }: Props) {
                   className={`rounded-xl border p-4 ${styles.bg} ${styles.border} backdrop-blur-md`}
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-zinc-900">
+                    <span className="font-mono text-xs font-bold text-slate-900">
                       {cf.conflictType.replace(/_/g, " ")}
                     </span>
                     <span
@@ -65,13 +65,13 @@ export function ConflictAlertCenter({ conflicts, uncertainties }: Props) {
                     </span>
                   </div>
 
-                  <p className="mb-3 text-xs leading-relaxed text-zinc-900">{cf.description}</p>
+                  <p className="mb-3 text-xs leading-relaxed text-slate-900">{cf.description}</p>
 
-                  <div className="rounded-lg border border-zinc-200 bg-white p-2.5 text-xs">
+                  <div className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs">
                     <span className="mb-1 block font-semibold text-cyan-300">
                       Mitigation Recommendation:
                     </span>
-                    <p className="text-zinc-700 italic">{cf.mitigationRecommendation}</p>
+                    <p className="text-slate-700 italic">{cf.mitigationRecommendation}</p>
                   </div>
                 </div>
               );
@@ -82,17 +82,17 @@ export function ConflictAlertCenter({ conflicts, uncertainties }: Props) {
 
       {/* Remaining Uncertainties */}
       <div>
-        <h4 className="mb-2 text-sm font-semibold text-zinc-900">
+        <h4 className="mb-2 text-sm font-semibold text-slate-900">
           Remaining Engineering Uncertainties
         </h4>
         {uncertainties.length === 0 ? (
-          <p className="text-xs text-zinc-500 italic">No unresolved uncertainties remaining.</p>
+          <p className="text-xs text-slate-500 italic">No unresolved uncertainties remaining.</p>
         ) : (
           <ul className="space-y-2">
             {uncertainties.map((u, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 rounded-lg border border-zinc-200 bg-white p-3 text-xs text-zinc-700"
+                className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700"
               >
                 <span className="font-bold text-amber-400">•</span>
                 <span>{u}</span>

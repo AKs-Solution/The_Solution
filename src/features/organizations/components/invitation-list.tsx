@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 interface Invitation {
@@ -17,14 +16,13 @@ interface InvitationListProps {
 }
 
 export function InvitationList({ invitations }: InvitationListProps) {
-  const router = useRouter();
   const [actionId, setActionId] = useState<string | null>(null);
 
   async function handleAccept(id: string) {
     setActionId(id);
     try {
       await fetch(`/api/invitations/${id}/accept`, { method: "POST" });
-      router.refresh();
+      window.location.assign("/dashboard");
     } catch {
       // silently fail
     } finally {
@@ -36,7 +34,7 @@ export function InvitationList({ invitations }: InvitationListProps) {
     setActionId(id);
     try {
       await fetch(`/api/invitations/${id}/decline`, { method: "POST" });
-      router.refresh();
+      window.location.reload();
     } catch {
       // silently fail
     } finally {

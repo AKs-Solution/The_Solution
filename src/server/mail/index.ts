@@ -16,18 +16,22 @@ function appUrl(): string {
   return config.appUrl.replace(/\/$/, "");
 }
 
+export function isMailConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 async function sendMail(opts: {
   to: string;
   subject: string;
   html: string;
   text: string;
-}): Promise<void> {
+}): Promise<boolean> {
   const resend = getResendClient();
   if (!resend) {
     console.warn(
       `[Mail] RESEND_API_KEY is not configured. Skipping "${opts.subject}" to ${opts.to}. Set RESEND_API_KEY in your environment to enable email delivery.`,
     );
-    return;
+    return false;
   }
   try {
     await resend.emails.send({
@@ -37,8 +41,10 @@ async function sendMail(opts: {
       html: opts.html,
       text: opts.text,
     });
+    return true;
   } catch (err) {
     console.error("[Mail] Failed to send email:", err);
+    return false;
   }
 }
 
@@ -71,18 +77,18 @@ export async function sendInvitationEmail(
   to: string,
   organizationName: string,
   role: string,
+  inviteUrl: string,
   recipientName?: string,
-): Promise<void> {
-  const invitationsUrl = `${appUrl()}/invitations`;
+): Promise<boolean> {
   const greeting = recipientName?.trim() ? `Hi ${recipientName.trim()},` : "";
-  await sendMail({
+  return sendMail({
     to,
     subject: `You're invited to join ${organizationName} on Consecuencia`,
     text: [
       greeting,
       `You've been invited to join the ${organizationName} workspace on Consecuencia as ${role}.`,
       "",
-      `Sign in to review and accept the invitation: ${invitationsUrl}`,
+      `Accept the invitation: ${inviteUrl}`,
       "",
       "This invitation expires in 7 days.",
     ]
@@ -94,7 +100,7 @@ export async function sendInvitationEmail(
         ${greeting ? `<p style="color: #3f3f46;">${greeting}</p>` : ""}
         <p style="color: #3f3f46;">You've been invited to join the ${organizationName} workspace on Consecuencia as <strong>${role}</strong>.</p>
         <p>
-          <a href="${invitationsUrl}" style="display: inline-block; background: #18181b; color: #fafafa; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">Review invitation</a>
+          <a href="${inviteUrl}" style="display: inline-block; background: #2563eb; color: #fafafa; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">Accept invitation</a>
         </p>
         <p style="font-size: 13px; color: #71717a;">This invitation expires in 7 days.</p>
       </div>

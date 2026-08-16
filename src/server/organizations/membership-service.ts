@@ -3,8 +3,10 @@ import { prisma } from "@/server/db";
 import { validateSession } from "@/server/auth/session-service";
 import { DEFAULT_ROLES } from "@/server/rbac/permissions";
 import { sendInvitationEmail } from "@/server/mail";
+import { config } from "@/shared/config";
+import { createSession } from "@/server/auth/session-service";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/shared/errors";
-import type { Invitation, OrganizationMember, User } from "@prisma/client";
+import type { Invitation } from "@prisma/client";
 
 export const INVITABLE_ROLE_SLUGS = new Set(
   DEFAULT_ROLES.filter((r) => r.slug !== "owner").map((r) => r.slug),
@@ -29,6 +31,27 @@ export interface InvitationResult {
   status: string;
   createdAt: Date;
   expiresAt: Date;
+}
+
+export interface InviteCreatedResult {
+  invitationId: string;
+  email: string;
+  role: string;
+  expiresAt: Date;
+  inviteUrl: string;
+  emailSent: boolean;
+}
+
+export interface InvitationPreview {
+  organizationName: string;
+  email: string | null;
+  role: string;
+  expiresAt: Date;
+  status: string;
+}
+
+function inviteUrlFor(token: string): string {
+  return `${config.appUrl.replace(/\/$/, "")}/invite?token=${encodeURIComponent(token)}`;
 }
 
 async function requireOrgAccess(organizationId: string, userId: string): Promise<string> {
@@ -78,7 +101,7 @@ export async function inviteMember(
   email: string,
   role: string = "viewer",
   name?: string,
-): Promise<{ invitationId: string }> {
+): Promise<InviteCreatedResult> {
   const session = await validateSession();
   if (!session) throw new ForbiddenError("Not authenticated");
 
@@ -101,45 +124,30 @@ export async function inviteMember(
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  let invitee: User | null = null;
-  try {
-    invitee = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  } catch {
-    // offline fallback
-  }
+  const invitee = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
   if (invitee) {
-    let existingMember: OrganizationMember | null = null;
-    try {
-      existingMember = await prisma.organizationMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId,
-            userId: invitee.id,
-          },
+    const existingMember = await prisma.organizationMember.findUnique({
+      where: {
+        organizationId_userId: {
+          organizationId,
+          userId: invitee.id,
         },
-      });
-    } catch {
-      // offline fallback
-    }
+      },
+    });
     if (existingMember) {
       throw new ValidationError({ email: ["User is already a member of this organization"] });
     }
   }
 
-  let existingInvitation: Invitation | null = null;
-  try {
-    existingInvitation = await prisma.invitation.findFirst({
-      where: {
-        organizationId,
-        email: normalizedEmail,
-        status: "pending",
-        expiresAt: { gt: new Date() },
-      },
-    });
-  } catch {
-    // offline fallback
-  }
+  const existingInvitation = await prisma.invitation.findFirst({
+    where: {
+      organizationId,
+      email: normalizedEmail,
+      status: "pending",
+      expiresAt: { gt: new Date() },
+    },
+  });
   if (existingInvitation) {
     throw new ValidationError({ email: ["An active invitation already exists for this email"] });
   }
@@ -147,93 +155,79 @@ export async function inviteMember(
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  let invitationId = `inv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  let orgName = "Consecuencia Workspace";
-
-  try {
-    const invitation = await prisma.invitation.create({
-      data: {
-        organizationId,
-        email: normalizedEmail,
-        userId: invitee?.id,
-        token,
-        role: normalizedRole,
-        invitedBy: session.userId,
-        expiresAt,
-      },
-      include: { organization: { select: { name: true } } },
-    });
-    invitationId = invitation.id;
-    if (invitation.organization?.name) orgName = invitation.organization.name;
-
-    await prisma.authEvent
-      .create({
-        data: {
-          userId: session.userId,
-          action: "organization.member.invited",
-          metadata: { organizationId, email: normalizedEmail },
-        },
-      })
-      .catch(() => null);
-  } catch (err) {
-    console.warn("[MembershipService] DB offline fallback invite creation:", err);
-  }
-
-  try {
-    await sendInvitationEmail(normalizedEmail, orgName, normalizedRole, name);
-  } catch (err) {
-    console.warn("[MembershipService] Failed to dispatch invitation email:", err);
-  }
-
-  return { invitationId };
-}
-
-export async function acceptInvitation(invitationId: string): Promise<void> {
-  const session = await validateSession();
-  if (!session) throw new ForbiddenError("Not authenticated");
-
-  const invitation = await prisma.invitation.findUnique({
-    where: { id: invitationId },
+  const invitation = await prisma.invitation.create({
+    data: {
+      organizationId,
+      email: normalizedEmail,
+      userId: invitee?.id,
+      token,
+      role: normalizedRole,
+      invitedBy: session.userId,
+      expiresAt,
+    },
     include: { organization: { select: { name: true } } },
   });
 
-  if (!invitation) throw new NotFoundError("Invitation", invitationId);
-  if (invitation.status !== "pending")
-    throw new ValidationError({ invitation: ["Invitation is no longer pending"] });
-  if (invitation.expiresAt < new Date())
-    throw new ValidationError({ invitation: ["Invitation has expired"] });
+  await prisma.authEvent
+    .create({
+      data: {
+        userId: session.userId,
+        action: "organization.member.invited",
+        metadata: { organizationId, email: normalizedEmail },
+      },
+    })
+    .catch(() => null);
 
-  if (invitation.email) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: { email: true },
-    });
-    if (
-      user &&
-      invitation.email !== user.email &&
-      invitation.userId &&
-      invitation.userId !== session.userId
-    ) {
-      throw new ForbiddenError("This invitation was sent to a different email address");
-    }
+  const inviteUrl = inviteUrlFor(token);
+  const emailSent = await sendInvitationEmail(
+    normalizedEmail,
+    invitation.organization.name,
+    normalizedRole,
+    inviteUrl,
+    name,
+  );
+
+  return {
+    invitationId: invitation.id,
+    email: normalizedEmail,
+    role: normalizedRole,
+    expiresAt,
+    inviteUrl,
+    emailSent,
+  };
+}
+
+async function completeInvitationAcceptance(
+  invitation: Invitation & { organization: { name: string } },
+  userId: string,
+  userEmail: string,
+): Promise<{ organizationId: string; organizationName: string }> {
+  if (invitation.status !== "pending") {
+    throw new ValidationError({ invitation: ["Invitation is no longer pending"] });
+  }
+  if (invitation.expiresAt < new Date()) {
+    throw new ValidationError({ invitation: ["Invitation has expired"] });
+  }
+  if (invitation.email && invitation.email.toLowerCase() !== userEmail.toLowerCase()) {
+    throw new ForbiddenError("This invitation was sent to a different email address");
   }
 
   await prisma.$transaction(async (tx) => {
     await tx.invitation.update({
-      where: { id: invitationId },
-      data: { status: "accepted", acceptedAt: new Date(), userId: session.userId },
+      where: { id: invitation.id },
+      data: { status: "accepted", acceptedAt: new Date(), userId },
     });
 
     await tx.organizationMember.upsert({
       where: {
         organizationId_userId: {
           organizationId: invitation.organizationId,
-          userId: session.userId,
+          userId,
         },
       },
       create: {
         organizationId: invitation.organizationId,
-        userId: session.userId,
+        userId,
         role: invitation.role,
         status: "active",
         invitedBy: invitation.invitedBy,
@@ -248,7 +242,7 @@ export async function acceptInvitation(invitationId: string): Promise<void> {
 
     await tx.authEvent.create({
       data: {
-        userId: session.userId,
+        userId,
         action: "organization.invitation.accepted",
         metadata: {
           organizationId: invitation.organizationId,
@@ -257,6 +251,91 @@ export async function acceptInvitation(invitationId: string): Promise<void> {
       },
     });
   });
+
+  await createSession(userId, invitation.organizationId);
+  return {
+    organizationId: invitation.organizationId,
+    organizationName: invitation.organization.name,
+  };
+}
+
+export async function acceptInvitation(invitationId: string): Promise<void> {
+  const session = await validateSession();
+  if (!session) throw new ForbiddenError("Not authenticated");
+
+  const invitation = await prisma.invitation.findUnique({
+    where: { id: invitationId },
+    include: { organization: { select: { name: true } } },
+  });
+
+  if (!invitation) throw new NotFoundError("Invitation", invitationId);
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { email: true },
+  });
+  if (!user) throw new ForbiddenError("Not authenticated");
+
+  await completeInvitationAcceptance(invitation, session.userId, user.email);
+}
+
+export async function acceptInvitationByToken(
+  token: string,
+): Promise<{ organizationId: string; organizationName: string }> {
+  const session = await validateSession();
+  if (!session) throw new ForbiddenError("Not authenticated");
+
+  const invitation = await prisma.invitation.findUnique({
+    where: { token },
+    include: { organization: { select: { name: true } } },
+  });
+  if (!invitation) throw new NotFoundError("Invitation", token);
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { email: true },
+  });
+  if (!user) throw new ForbiddenError("Not authenticated");
+
+  return completeInvitationAcceptance(invitation, session.userId, user.email);
+}
+
+export async function acceptInvitationForUser(
+  userId: string,
+  userEmail: string,
+  token: string,
+): Promise<{ organizationId: string; organizationName: string }> {
+  const invitation = await prisma.invitation.findUnique({
+    where: { token },
+    include: { organization: { select: { name: true } } },
+  });
+  if (!invitation) throw new NotFoundError("Invitation", token);
+  return completeInvitationAcceptance(invitation, userId, userEmail);
+}
+
+export async function previewInvitationByToken(token: string): Promise<InvitationPreview> {
+  if (!token || token.length < 16) {
+    throw new ValidationError({ token: ["Invitation token is invalid"] });
+  }
+
+  const invitation = await prisma.invitation.findUnique({
+    where: { token },
+    include: { organization: { select: { name: true } } },
+  });
+  if (!invitation) throw new NotFoundError("Invitation", token);
+
+  let status = invitation.status;
+  if (invitation.status === "pending" && invitation.expiresAt < new Date()) {
+    status = "expired";
+  }
+
+  return {
+    organizationName: invitation.organization.name,
+    email: invitation.email,
+    role: invitation.role,
+    expiresAt: invitation.expiresAt,
+    status,
+  };
 }
 
 export async function declineInvitation(invitationId: string): Promise<void> {
@@ -338,11 +417,16 @@ export async function listPendingInvitations(): Promise<InvitationResult[]> {
   const session = await validateSession();
   if (!session) return [];
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { email: true },
+  });
+
   const invitations = await prisma.invitation.findMany({
     where: {
-      userId: session.userId,
       status: "pending",
       expiresAt: { gt: new Date() },
+      OR: [{ userId: session.userId }, ...(user?.email ? [{ email: user.email }] : [])],
     },
     include: {
       organization: { select: { name: true } },

@@ -21,7 +21,7 @@ const nodeTypeColors: Record<ReasoningNodeType, { bg: string; border: string; te
     text: "text-emerald-700",
   },
   CONCLUSION: { bg: "bg-emerald-50", border: "border-emerald-400", text: "text-emerald-800" },
-  STEP: { bg: "bg-white", border: "border-zinc-200", text: "text-zinc-700" },
+  STEP: { bg: "bg-white", border: "border-slate-200", text: "text-slate-700" },
   MISSING_EVIDENCE: { bg: "bg-rose-50", border: "border-rose-400", text: "text-rose-800" },
   DECISION_BRANCH: { bg: "bg-amber-50", border: "border-amber-400", text: "text-amber-800" },
 };
@@ -42,13 +42,13 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
   return (
     <div className="space-y-6">
       {/* Controls & Filter */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-zinc-700">Filter Nodes:</span>
+          <span className="text-sm font-medium text-slate-700">Filter Nodes:</span>
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 focus:border-cyan-500 focus:outline-none"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-cyan-500 focus:outline-none"
           >
             <option value="ALL">All Nodes ({graph.nodes.length})</option>
             <option value="EVIDENCE">Evidence</option>
@@ -61,15 +61,15 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
           </select>
         </div>
 
-        <div className="font-mono text-xs text-zinc-500">
+        <div className="font-mono text-xs text-slate-500">
           Nodes: {filteredNodes.length} | Relationships (Edges): {graph.edges.length}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Node Matrix Canvas */}
-        <div className="min-h-[400px] rounded-xl border border-zinc-200 bg-white p-4 lg:col-span-2">
-          <h4 className="mb-4 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+        <div className="min-h-[400px] rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2">
+          <h4 className="mb-4 text-xs font-semibold tracking-wider text-slate-500 uppercase">
             Reasoning Graph Topology
           </h4>
 
@@ -85,22 +85,22 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
                   className={`rounded-xl border p-3.5 text-left transition-all duration-200 ${colors.bg} ${colors.border} ${
                     isSelected
                       ? "scale-[1.02] shadow-lg ring-2 shadow-cyan-100 ring-cyan-500"
-                      : "hover:border-zinc-300"
+                      : "hover:border-slate-300"
                   }`}
                 >
                   <div className="mb-1.5 flex items-center justify-between">
                     <span
-                      className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${colors.text} border border-zinc-200 bg-white`}
+                      className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${colors.text} border border-slate-200 bg-white`}
                     >
                       {node.nodeType}
                     </span>
                     {node.confidence !== undefined && node.confidence !== null && (
-                      <span className="font-mono text-[10px] text-zinc-500">
+                      <span className="font-mono text-[10px] text-slate-500">
                         {Math.round(node.confidence * 100)}% Conf
                       </span>
                     )}
                   </div>
-                  <p className="line-clamp-2 text-xs font-semibold text-zinc-900">{node.label}</p>
+                  <p className="line-clamp-2 text-xs font-semibold text-slate-900">{node.label}</p>
                 </button>
               );
             })}
@@ -108,26 +108,26 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
         </div>
 
         {/* Node Details & Justification Panel */}
-        <div className="rounded-xl border border-zinc-200 bg-white p-4">
-          <h4 className="mb-3 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <h4 className="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase">
             Relationship &amp; Justification Inspector
           </h4>
 
           {selectedNode ? (
             <div className="space-y-4">
-              <div className="rounded-lg border border-zinc-200 bg-white p-3">
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
                 <span className="font-mono text-[10px] text-cyan-600 uppercase">
                   {selectedNode.nodeType}
                 </span>
-                <h5 className="mt-1 text-sm font-bold text-zinc-900">{selectedNode.label}</h5>
+                <h5 className="mt-1 text-sm font-bold text-slate-900">{selectedNode.label}</h5>
               </div>
 
               <div>
-                <h6 className="mb-2 text-xs font-semibold text-zinc-700">
+                <h6 className="mb-2 text-xs font-semibold text-slate-700">
                   Connected Relationships (&quot;WHY&quot;):
                 </h6>
                 {connectedEdges.length === 0 ? (
-                  <p className="text-xs text-zinc-500 italic">
+                  <p className="text-xs text-slate-500 italic">
                     No direct edges connected to this node.
                   </p>
                 ) : (
@@ -140,18 +140,18 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
                       return (
                         <div
                           key={edge.id}
-                          className="rounded-lg border border-zinc-200 bg-white p-3 text-xs"
+                          className="rounded-lg border border-slate-200 bg-white p-3 text-xs"
                         >
                           <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-cyan-700">
                             <span>{isSource ? "OUTGOING ->" : "<- INCOMING"}</span>
                             <span className="rounded border border-cyan-200 bg-cyan-50 px-1.5 py-0.5 text-cyan-700">
                               {edge.edgeType}
                             </span>
-                            <span className="text-zinc-500">
+                            <span className="text-slate-500">
                               to {otherNode?.label || otherNodeId}
                             </span>
                           </div>
-                          <p className="mt-1.5 border-l-2 border-cyan-400 pl-2 text-[11px] leading-relaxed text-zinc-700 italic">
+                          <p className="mt-1.5 border-l-2 border-cyan-400 pl-2 text-[11px] leading-relaxed text-slate-700 italic">
                             &quot;{edge.justification}&quot;
                           </p>
                         </div>
@@ -162,7 +162,7 @@ export function ReasoningGraphVisualizer({ graph }: Props) {
               </div>
             </div>
           ) : (
-            <div className="p-8 text-center text-xs text-zinc-500 italic">
+            <div className="p-8 text-center text-xs text-slate-500 italic">
               Select any node in the graph topology canvas to inspect connected relationships and
               explicit &quot;WHY&quot; justifications.
             </div>

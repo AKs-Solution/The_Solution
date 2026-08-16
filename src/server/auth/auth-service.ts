@@ -6,6 +6,10 @@ import { GUEST_USER_ID, PUBLIC_ORGANIZATION_ID } from "./jwt";
 import { createVerificationToken, consumeVerificationToken } from "./token-service";
 import { sendPasswordResetEmail } from "@/server/mail";
 import { generateUniqueSlug } from "@/server/organizations/slug";
+import {
+  acceptInvitationForUser,
+  previewInvitationByToken,
+} from "@/server/organizations/membership-service";
 
 export interface RegisterInput {
   email: string;
@@ -13,6 +17,7 @@ export interface RegisterInput {
   name?: string;
   userAgent?: string;
   ipAddress?: string;
+  inviteToken?: string;
 }
 
 export interface LoginInput {
@@ -72,6 +77,20 @@ export async function registerUser(input: RegisterInput): Promise<{ user: AuthUs
     throw new AppError("An account with this email already exists", "EMAIL_TAKEN", 409);
   }
 
+  if (input.inviteToken) {
+    const preview = await previewInvitationByToken(input.inviteToken);
+    if (preview.status !== "pending") {
+      throw new AppError("This invitation is no longer valid", "INVITE_INVALID", 400);
+    }
+    if (preview.email && preview.email.toLowerCase() !== input.email.toLowerCase()) {
+      throw new AppError(
+        "Use the email address this invitation was sent to",
+        "INVITE_EMAIL_MISMATCH",
+        403,
+      );
+    }
+  }
+
   const passwordHash = hashPassword(input.password);
   const displayName = input.name?.trim() || input.email.split("@")[0] || "User";
 
@@ -116,6 +135,19 @@ export async function registerUser(input: RegisterInput): Promise<{ user: AuthUs
   });
 
   await createSession(user.id, org.id);
+
+  if (input.inviteToken) {
+    const joined = await acceptInvitationForUser(user.id, user.email, input.inviteToken);
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        organizationId: joined.organizationId,
+        organizationName: joined.organizationName,
+      },
+    };
+  }
 
   return {
     user: {

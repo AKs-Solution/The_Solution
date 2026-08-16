@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertOctagon className="size-5" />
           </div>
           <div className="max-w-md">
-            <p className="text-sm font-semibold text-zinc-900">
+            <p className="text-sm font-semibold text-slate-900">
               {this.props.name ? `${this.props.name} Failed to Load` : "Telemetry Component Error"}
             </p>
             <p className="mt-1 font-mono text-xs text-rose-600">
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
             size="sm"
             variant="secondary"
             onClick={this.reset}
-            className="mt-1 border border-zinc-200 bg-white text-xs text-zinc-700 hover:border-zinc-300 hover:bg-zinc-100"
+            className="mt-1 border border-slate-200 bg-white text-xs text-slate-700 hover:border-slate-300 hover:bg-slate-100"
           >
             <RefreshCw className="mr-1.5 size-3.5" />
             Retry Component

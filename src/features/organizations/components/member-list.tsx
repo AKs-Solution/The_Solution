@@ -180,17 +180,23 @@ export function MemberList({
           </div>
         )}
 
-        <div className="divide-border border-border divide-y rounded-lg border">
-          {members.map((member) => (
-            <MemberRow
-              key={member.id}
-              member={member}
-              organizationId={organizationId}
-              currentUserId={currentUserId}
-              onRemove={handleRemove}
-              removing={removing}
-            />
-          ))}
+        <div className="divide-y divide-slate-200 rounded-lg border border-slate-200">
+          {members.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-slate-500">
+              No teammates yet. Invite someone by email to share this organization.
+            </p>
+          ) : (
+            members.map((member) => (
+              <MemberRow
+                key={member.id}
+                member={member}
+                organizationId={organizationId}
+                currentUserId={currentUserId}
+                onRemove={handleRemove}
+                removing={removing}
+              />
+            ))
+          )}
         </div>
 
         <InviteMemberDialog

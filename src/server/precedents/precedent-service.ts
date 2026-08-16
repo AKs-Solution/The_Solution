@@ -10,17 +10,6 @@ import {
 import { ValidationError } from "@/shared/errors";
 
 /**
- * Self-healing seeder for historical precedents in the database
- */
-export async function ensurePrecedentsSeeded(
-  _organizationId?: string,
-  _userId?: string,
-): Promise<void> {
-  void _organizationId;
-  void _userId;
-}
-
-/**
  * Maps the database model to user-facing EngineeringPrecedent type
  */
 function mapToEngineeringPrecedent(dbPrecedent: any): EngineeringPrecedent {
@@ -184,17 +173,6 @@ export async function getPrecedents(query: PrecedentQuery & { organizationId?: s
   const page = query.page || 1;
   const pageSize = query.pageSize || 10;
   const skip = (page - 1) * pageSize;
-
-  // Auto seed default data if DB is empty
-  const count =
-    (await (prisma as any).historicalPrecedent
-      ?.count({
-        where: { organizationId: orgId, deletedAt: null },
-      })
-      .catch(() => 0)) ?? 0;
-  if (count === 0) {
-    await ensurePrecedentsSeeded(orgId);
-  }
 
   // Construct filters
   const andFilters: any[] = [{ organizationId: orgId, deletedAt: null }];

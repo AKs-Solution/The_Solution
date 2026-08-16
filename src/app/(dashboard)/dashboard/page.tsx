@@ -136,87 +136,6 @@ interface ResolutionResult {
   resolvedAt: string;
 }
 
-// --- Presets Map for Questions ---
-
-const PRESETS = [
-  {
-    question: "Can Supplier X be used on Project Alpha?",
-    targetQuery: "Supplier X",
-    precedent: {
-      project: "Project Alpha - Phase I (2024)",
-      problem: "Fastener failure under high cyclic vibration load due to fatigue.",
-      decision:
-        "Mandated ASTM A325 structural grade fasteners, transitioning from unqualified local suppliers to Supplier X.",
-      outcome:
-        "Passed verification tests with zero fatigue cracking during subsequent 18-month run.",
-      lessonsLearned:
-        "Supplier certifications must be anchored and locked before detailing structural steel components.",
-      similarity:
-        "Both involve cyclic vibration load requirements for high-strength steel fasteners.",
-    },
-  },
-  {
-    question: "What evidence supports Requirement 4.2?",
-    targetQuery: "Requirement 4.2",
-    precedent: {
-      project: "Deepwater Compliance Audit (2025)",
-      problem:
-        "Pipeline weld traceability logs rejected by independent auditors for lacking document page references.",
-      decision:
-        "Enforced structural inspection logs with explicit PDF page-level provenance fields.",
-      outcome: "Auditors approved weld integrity certifications within 7 days of resubmission.",
-      lessonsLearned:
-        "All safety-critical load limit claims must trace directly back to verified mill certifications.",
-      similarity: "Both require page-level verification of tensile stress inspection logs.",
-    },
-  },
-  {
-    question: "What changed since Revision C?",
-    targetQuery: "Revision C",
-    precedent: {
-      project: "Turbine Housing Drawing Update (2025)",
-      problem:
-        "Flange diameter mismatch caused assembly alignment failure on the manufacturing floor.",
-      decision:
-        "Instituted a delta check step to reconcile physical mating relationships before releasing new revisions.",
-      outcome:
-        "Zero fitment or mismatch issues reported on the assembly line for Revision D and beyond.",
-      lessonsLearned:
-        "Drawings should never be updated in isolation; verify all mating relationships before check-in.",
-      similarity: "Checks for delta modifications of mechanical interfaces between revisions.",
-    },
-  },
-  {
-    question: "Has this failure happened before?",
-    targetQuery: "Failure",
-    precedent: {
-      project: "Seawater Intake Impeller cracking (2024)",
-      problem:
-        "Brittle fracture risks in corrosive environments must be verified against cavitation limit curves.",
-      decision: "Upgraded material specification from grade 316 stainless steel to Duplex 2507.",
-      outcome: "Intake pumps have run continuously for 24 months without crack indications.",
-      lessonsLearned:
-        "Brittle fracture risks in corrosive environments must be verified against cavitation limit curves.",
-      similarity: "Impeller blade fracture matching cyclic flow cavitation patterns.",
-    },
-  },
-  {
-    question: "Which documents justify this design decision?",
-    targetQuery: "Design Decision",
-    precedent: {
-      project: "Subsea Manifold Structural Assessment (2024)",
-      problem:
-        "Design certificate delayed because stress calculations lacked linked finite element analysis logs.",
-      decision:
-        "Aggregated all finite element run files and mapped them to compliance requirements.",
-      outcome: "Obtained classification society approval without further engineering queries.",
-      lessonsLearned:
-        "Keep calculations linked directly to experimental stress logs to satisfy external audit review.",
-      similarity: "Both require linking stress calculations directly to raw sensor logs.",
-    },
-  },
-];
-
 const SEVERITY_COLORS: Record<string, string> = {
   CRITICAL: "border-red-200 bg-red-50 text-red-700",
   HIGH: "border-orange-200 bg-orange-50 text-orange-700",
@@ -399,11 +318,7 @@ export default function WorkspacePage() {
       setRationaleText("");
 
       try {
-        // Find matching preset for precedents
-        const matchedPreset = PRESETS.find((p) =>
-          queryText.toLowerCase().includes(p.targetQuery.toLowerCase()),
-        );
-        const searchTerms = matchedPreset ? matchedPreset.targetQuery : queryText;
+        const searchTerms = queryText;
 
         // Fetch matched precedents based on search query
         try {
@@ -477,11 +392,6 @@ export default function WorkspacePage() {
     },
     [evaluateTarget, fetchRecentDecisions],
   );
-
-  const handlePresetClick = (presetText: string) => {
-    setQuestion(presetText);
-    searchTargets(presetText);
-  };
 
   const handleSelectDecision = useCallback(
     async (dec: any) => {
@@ -660,7 +570,7 @@ export default function WorkspacePage() {
 
   // Determine verification strength class & label
   const getVerificationStrength = () => {
-    if (!resolution) return { label: "—", color: "text-zinc-500" };
+    if (!resolution) return { label: "—", color: "text-slate-500" };
     if (resolution.status === "VERIFIED" || resolution.status === "SUFFICIENT") {
       return { label: "Strong", color: "text-emerald-600" };
     }
@@ -678,7 +588,7 @@ export default function WorkspacePage() {
   const getStatusBadgeColor = (status: string) => {
     if (status === "FINALIZED") return "border-emerald-200 bg-emerald-50 text-emerald-800";
     if (status === "EVIDENCE_REVIEW") return "border-amber-200 bg-amber-50 text-amber-800";
-    return "border-zinc-200 bg-zinc-100 text-zinc-700";
+    return "border-slate-200 bg-slate-100 text-slate-700";
   };
 
   return (
@@ -686,11 +596,14 @@ export default function WorkspacePage() {
       <Stack gap={8}>
         {/* Header Title */}
         <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-foreground text-3xl font-semibold tracking-tight">
+          <div>
+            <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+              Mission Console
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
               Verification Workspace
             </h1>
-            <p className="text-muted-foreground max-w-2xl text-sm leading-normal">
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">
               Query engineering specifications, gather traceable evidence, analyze contradictions,
               and package verified decisions deterministically.
             </p>
@@ -709,7 +622,7 @@ export default function WorkspacePage() {
 
         {/* --- QUESTION INPUT SECTION (Hide when viewing active/finalized decisions) --- */}
         {!activeDecision && (
-          <Panel padding="lg" className="border border-zinc-200 bg-white">
+          <Panel padding="lg" className="border border-slate-200 bg-white">
             <Stack gap={4}>
               <div className="flex flex-col gap-2">
                 <label htmlFor="question-input" className="text-foreground text-sm font-medium">
@@ -720,38 +633,20 @@ export default function WorkspacePage() {
                     <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
                     <Input
                       id="question-input"
-                      placeholder="Enter an engineering question or verify a supplier, component, or revision..."
+                      placeholder="Ask about a supplier, component, drawing revision, or requirement in this workspace..."
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && searchTargets(question)}
-                      className="h-11 border-zinc-200 pl-10"
+                      className="h-11 border-slate-200 pl-10"
                     />
                   </div>
                   <Button
-                    className="h-11 shrink-0 bg-zinc-900 px-6 font-medium text-zinc-50 hover:bg-zinc-800"
+                    className="h-11 shrink-0 bg-blue-600 px-6 font-medium text-white hover:bg-blue-700"
                     onClick={() => searchTargets(question)}
                     disabled={isSearching}
                   >
                     {isSearching ? "Processing..." : "Verify"}
                   </Button>
-                </div>
-              </div>
-
-              {/* Quick Suggestions */}
-              <div className="flex flex-col gap-2">
-                <span className="font-mono text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-                  Suggested Verification Inquiries
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {PRESETS.map((preset, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handlePresetClick(preset.question)}
-                      className="cursor-pointer rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-zinc-700 shadow-sm transition-colors hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900"
-                    >
-                      {preset.question}
-                    </button>
-                  ))}
                 </div>
               </div>
             </Stack>
@@ -771,8 +666,8 @@ export default function WorkspacePage() {
         {/* --- LOADING EXPERIENCE --- */}
         {(isSearching || isEvaluating) && (
           <div className="flex flex-col items-center justify-center py-20">
-            <Clock className="mb-3 size-8 animate-pulse text-zinc-400" />
-            <p className="text-sm font-medium text-zinc-600">
+            <Clock className="mb-3 size-8 animate-pulse text-slate-400" />
+            <p className="text-sm font-medium text-slate-600">
               Reconciling specifications and gathering evidence...
             </p>
           </div>
@@ -780,8 +675,8 @@ export default function WorkspacePage() {
 
         {/* --- DYNAMIC TARGET RESOLUTION SELECTOR --- */}
         {entityResults.length > 0 && !isSearching && !isEvaluating && (
-          <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-            <span className="font-mono text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+          <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <span className="font-mono text-xs font-semibold tracking-wider text-slate-500 uppercase">
               Verification Targets Resolved
             </span>
             <div className="flex flex-wrap gap-2">
@@ -792,8 +687,8 @@ export default function WorkspacePage() {
                   className={cn(
                     "cursor-pointer rounded-md border px-3 py-1.5 text-left font-mono text-xs font-medium transition-colors",
                     selectedEntity?.id === ent.id
-                      ? "border-zinc-900 bg-zinc-900 text-zinc-50"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900",
+                      ? "border-slate-900 bg-slate-900 text-slate-50"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900",
                   )}
                 >
                   {ent.name} ({ent.identifier})
@@ -806,24 +701,24 @@ export default function WorkspacePage() {
         {/* --- DECISIONS HISTORY LIST (Only visible when no active workspace selection is running) --- */}
         {!activeDecision && !isSearching && !isEvaluating && (
           <Stack gap={4}>
-            <div className="flex flex-col justify-between gap-3 border-b border-zinc-200 pb-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col justify-between gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2.5">
-                <div className="shrink-0 rounded-md border border-zinc-200 bg-zinc-100 p-1.5 text-zinc-600">
+                <div className="shrink-0 rounded-md border border-slate-200 bg-slate-100 p-1.5 text-slate-600">
                   <History className="size-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold tracking-tight text-zinc-900 sm:text-lg">
+                  <h2 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">
                     Recent Engineering Decisions
                   </h2>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-slate-500">
                     Deterministic audit trail of finalized and active decision evaluations
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 font-mono text-xs text-zinc-700">
-                  <span className="text-zinc-500">Total:</span>
-                  <strong className="text-zinc-900">{decisions.length}</strong>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs text-slate-700">
+                  <span className="text-slate-500">Total:</span>
+                  <strong className="text-slate-900">{decisions.length}</strong>
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-xs text-emerald-800">
                   <span className="text-emerald-600">Finalized:</span>
@@ -837,9 +732,14 @@ export default function WorkspacePage() {
             </div>
 
             {decisions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/60 py-16 text-center">
-                <p className="text-sm font-medium text-zinc-500">
-                  No decisions logged yet. Start a new verification query above to begin a workflow.
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-16 text-center">
+                <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400">
+                  <FileText className="size-5" />
+                </div>
+                <p className="text-sm font-semibold text-slate-900">Start here</p>
+                <p className="mt-1 max-w-md text-sm text-slate-500">
+                  This workspace is empty. Ask a verification question above to log your first
+                  engineering decision. Nothing is preloaded.
                 </p>
               </div>
             ) : (
@@ -848,7 +748,7 @@ export default function WorkspacePage() {
                   <div
                     key={dec.id}
                     onClick={() => handleSelectDecision(dec)}
-                    className="group relative flex cursor-pointer flex-col justify-between rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-zinc-400 hover:shadow-md"
+                    className="group relative flex cursor-pointer flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-400 hover:shadow-md"
                   >
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between gap-2">
@@ -860,7 +760,7 @@ export default function WorkspacePage() {
                         >
                           {dec.status.replace(/_/g, " ")}
                         </Badge>
-                        <span className="font-mono text-xs text-zinc-500">
+                        <span className="font-mono text-xs text-slate-500">
                           {new Date(dec.createdAt).toLocaleDateString(undefined, {
                             year: "numeric",
                             month: "short",
@@ -869,27 +769,27 @@ export default function WorkspacePage() {
                         </span>
                       </div>
 
-                      <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-zinc-900 transition-colors group-hover:text-zinc-700">
+                      <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-slate-900 transition-colors group-hover:text-slate-700">
                         {dec.question}
                       </h3>
 
                       {dec.status === "FINALIZED" && dec.finalDecision && (
-                        <div className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                        <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-3">
                           <span className="mb-1 block text-[10px] font-bold tracking-wider text-emerald-600 uppercase">
                             Final Decision Outcome:
                           </span>
-                          <p className="line-clamp-3 font-mono text-xs leading-relaxed text-zinc-700">
+                          <p className="line-clamp-3 font-mono text-xs leading-relaxed text-slate-700">
                             &quot;{dec.finalDecision}&quot;
                           </p>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 text-xs">
-                      <span className="font-mono text-[11px] text-zinc-500">
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                      <span className="font-mono text-[11px] text-slate-500">
                         {dec.id ? `ID: ${dec.id.slice(0, 8)}...` : ""}
                       </span>
-                      <div className="flex items-center gap-1 font-semibold text-zinc-900 transition-all group-hover:translate-x-0.5">
+                      <div className="flex items-center gap-1 font-semibold text-slate-900 transition-all group-hover:translate-x-0.5">
                         <span>
                           {dec.status === "FINALIZED" ? "View Full Audit" : "Resume Review"}
                         </span>
@@ -905,8 +805,8 @@ export default function WorkspacePage() {
 
         {/* --- IDLE MESSAGE WHEN ACTIVE BUT NO DETAILS LOADED --- */}
         {!selectedEntity && !isSearching && !isEvaluating && activeDecision && (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50/30 py-24 text-center">
-            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/30 py-24 text-center">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
               <ShieldCheck className="size-7" />
             </div>
             <p className="text-foreground text-base font-medium">Workflow Resumed</p>
@@ -921,10 +821,10 @@ export default function WorkspacePage() {
         {resolution && selectedEntity && !isEvaluating && !isSearching && (
           <Stack gap={8}>
             {/* Target Header Banner */}
-            <Panel padding="md" className="border border-zinc-200 bg-zinc-50/50">
+            <Panel padding="md" className="border border-slate-200 bg-slate-50/50">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                     <FileText className="size-5" />
                   </div>
                   <div className="flex flex-col">
@@ -949,7 +849,7 @@ export default function WorkspacePage() {
                   )}
                   <Badge
                     variant="secondary"
-                    className="border-zinc-200 bg-zinc-100 font-medium text-zinc-800 capitalize"
+                    className="border-slate-200 bg-slate-100 font-medium text-slate-800 capitalize"
                   >
                     Status: {getVerificationStatusLabel(resolution.status).toLowerCase()}
                   </Badge>
@@ -963,7 +863,7 @@ export default function WorkspacePage() {
             {/* --- ASSESSMENT SUMMARY & DECISION EXPORT --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Summary Card */}
-              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2">
+              <Card className="bg-background border-slate-200 shadow-sm lg:col-span-2">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <h3 className="text-foreground text-sm font-semibold tracking-wider uppercase">
@@ -1022,7 +922,7 @@ export default function WorkspacePage() {
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-200" />
+                    <Divider className="border-slate-200" />
 
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -1044,7 +944,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Export Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm">
+              <Card className="bg-background border-slate-200 shadow-sm">
                 <CardContent className="flex h-full flex-col justify-between p-6">
                   <Stack gap={4}>
                     <h3 className="text-foreground text-sm font-semibold tracking-wider uppercase">
@@ -1058,7 +958,7 @@ export default function WorkspacePage() {
                   <div className="mt-6">
                     <Button
                       onClick={handleExportDecision}
-                      className="flex h-11 w-full items-center justify-center gap-2 bg-zinc-900 font-medium text-zinc-50 shadow hover:bg-zinc-800"
+                      className="flex h-11 w-full items-center justify-center gap-2 bg-blue-600 font-medium text-white shadow-sm hover:bg-blue-700"
                     >
                       {exportSuccess ? (
                         <>
@@ -1080,7 +980,7 @@ export default function WorkspacePage() {
             {/* --- EVIDENCE TIMELINE & RELATED DOCUMENTS --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Evidence Timeline */}
-              <Card className="bg-background border-zinc-200 shadow-sm lg:col-span-2">
+              <Card className="bg-background border-slate-200 shadow-sm lg:col-span-2">
                 <CardContent className="p-6">
                   <Stack gap={6}>
                     <div className="flex flex-col gap-1">
@@ -1097,11 +997,11 @@ export default function WorkspacePage() {
                         No supporting compliance documents verified.
                       </div>
                     ) : (
-                      <div className="relative ml-2.5 space-y-6 border-l border-zinc-200 pl-5">
+                      <div className="relative ml-2.5 space-y-6 border-l border-slate-200 pl-5">
                         {resolution.supportingEvidence.map((node) => (
                           <div key={node.id} className="group relative">
                             {/* Circle Dot indicator */}
-                            <span className="bg-background absolute top-1.5 -left-[26px] flex h-3 w-3 items-center justify-center rounded-full border-2 border-zinc-300 transition-colors group-hover:border-zinc-500" />
+                            <span className="bg-background absolute top-1.5 -left-[26px] flex h-3 w-3 items-center justify-center rounded-full border-2 border-slate-300 transition-colors group-hover:border-slate-500" />
 
                             <Stack gap={2}>
                               <div className="flex flex-wrap items-center gap-2">
@@ -1110,20 +1010,20 @@ export default function WorkspacePage() {
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="border-zinc-200 bg-zinc-100 px-1.5 py-0 text-[10px] text-zinc-600"
+                                  className="border-slate-200 bg-slate-100 px-1.5 py-0 text-[10px] text-slate-600"
                                 >
                                   {node.entityType ?? node.type}
                                 </Badge>
                               </div>
 
                               <p className="text-muted-foreground text-xs leading-normal">
-                                <span className="font-semibold text-zinc-700">
+                                <span className="font-semibold text-slate-700">
                                   Why it is relevant:
                                 </span>{" "}
                                 verified compliance matching requirement constraints.
                               </p>
 
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-500">
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
                                 {node.documentName && (
                                   <span>
                                     Document: {node.documentName}{" "}
@@ -1146,7 +1046,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Related Documents */}
-              <Card className="bg-background border-zinc-200 shadow-sm">
+              <Card className="bg-background border-slate-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1179,14 +1079,14 @@ export default function WorkspacePage() {
                             <Link
                               key={docId}
                               href={`/ingestion/documents/${docId}`}
-                              className="group flex items-start gap-2.5 rounded border border-transparent p-2 text-left transition-all hover:border-zinc-200 hover:bg-zinc-50"
+                              className="group flex items-start gap-2.5 rounded border border-transparent p-2 text-left transition-all hover:border-slate-200 hover:bg-slate-50"
                             >
-                              <FileText className="mt-0.5 size-4 shrink-0 text-zinc-400 group-hover:text-zinc-600" />
+                              <FileText className="mt-0.5 size-4 shrink-0 text-slate-400 group-hover:text-slate-600" />
                               <div className="flex min-w-0 flex-col">
                                 <span className="text-foreground truncate text-xs font-semibold transition-colors group-hover:text-indigo-600">
                                   {docRecord.documentName}
                                 </span>
-                                <span className="mt-0.5 text-[10px] text-zinc-500">
+                                <span className="mt-0.5 text-[10px] text-slate-500">
                                   Version {docRecord.documentVersion ?? 1} ·{" "}
                                   {docRecord.extractionMethod ?? "manual review"}
                                 </span>
@@ -1204,7 +1104,7 @@ export default function WorkspacePage() {
             {/* --- CONTRADICTIONS & MISSING EVIDENCE --- */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Contradictions Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm">
+              <Card className="bg-background border-slate-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1217,7 +1117,7 @@ export default function WorkspacePage() {
                     </div>
 
                     {resolution.conflicts.length === 0 ? (
-                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm">
+                      <div className="text-muted-foreground rounded-lg border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center text-sm">
                         No contradictions or specifications mismatch detected.
                       </div>
                     ) : (
@@ -1276,7 +1176,7 @@ export default function WorkspacePage() {
               </Card>
 
               {/* Missing Evidence Panel */}
-              <Card className="bg-background border-zinc-200 shadow-sm">
+              <Card className="bg-background border-slate-200 shadow-sm">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1289,7 +1189,7 @@ export default function WorkspacePage() {
                     </div>
 
                     {resolution.missingEvidence.length === 0 ? (
-                      <div className="text-muted-foreground rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-10 text-center text-sm">
+                      <div className="text-muted-foreground rounded-lg border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center text-sm">
                         All compliance checklists and certifications are complete.
                       </div>
                     ) : (
@@ -1332,7 +1232,7 @@ export default function WorkspacePage() {
             </div>
 
             {/* --- RELATED HISTORICAL CONTEXT --- */}
-            <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200">
+            <Card className="bg-background animate-in fade-in border-slate-200 shadow-sm duration-200">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
@@ -1354,16 +1254,16 @@ export default function WorkspacePage() {
                             setSelectedPrecedent(prec);
                             setIsPrecedentModalOpen(true);
                           }}
-                          className="cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50/10 p-5 text-left transition-all hover:bg-zinc-100/50"
+                          className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50/10 p-5 text-left transition-all hover:bg-slate-100/50"
                         >
                           <div className="flex flex-col gap-3">
                             <div className="flex items-start justify-between gap-4">
                               <div>
-                                <h4 className="text-foreground text-sm font-semibold hover:text-zinc-600">
+                                <h4 className="text-foreground text-sm font-semibold hover:text-slate-600">
                                   {prec.title}
                                 </h4>
                                 <span className="text-muted-foreground mt-0.5 block text-[10px]">
-                                  Owner: {prec.decisionOwner?.name || "Authorized Engineer"} · Date:{" "}
+                                  Owner: {prec.decisionOwner?.name || "Unassigned"} · Date:{" "}
                                   {new Date(prec.decisionDate).toLocaleDateString()}
                                 </span>
                               </div>
@@ -1375,7 +1275,7 @@ export default function WorkspacePage() {
                                       ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                                       : prec.similarityScore >= 50
                                         ? "border-amber-200 bg-amber-50 text-amber-800"
-                                        : "border-zinc-200 bg-zinc-100 text-zinc-800",
+                                        : "border-slate-200 bg-slate-100 text-slate-800",
                                   )}
                                 >
                                   {prec.similarityScore}% Match
@@ -1386,10 +1286,10 @@ export default function WorkspacePage() {
                             <p className="text-muted-foreground text-xs leading-normal">
                               <strong>Why it matched:</strong>{" "}
                               {prec.matchExplanation?.join("; ") ||
-                                "Matched via general metadata index."}
+                                "Matched from records in this workspace."}
                             </p>
 
-                            <div className="grid grid-cols-1 gap-3 rounded border border-zinc-200/80 bg-zinc-50/50 p-3 text-xs sm:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-3 rounded border border-slate-200/80 bg-slate-50/50 p-3 text-xs sm:grid-cols-2">
                               <div>
                                 <strong className="text-foreground block font-medium">
                                   Outcome
@@ -1408,7 +1308,7 @@ export default function WorkspacePage() {
                               </div>
                             </div>
 
-                            <div className="text-[10px] text-zinc-400">
+                            <div className="text-[10px] text-slate-400">
                               Supporting Evidence Count: {prec.supportingEvidence?.length || 0}
                             </div>
                           </div>
@@ -1416,8 +1316,9 @@ export default function WorkspacePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-muted-foreground rounded border border-dashed border-zinc-200 py-6 text-center text-sm">
-                      No matching precedents found in organizational memory.
+                    <div className="rounded border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500">
+                      No matching precedents in this workspace yet. Record a precedent after you
+                      finalize a decision.
                     </div>
                   )}
                 </Stack>
@@ -1426,7 +1327,7 @@ export default function WorkspacePage() {
 
             {/* --- FEDERATED INDUSTRY FABRIC INSIGHTS --- */}
             {fabricInsights.length > 0 && (
-              <Card className="bg-background animate-in fade-in border-zinc-200 shadow-sm duration-200">
+              <Card className="bg-background animate-in fade-in border-slate-200 shadow-sm duration-200">
                 <CardContent className="p-6">
                   <Stack gap={4}>
                     <div className="flex flex-col gap-1">
@@ -1503,14 +1404,14 @@ export default function WorkspacePage() {
 
             {/* --- ENGINEER SIGN-OFF & FINAL DECISION CAPTURE --- */}
             {activeDecision && (
-              <Card className="border-zinc-200 bg-zinc-50/10 shadow-lg">
+              <Card className="border-slate-200 bg-slate-50/10 shadow-lg">
                 <CardContent className="p-6">
                   <Stack gap={6}>
                     <div className="flex items-center gap-3">
                       {activeDecision.status === "FINALIZED" ? (
                         <FileCheck2 className="size-6 text-emerald-600" />
                       ) : (
-                        <UserCheck className="size-6 text-zinc-600" />
+                        <UserCheck className="size-6 text-slate-600" />
                       )}
                       <div className="flex flex-col">
                         <h3 className="text-foreground text-base font-semibold">
@@ -1526,30 +1427,28 @@ export default function WorkspacePage() {
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-200" />
+                    <Divider className="border-slate-200" />
 
                     {activeDecision.status === "FINALIZED" ? (
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4">
+                        <Stack gap={3} className="rounded-lg bg-slate-50/50 p-4">
                           <div>
                             <span className="text-muted-foreground text-xs font-semibold uppercase">
                               Final Decision Statement
                             </span>
-                            <p className="text-foreground mt-2 border-l-2 border-emerald-500 bg-zinc-500/5 py-1 pl-3 text-sm leading-relaxed font-medium">
+                            <p className="text-foreground mt-2 border-l-2 border-emerald-500 bg-slate-500/5 py-1 pl-3 text-sm leading-relaxed font-medium">
                               {activeDecision.finalDecision}
                             </p>
                           </div>
-                          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-zinc-500">
+                          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
                             <Lock className="size-3 text-emerald-500" />
-                            <span>
-                              Signed by {activeDecision.finalizedById || "Authorized Engineer"}
-                            </span>
+                            <span>Signed by {activeDecision.finalizedById || "Unassigned"}</span>
                             <span>·</span>
                             <span>{new Date(activeDecision.finalizedAt).toLocaleString()}</span>
                           </div>
                         </Stack>
 
-                        <Stack gap={3} className="rounded-lg bg-zinc-50/50 p-4">
+                        <Stack gap={3} className="rounded-lg bg-slate-50/50 p-4">
                           <div>
                             <span className="text-muted-foreground text-xs font-semibold uppercase">
                               Rationale & Mitigation Notes
@@ -1591,10 +1490,10 @@ export default function WorkspacePage() {
                           </label>
                           <Input
                             id="final-decision-text"
-                            placeholder="e.g. Approve Supplier X fastener usage for cyclic vibration load compliance."
+                            placeholder="State the decision in terms of the evidence in this workspace."
                             value={finalDecisionText}
                             onChange={(e) => setFinalDecisionText(e.target.value)}
-                            className="border-zinc-200"
+                            className="border-slate-200"
                             disabled={isFinalizing}
                           />
                         </div>
@@ -1611,7 +1510,7 @@ export default function WorkspacePage() {
                             placeholder="Document the exact engineering justification, limitations, and mitigations..."
                             value={rationaleText}
                             onChange={(e) => setRationaleText(e.target.value)}
-                            className="placeholder:text-muted-foreground focus-visible:ring-ring min-h-[100px] w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            className="placeholder:text-muted-foreground focus-visible:ring-ring min-h-[100px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isFinalizing}
                           />
                         </div>
@@ -1632,7 +1531,7 @@ export default function WorkspacePage() {
                           <Button
                             onClick={handleFinalizeDecision}
                             disabled={isFinalizing}
-                            className="h-11 bg-zinc-900 px-6 font-semibold text-zinc-50 shadow hover:bg-zinc-800"
+                            className="h-11 bg-blue-600 px-6 font-semibold text-white shadow-sm hover:bg-blue-700"
                           >
                             {isFinalizing ? "Signing Off..." : "Sign Off & Finalize Decision"}
                           </Button>
@@ -1646,19 +1545,19 @@ export default function WorkspacePage() {
             {/* Precedent Detail Modal Overlay */}
             {isPrecedentModalOpen && selectedPrecedent && (
               <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs transition-opacity duration-300">
-                <div className="animate-in slide-in-from-right flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-zinc-200 bg-white p-6 text-zinc-900 shadow-sm duration-250">
-                  <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+                <div className="animate-in slide-in-from-right flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-slate-200 bg-white p-6 text-slate-900 shadow-sm duration-250">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                     <div>
                       <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">
                         Historical Context / Precedent Profile
                       </span>
-                      <h2 className="mt-1 text-lg font-bold text-zinc-900">
+                      <h2 className="mt-1 text-lg font-bold text-slate-900">
                         {selectedPrecedent.title}
                       </h2>
                     </div>
                     <button
                       onClick={() => setIsPrecedentModalOpen(false)}
-                      className="flex size-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-200"
+                      className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-200"
                     >
                       <XCircle className="size-5" />
                     </button>
@@ -1674,7 +1573,7 @@ export default function WorkspacePage() {
                             Similarity Match: {selectedPrecedent.similarityScore}%
                           </span>
                         </div>
-                        <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
                           <strong>Match rationale:</strong>{" "}
                           {selectedPrecedent.matchExplanation?.join("; ")}
                         </p>
@@ -1682,77 +1581,77 @@ export default function WorkspacePage() {
                     )}
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                         Engineering Question
                       </h4>
-                      <p className="mt-1 text-sm font-medium text-zinc-700 italic">
+                      <p className="mt-1 text-sm font-medium text-slate-700 italic">
                         &quot;{selectedPrecedent.engineeringQuestion}&quot;
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                         Decision Summary
                       </h4>
-                      <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 text-sm leading-relaxed font-normal text-zinc-700">
+                      <p className="mt-1 rounded-lg border border-slate-200 bg-slate-50/50 p-3 text-sm leading-relaxed font-normal text-slate-700">
                         {selectedPrecedent.decisionMade}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                        <h4 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Outcome
                         </h4>
-                        <p className="mt-1 text-sm font-semibold text-zinc-600">
+                        <p className="mt-1 text-sm font-semibold text-slate-600">
                           {selectedPrecedent.outcome}
                         </p>
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                        <h4 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                           Decision Date
                         </h4>
-                        <p className="mt-1 text-sm text-zinc-600">
+                        <p className="mt-1 text-sm text-slate-600">
                           {new Date(selectedPrecedent.decisionDate).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                      <h4 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                         Lessons Learned
                       </h4>
-                      <p className="mt-1 rounded-lg border border-zinc-200/60 bg-zinc-50/20 p-3 text-sm leading-relaxed text-zinc-600">
+                      <p className="mt-1 rounded-lg border border-slate-200/60 bg-slate-50/20 p-3 text-sm leading-relaxed text-slate-600">
                         {selectedPrecedent.lessonsLearned}
                       </p>
                     </div>
 
                     {/* Evidence, Contradictions, Missing */}
-                    <div className="border-t border-zinc-200 pt-4">
-                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
+                    <div className="border-t border-slate-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-slate-700">
                         Verification Details
                       </h3>
                       <Stack gap={4}>
                         <div>
-                          <span className="text-xs font-semibold text-zinc-500">
+                          <span className="text-xs font-semibold text-slate-500">
                             Supporting Evidence Used
                           </span>
                           {selectedPrecedent.supportingEvidence &&
                           selectedPrecedent.supportingEvidence.length > 0 ? (
-                            <ul className="mt-1.5 list-inside list-disc space-y-1 text-xs text-zinc-600">
+                            <ul className="mt-1.5 list-inside list-disc space-y-1 text-xs text-slate-600">
                               {selectedPrecedent.supportingEvidence.map((e, i) => (
                                 <li key={i}>{e}</li>
                               ))}
                             </ul>
                           ) : (
-                            <p className="mt-1 text-xs text-zinc-500 italic">
+                            <p className="mt-1 text-xs text-slate-500 italic">
                               No explicit evidence items listed.
                             </p>
                           )}
                         </div>
 
                         <div>
-                          <span className="text-xs font-semibold text-zinc-500">
+                          <span className="text-xs font-semibold text-slate-500">
                             Contradictions Encountered
                           </span>
                           {selectedPrecedent.contradictions &&
@@ -1763,14 +1662,14 @@ export default function WorkspacePage() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="mt-1 text-xs text-zinc-500 italic">
+                            <p className="mt-1 text-xs text-slate-500 italic">
                               No contradictions flagged.
                             </p>
                           )}
                         </div>
 
                         <div>
-                          <span className="text-xs font-semibold text-zinc-500">
+                          <span className="text-xs font-semibold text-slate-500">
                             Missing Evidence Identified
                           </span>
                           {selectedPrecedent.missingEvidence &&
@@ -1781,7 +1680,7 @@ export default function WorkspacePage() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="mt-1 text-xs text-zinc-500 italic">
+                            <p className="mt-1 text-xs text-slate-500 italic">
                               No missing requirements found.
                             </p>
                           )}
@@ -1790,40 +1689,40 @@ export default function WorkspacePage() {
                     </div>
 
                     {/* Linked parameters */}
-                    <div className="border-t border-zinc-200 pt-4">
-                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
+                    <div className="border-t border-slate-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-slate-700">
                         Linked Parameters
                       </h3>
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="block font-semibold text-zinc-500">
+                          <span className="block font-semibold text-slate-500">
                             Linked Documents
                           </span>
-                          <span className="mt-1 block text-zinc-600">
+                          <span className="mt-1 block text-slate-600">
                             {selectedPrecedent.relatedDocuments?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-500">
+                          <span className="block font-semibold text-slate-500">
                             Linked Suppliers
                           </span>
-                          <span className="mt-1 block text-zinc-600">
+                          <span className="mt-1 block text-slate-600">
                             {selectedPrecedent.relatedSuppliers?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-500">
+                          <span className="block font-semibold text-slate-500">
                             Linked Requirements
                           </span>
-                          <span className="mt-1 block text-zinc-600">
+                          <span className="mt-1 block text-slate-600">
                             {selectedPrecedent.relatedRequirements?.join(", ") || "None"}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-semibold text-zinc-500">
+                          <span className="block font-semibold text-slate-500">
                             Linked Standards
                           </span>
-                          <span className="mt-1 block text-zinc-600">
+                          <span className="mt-1 block text-slate-600">
                             {selectedPrecedent.relatedStandards?.join(", ") || "None"}
                           </span>
                         </div>
@@ -1831,25 +1730,25 @@ export default function WorkspacePage() {
                     </div>
 
                     {/* Audit & Version History */}
-                    <div className="border-t border-zinc-200 pt-4">
-                      <h3 className="mb-3 text-sm font-semibold text-zinc-700">
+                    <div className="border-t border-slate-200 pt-4">
+                      <h3 className="mb-3 text-sm font-semibold text-slate-700">
                         Audit Trail & History
                       </h3>
                       <div className="space-y-4">
                         {selectedPrecedent.versions && selectedPrecedent.versions.length > 0 && (
                           <div>
-                            <span className="mb-1 block text-xs font-semibold text-zinc-500">
+                            <span className="mb-1 block text-xs font-semibold text-slate-500">
                               Version History
                             </span>
                             <div className="space-y-1.5">
                               {selectedPrecedent.versions.map((v, i) => (
                                 <div
                                   key={i}
-                                  className="flex justify-between rounded border border-zinc-200 bg-zinc-50/30 p-2 text-xs"
+                                  className="flex justify-between rounded border border-slate-200 bg-slate-50/30 p-2 text-xs"
                                 >
-                                  <span className="font-medium text-zinc-700">v{v.version}</span>
-                                  <span className="text-zinc-500">{v.summary}</span>
-                                  <span className="text-zinc-500">
+                                  <span className="font-medium text-slate-700">v{v.version}</span>
+                                  <span className="text-slate-500">{v.summary}</span>
+                                  <span className="text-slate-500">
                                     {new Date(v.createdAt).toLocaleDateString()}
                                   </span>
                                 </div>
@@ -1861,16 +1760,16 @@ export default function WorkspacePage() {
                         {selectedPrecedent.auditMetadata &&
                           selectedPrecedent.auditMetadata.length > 0 && (
                             <div>
-                              <span className="mb-1 block text-xs font-semibold text-zinc-500">
+                              <span className="mb-1 block text-xs font-semibold text-slate-500">
                                 System Audit Logs
                               </span>
                               <div className="space-y-1.5">
                                 {selectedPrecedent.auditMetadata.map((log, i) => (
                                   <div
                                     key={i}
-                                    className="rounded border border-zinc-200 bg-zinc-50/20 p-2 text-[11px] text-zinc-500"
+                                    className="rounded border border-slate-200 bg-slate-50/20 p-2 text-[11px] text-slate-500"
                                   >
-                                    <span className="font-semibold text-zinc-700">
+                                    <span className="font-semibold text-slate-700">
                                       {log.action}
                                     </span>{" "}
                                     by {log.performedBy} on{" "}

@@ -42,12 +42,12 @@ export default function LineageExplorerPage() {
   return (
     <div className="flex min-h-full flex-col gap-6 bg-white p-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-zinc-900">
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-900">
             <GitBranch className="h-6 w-6 text-indigo-600" /> Lineage & Dependency Graph Explorer
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-slate-500">
             Multi-hop graph visualization of parts, suppliers, decisions, and failure modes
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function LineageExplorerPage() {
             value={recordId}
             onChange={(e) => setRecordId(e.target.value)}
             placeholder="Enter Record / Part / Assessment ID..."
-            className="w-64 rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-1.5 text-xs text-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="w-64 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
           <button
             type="submit"
@@ -72,7 +72,7 @@ export default function LineageExplorerPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center p-12 text-sm text-zinc-500">
+        <div className="flex items-center justify-center p-12 text-sm text-slate-500">
           Tracing dependency network...
         </div>
       ) : (

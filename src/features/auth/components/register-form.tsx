@@ -1,12 +1,13 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function RegisterForm() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("token") ?? "";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,19 +34,25 @@ export function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name || undefined, email, password }),
+        credentials: "include",
+        body: JSON.stringify({
+          name: name || undefined,
+          email,
+          password,
+          inviteToken: inviteToken || undefined,
+        }),
       });
 
       if (!res.ok) {
         const err = await res.json();
         setError(err.error || "Registration failed");
+        setIsPending(false);
         return;
       }
 
-      router.push("/login");
+      window.location.assign("/dashboard");
     } catch {
       setError("An unexpected error occurred");
-    } finally {
       setIsPending(false);
     }
   }

@@ -79,7 +79,7 @@ export default function PricingPage() {
           {TIERS.map((tier) => (
             <article
               key={tier.name}
-              className="flex flex-col rounded-lg border border-slate-200 bg-white p-6 shadow-xs"
+              className="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-xs transition-colors hover:border-slate-300"
             >
               <h2 className="text-lg font-semibold text-slate-900">{tier.name}</h2>
               <p className="mt-3 text-2xl font-bold text-slate-900">{tier.price}</p>

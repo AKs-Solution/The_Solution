@@ -9,7 +9,7 @@ interface Props {
 export function DecisionTreeViewer({ tree }: Props) {
   if (!tree) {
     return (
-      <div className="p-8 text-center text-xs text-zinc-500 italic">
+      <div className="p-8 text-center text-xs text-slate-500 italic">
         No decision tree data available for this reasoning session.
       </div>
     );
@@ -21,7 +21,7 @@ export function DecisionTreeViewer({ tree }: Props) {
         ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-300"
         : node.status === "FAILED"
           ? "border-rose-500/50 bg-rose-950/30 text-rose-300"
-          : "border-zinc-200 bg-white text-zinc-500";
+          : "border-slate-200 bg-white text-slate-500";
 
     return (
       <div key={node.id} className="space-y-3" style={{ marginLeft: `${depth * 20}px` }}>
@@ -34,12 +34,12 @@ export function DecisionTreeViewer({ tree }: Props) {
               {node.status}
             </span>
           </div>
-          <h5 className="text-xs font-bold text-zinc-900">{node.label}</h5>
-          <p className="text-[11px] leading-relaxed text-zinc-700">{node.details}</p>
+          <h5 className="text-xs font-bold text-slate-900">{node.label}</h5>
+          <p className="text-[11px] leading-relaxed text-slate-700">{node.details}</p>
         </div>
 
         {node.children && node.children.length > 0 && (
-          <div className="space-y-3 border-l-2 border-zinc-200 pl-3">
+          <div className="space-y-3 border-l-2 border-slate-200 pl-3">
             {node.children.map((child) => renderNode(child, depth + 1))}
           </div>
         )}
@@ -50,7 +50,7 @@ export function DecisionTreeViewer({ tree }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+        <h4 className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
           Hierarchical Engineering Decision Tree
         </h4>
         <span className="font-mono text-[11px] text-cyan-400">Interactive Tree View</span>

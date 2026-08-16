@@ -69,10 +69,10 @@ export default function ValidationTimelinePage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Validation Timeline</span>
+            <span className="font-medium text-slate-800">Validation Timeline</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -101,10 +101,10 @@ export default function ValidationTimelinePage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : milestones.length > 0 ? (
-              <div className="relative ml-4 flex flex-col gap-6 border-l border-zinc-200 pl-6">
+              <div className="relative ml-4 flex flex-col gap-6 border-l border-slate-200 pl-6">
                 {milestones.map((m) => {
                   const isActive = m.status === "ACTIVE";
                   const isCompleted = m.status === "COMPLETED";
@@ -118,12 +118,12 @@ export default function ValidationTimelinePage() {
                             ? "border-emerald-500 bg-emerald-500"
                             : isActive
                               ? "animate-pulse border-amber-500 bg-amber-500"
-                              : "border-zinc-300 bg-zinc-100"
+                              : "border-slate-300 bg-slate-100"
                         }`}
                       />
 
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h3 className="text-sm font-bold text-zinc-950">{m.stageName}</h3>
+                        <h3 className="text-sm font-bold text-slate-950">{m.stageName}</h3>
                         <Badge
                           variant={isCompleted ? "success" : isActive ? "warning" : "secondary"}
                         >
@@ -132,7 +132,7 @@ export default function ValidationTimelinePage() {
                       </div>
 
                       {m.precisionPercent !== null && (
-                        <div className="text-xs font-medium text-zinc-600">
+                        <div className="text-xs font-medium text-slate-600">
                           Algorithm Measured Precision:{" "}
                           <span className="font-bold text-indigo-600">
                             {Math.round(m.precisionPercent * 100)}%
@@ -141,7 +141,7 @@ export default function ValidationTimelinePage() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-4 text-[10px] text-zinc-500">
+                      <div className="flex items-center gap-4 text-[10px] text-slate-500">
                         <span>Target Start: {new Date(m.startDate).toLocaleDateString()}</span>
                         {m.signOffDate && (
                           <span>
@@ -151,7 +151,7 @@ export default function ValidationTimelinePage() {
                         )}
                       </div>
 
-                      <Divider className="mt-2 border-zinc-100" />
+                      <Divider className="mt-2 border-slate-100" />
                     </div>
                   );
                 })}
@@ -171,7 +171,7 @@ export default function ValidationTimelinePage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : conflicts.length > 0 ? (
               <div className="flex flex-col gap-4">
@@ -181,11 +181,11 @@ export default function ValidationTimelinePage() {
                   return (
                     <Card
                       key={c.id}
-                      className={`border ${isResolved ? "border-zinc-200" : "border-amber-200"}`}
+                      className={`border ${isResolved ? "border-slate-200" : "border-amber-200"}`}
                     >
                       <CardContent className="flex flex-col gap-3 p-5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold text-zinc-400 uppercase">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase">
                             Governance Log
                           </span>
                           <Badge variant={isResolved ? "success" : "warning"} size="sm">
@@ -193,11 +193,11 @@ export default function ValidationTimelinePage() {
                           </Badge>
                         </div>
 
-                        <div className="text-left text-xs leading-relaxed text-zinc-600">
+                        <div className="text-left text-xs leading-relaxed text-slate-600">
                           {c.description}
                         </div>
 
-                        <Divider className="border-zinc-100" />
+                        <Divider className="border-slate-100" />
 
                         {isResolved ? (
                           <div className="flex flex-col gap-2 text-left text-xs">
@@ -205,13 +205,13 @@ export default function ValidationTimelinePage() {
                               <UserCheck className="size-4" />
                               <span>Resolved by {c.resolvedBy}</span>
                             </div>
-                            <p className="rounded border border-zinc-100 bg-zinc-50 p-2.5 text-[10px] leading-normal text-zinc-500">
+                            <p className="rounded border border-slate-100 bg-slate-50 p-2.5 text-[10px] leading-normal text-slate-500">
                               Resolution notes: {c.resolutionNotes}
                             </p>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-3 text-left">
-                            <span className="text-xs font-semibold text-zinc-800">
+                            <span className="text-xs font-semibold text-slate-800">
                               Submit Resolution Sign-off
                             </span>
                             <Input
@@ -223,7 +223,7 @@ export default function ValidationTimelinePage() {
                             <textarea
                               value={resolutionNotes}
                               onChange={(e) => setResolutionNotes(e.target.value)}
-                              className="bg-background flex h-16 w-full rounded-md border border-zinc-200 px-3 py-2 text-xs focus-visible:outline-none"
+                              className="bg-background flex h-16 w-full rounded-md border border-slate-200 px-3 py-2 text-xs focus-visible:outline-none"
                               placeholder="Describe engineering reconciliation notes..."
                             />
                             <Button
@@ -242,7 +242,7 @@ export default function ValidationTimelinePage() {
                 })}
               </div>
             ) : (
-              <div className="text-center text-xs text-zinc-500">
+              <div className="text-center text-xs text-slate-500">
                 No conflicts currently logged.
               </div>
             )}

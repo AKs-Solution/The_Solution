@@ -269,7 +269,7 @@ export default function PrecedentEnginePage() {
           </div>
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="flex items-center gap-2 self-start rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 md:self-auto"
+            className="flex items-center gap-2 self-start rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 md:self-auto"
           >
             <Plus className="size-4" />
             <span>Record Precedent</span>
@@ -299,13 +299,17 @@ export default function PrecedentEnginePage() {
           />
           <MetricCard
             label="Avg Assessment Confidence"
-            value={`${((precedents.reduce((acc, curr) => acc + curr.confidence, 0) / (precedents.length || 1)) * 100).toFixed(1)}%`}
+            value={
+              precedents.length
+                ? `${((precedents.reduce((acc, curr) => acc + curr.confidence, 0) / precedents.length) * 100).toFixed(1)}%`
+                : "—"
+            }
             icon={<ShieldCheck className="size-5 text-amber-500" />}
           />
         </GridLayout>
 
         {/* Dynamic Verification Hub (Interactive Reasoner) */}
-        <div className="border-border rounded-xl border bg-zinc-50/50 p-6 shadow-sm">
+        <div className="border-border rounded-xl border bg-slate-50/50 p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Sparkles className="size-4 text-amber-500" />
             <h3 className="text-foreground text-base font-bold tracking-tight">
@@ -335,7 +339,7 @@ export default function PrecedentEnginePage() {
             <Button
               type="submit"
               disabled={isVerifying || !verifySystem.trim()}
-              className="animate-pulse bg-amber-500 px-5 font-semibold text-zinc-950 hover:bg-amber-600"
+              className="bg-blue-600 px-5 font-semibold text-white hover:bg-blue-700"
             >
               {isVerifying ? "Verifying..." : "Run Assessment"}
             </Button>
@@ -468,9 +472,15 @@ export default function PrecedentEnginePage() {
                 onRowClick={(prec) => setSelectedPrecedent(prec)}
                 emptyState={
                   <EmptyState
-                    icon={<History className="text-muted-foreground size-10" />}
-                    title="No matched precedents"
-                    description="Refine your search parameters or submit a new custom precedent record."
+                    icon={<History className="size-10 text-slate-400" />}
+                    title="No precedents yet"
+                    description="This workspace has no historical records. Start here by recording a precedent from a completed decision."
+                    action={
+                      <Button onClick={() => setIsFormOpen(true)}>
+                        <Plus className="mr-1.5 size-3.5" />
+                        Record first precedent
+                      </Button>
+                    }
                   />
                 }
                 columns={[
@@ -577,7 +587,7 @@ export default function PrecedentEnginePage() {
                               ? "text-green-600"
                               : outcomeStatus === "MITIGATED"
                                 ? "text-amber-600"
-                                : "text-zinc-600",
+                                : "text-slate-600",
                           )}
                         >
                           <span
@@ -587,7 +597,7 @@ export default function PrecedentEnginePage() {
                                 ? "bg-green-500"
                                 : outcomeStatus === "MITIGATED"
                                   ? "bg-amber-500"
-                                  : "bg-zinc-500",
+                                  : "bg-slate-500",
                             )}
                           />
                           {outcomeStatus}
@@ -682,7 +692,7 @@ export default function PrecedentEnginePage() {
                         DETERMINISTIC STRENGTH RATINGS
                       </span>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border bg-zinc-50/50 p-2.5">
+                        <div className="rounded-lg border bg-slate-50/50 p-2.5">
                           <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                             <ShieldCheck className="size-3.5 text-amber-500" />
                             <span>CONFIDENCE</span>
@@ -691,7 +701,7 @@ export default function PrecedentEnginePage() {
                             {(selectedPrecedent.confidence * 100).toFixed(0)}%
                           </span>
                         </div>
-                        <div className="rounded-lg border bg-zinc-50/50 p-2.5">
+                        <div className="rounded-lg border bg-slate-50/50 p-2.5">
                           <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[10px] font-medium">
                             <ShieldCheck className="size-3.5 text-blue-500" />
                             <span>EVIDENCE RATIO</span>
@@ -753,7 +763,7 @@ export default function PrecedentEnginePage() {
                         <span className="text-muted-foreground mb-1 block font-mono text-[10px] font-bold tracking-wider uppercase">
                           RULE ENGINE COMPLIANCE CHECKS
                         </span>
-                        <div className="rounded-lg border border-dashed bg-zinc-50/20 p-2.5">
+                        <div className="rounded-lg border border-dashed bg-slate-50/20 p-2.5">
                           <ul className="space-y-1.5">
                             {(selectedPrecedent.relatedStandards || []).map((re, i) => (
                               <li
@@ -779,7 +789,7 @@ export default function PrecedentEnginePage() {
                           {(selectedPrecedent.relatedDocuments || []).map((doc) => (
                             <div
                               key={doc}
-                              className="text-foreground flex items-center gap-2 rounded border bg-zinc-50 px-2.5 py-1.5 text-xs"
+                              className="text-foreground flex items-center gap-2 rounded border bg-slate-50 px-2.5 py-1.5 text-xs"
                             >
                               <FileText className="size-3.5 text-blue-500" />
                               <span className="truncate font-medium">{doc}</span>
@@ -869,7 +879,7 @@ export default function PrecedentEnginePage() {
                     placeholder="e.g. Flight 22 Actuator O-Ring Thermal Shrinkage"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
 
@@ -882,7 +892,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value as PrecedentType })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                   >
                     <option value="FAILURE">Failure / Incident Mode</option>
                     <option value="SUCCESSFUL_DESIGN">Successful Design Baseline</option>
@@ -903,7 +913,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, applicableSystemsStr: e.target.value })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
               </div>
@@ -918,7 +928,7 @@ export default function PrecedentEnginePage() {
                   placeholder="Provide a detailed abstract of the engineering precedent."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                  className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                 />
               </div>
 
@@ -933,7 +943,7 @@ export default function PrecedentEnginePage() {
                       placeholder="e.g. Material embrittlement under extreme low temps..."
                       value={formData.rootCause}
                       onChange={(e) => setFormData({ ...formData, rootCause: e.target.value })}
-                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                      className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                     />
                   </div>
 
@@ -948,7 +958,7 @@ export default function PrecedentEnginePage() {
                       onChange={(e) =>
                         setFormData({ ...formData, correctiveAction: e.target.value })
                       }
-                      className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                      className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                     />
                   </div>
                 </div>
@@ -962,7 +972,7 @@ export default function PrecedentEnginePage() {
                   <select
                     value={formData.resolutionStatus}
                     onChange={(e) => setFormData({ ...formData, resolutionStatus: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                   >
                     <option value="RESOLVED">Resolved</option>
                     <option value="MITIGATED">Mitigated</option>
@@ -983,7 +993,7 @@ export default function PrecedentEnginePage() {
                     onChange={(e) =>
                       setFormData({ ...formData, confidenceScore: parseFloat(e.target.value) })
                     }
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 font-mono text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 font-mono text-sm outline-none"
                   />
                 </div>
 
@@ -996,7 +1006,7 @@ export default function PrecedentEnginePage() {
                     placeholder="e.g. NASA-STD-5001"
                     value={formData.standardsStr}
                     onChange={(e) => setFormData({ ...formData, standardsStr: e.target.value })}
-                    className="border-border text-foreground w-full rounded-lg border bg-zinc-50 px-3 py-2 text-sm outline-none"
+                    className="border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none"
                   />
                 </div>
               </div>
@@ -1005,7 +1015,7 @@ export default function PrecedentEnginePage() {
                 <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-zinc-900 px-5 text-white">
+                <Button type="submit" className="bg-slate-900 px-5 text-white">
                   Confirm & Write
                 </Button>
               </div>

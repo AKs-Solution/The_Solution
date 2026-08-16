@@ -88,11 +88,18 @@ export function SupplierList({
       ) : suppliers.length === 0 ? (
         <EmptyState
           icon={<Building2 className="size-8" />}
-          title="No suppliers found"
+          title={searchQuery ? "No suppliers match this search" : "No suppliers yet"}
           description={
             searchQuery
-              ? "Try adjusting your search query."
-              : "Add your first supplier to get started."
+              ? "Try a different name, code, or identifier."
+              : "This workspace has no suppliers. Start here by adding the first one."
+          }
+          action={
+            searchQuery ? undefined : (
+              <Link href="/suppliers/new">
+                <Button>Add first supplier</Button>
+              </Link>
+            )
           }
         />
       ) : (
@@ -166,13 +173,13 @@ export function SupplierList({
                   <TableCell>
                     {supplier.liveCapacityScore !== undefined ? (
                       <div className="flex w-24 flex-col gap-1">
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                           <div
                             className="h-full rounded-full bg-indigo-500"
                             style={{ width: `${Math.round(supplier.liveCapacityScore * 100)}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-medium text-zinc-500">
+                        <span className="text-[10px] font-medium text-slate-500">
                           {Math.round(supplier.liveCapacityScore * 100)}% Available
                         </span>
                       </div>

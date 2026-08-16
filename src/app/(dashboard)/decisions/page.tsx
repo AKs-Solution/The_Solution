@@ -74,10 +74,11 @@ export default function DecisionAuditTrailPage() {
         <EmptyState
           icon={<FileText className="size-5" />}
           title="No decisions yet"
-          description="Propose a decision to start the audit trail for this workspace."
+          description="This workspace has an empty audit trail. Start here by proposing a decision."
           action={
             <Button as="a" href="/decisions/new" className={PAGE_PRIMARY_ACTION_CLASS}>
-              + Create First Record
+              <Plus className="mr-1.5 size-3.5" />
+              Propose first decision
             </Button>
           }
         />
@@ -119,7 +120,7 @@ export default function DecisionAuditTrailPage() {
                           href: `/decisions/${d.id}`,
                         })
                       }
-                      className="text-sm font-medium text-zinc-900 no-underline hover:underline"
+                      className="text-sm font-medium text-slate-900 no-underline hover:underline"
                     >
                       View details
                     </Link>

@@ -63,12 +63,12 @@ export function EngineeringCopilotChat({ onSendQuery }: EngineeringCopilotChatPr
   };
 
   return (
-    <div className="flex h-[600px] w-full flex-col rounded-xl border border-zinc-200 bg-white font-sans text-zinc-900 shadow-2xl">
+    <div className="flex h-[600px] w-full flex-col rounded-xl border border-slate-200 bg-white font-sans text-slate-900 shadow-2xl">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 p-4">
+      <div className="flex shrink-0 items-center justify-between border-b border-slate-200 p-4">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-indigo-400" />
-          <h2 className="text-sm font-bold text-zinc-900">Engineering Copilot</h2>
+          <h2 className="text-sm font-bold text-slate-900">Engineering Copilot</h2>
           <span className="flex items-center gap-1 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-400">
             <Sparkles className="h-3 w-3" /> Evidence-Backed
           </span>
@@ -86,20 +86,20 @@ export function EngineeringCopilotChat({ onSendQuery }: EngineeringCopilotChatPr
               className={`max-w-[85%] space-y-3 rounded-xl p-4 text-xs leading-relaxed ${
                 m.sender === "USER"
                   ? "rounded-br-none bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                  : "rounded-bl-none border border-zinc-200 bg-zinc-100 text-zinc-900 shadow-md"
+                  : "rounded-bl-none border border-slate-200 bg-slate-100 text-slate-900 shadow-md"
               }`}
             >
               <p>{m.content}</p>
 
               {m.copilotData && (
-                <div className="space-y-2 border-t border-zinc-200 pt-3">
-                  <div className="flex items-center justify-between font-mono text-[11px] text-zinc-500">
+                <div className="space-y-2 border-t border-slate-200 pt-3">
+                  <div className="flex items-center justify-between font-mono text-[11px] text-slate-500">
                     <span>Confidence: {Math.round(m.copilotData.confidenceScore * 100)}%</span>
                   </div>
 
                   {m.copilotData.evidenceHashes.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1 rounded border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[10px] text-emerald-400">
+                      <span className="flex items-center gap-1 rounded border border-slate-200 bg-white px-2 py-0.5 font-mono text-[10px] text-emerald-400">
                         <Hash className="h-3 w-3" /> {m.copilotData.evidenceHashes[0].slice(0, 16)}
                         ...
                       </span>
@@ -107,11 +107,11 @@ export function EngineeringCopilotChat({ onSendQuery }: EngineeringCopilotChatPr
                   )}
 
                   {m.copilotData.reasoningChain.length > 0 && (
-                    <div className="space-y-1 rounded-lg border border-zinc-200 bg-white p-2.5">
-                      <div className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">
+                    <div className="space-y-1 rounded-lg border border-slate-200 bg-white p-2.5">
+                      <div className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
                         <FileCode className="h-3 w-3 text-indigo-400" /> Reasoning Chain:
                       </div>
-                      <ul className="space-y-0.5 font-mono text-[11px] text-zinc-700">
+                      <ul className="space-y-0.5 font-mono text-[11px] text-slate-700">
                         {m.copilotData.reasoningChain.map((step, idx) => (
                           <li key={idx}>{step}</li>
                         ))}
@@ -121,7 +121,7 @@ export function EngineeringCopilotChat({ onSendQuery }: EngineeringCopilotChatPr
                 </div>
               )}
             </div>
-            <span className="mt-1 px-1 text-[10px] text-zinc-500">{m.timestamp}</span>
+            <span className="mt-1 px-1 text-[10px] text-slate-500">{m.timestamp}</span>
           </div>
         ))}
       </div>
@@ -129,14 +129,14 @@ export function EngineeringCopilotChat({ onSendQuery }: EngineeringCopilotChatPr
       {/* Input Form */}
       <form
         onSubmit={handleSubmit}
-        className="flex shrink-0 items-center gap-2 border-t border-zinc-200 p-4"
+        className="flex shrink-0 items-center gap-2 border-t border-slate-200 p-4"
       >
         <input
           type="text"
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
           placeholder="Ask Copilot about material selection, failure precedents, boundary limits..."
-          className="flex-1 rounded-xl border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-xs text-zinc-900 placeholder-zinc-500 transition-all focus:border-indigo-500 focus:outline-none"
+          className="flex-1 rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-500 transition-all focus:border-indigo-500 focus:outline-none"
         />
         <button
           type="submit"

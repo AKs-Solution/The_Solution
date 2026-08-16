@@ -40,10 +40,14 @@ export interface SidebarNavGroup {
 export type SidebarNavEntry = SidebarNavGroup | SidebarNavItem;
 
 function isGroup(entry: SidebarNavEntry): entry is SidebarNavGroup {
-  return (entry as SidebarNavGroup).items !== undefined;
+  return "items" in entry && Array.isArray(entry.items);
 }
 
-export { isGroup };
+function isNavItem(entry: SidebarNavEntry): entry is SidebarNavItem {
+  return !isGroup(entry);
+}
+
+export { isGroup, isNavItem };
 
 export const SIDEBAR_NAV: SidebarNavEntry[] = [
   { label: "Mission Console", href: ROUTES.dashboard, icon: "LayoutDashboard", shortcut: "1" },

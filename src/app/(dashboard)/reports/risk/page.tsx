@@ -72,12 +72,12 @@ export default function RiskPage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
             <span>Reports</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Risk</span>
+            <span className="font-medium text-slate-800">Risk</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export default function RiskPage() {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <RefreshCw className="size-6 animate-spin text-zinc-400" />
+              <RefreshCw className="size-6 animate-spin text-slate-400" />
             </div>
           ) : risks.length > 0 ? (
             <div className="flex flex-col gap-4">
@@ -126,20 +126,20 @@ export default function RiskPage() {
                         ? "border-emerald-200 bg-emerald-50/5"
                         : isHighRisk
                           ? "border-red-200 bg-red-50/5"
-                          : "border-zinc-200 bg-zinc-50/10"
+                          : "border-slate-200 bg-slate-50/10"
                     }`}
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex flex-col">
-                        <h3 className="text-sm font-bold text-zinc-900">{r.programName}</h3>
-                        <span className="text-[10px] text-zinc-400">
+                        <h3 className="text-sm font-bold text-slate-900">{r.programName}</h3>
+                        <span className="text-[10px] text-slate-400">
                           Simulation Run: {new Date(r.simulatedAt).toLocaleString()}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <span className="block text-[10px] font-semibold text-zinc-400 uppercase">
+                          <span className="block text-[10px] font-semibold text-slate-400 uppercase">
                             Delay Risk Score
                           </span>
                           <span
@@ -165,41 +165,41 @@ export default function RiskPage() {
                       </div>
                     </div>
 
-                    <Divider className="border-zinc-100" />
+                    <Divider className="border-slate-100" />
 
                     <div className="grid grid-cols-1 gap-4 text-xs md:grid-cols-3">
-                      <div className="rounded border border-zinc-100 bg-zinc-50 p-4">
-                        <span className="mb-1 block text-zinc-400">Identified Bottleneck</span>
-                        <span className="block font-bold text-zinc-800">
+                      <div className="rounded border border-slate-100 bg-slate-50 p-4">
+                        <span className="mb-1 block text-slate-400">Identified Bottleneck</span>
+                        <span className="block font-bold text-slate-800">
                           {r.bottlenecks?.supplierName}
                         </span>
-                        <span className="mt-1 block text-[10px] text-zinc-500">
+                        <span className="mt-1 block text-[10px] text-slate-500">
                           {r.bottlenecks?.cause}
                         </span>
                       </div>
 
-                      <div className="flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4">
+                      <div className="flex flex-col justify-between rounded border border-slate-100 bg-slate-50 p-4">
                         <div>
-                          <span className="block text-zinc-400">Delay Probability</span>
-                          <span className="mt-1 block text-lg font-bold text-zinc-800">
+                          <span className="block text-slate-400">Delay Probability</span>
+                          <span className="mt-1 block text-lg font-bold text-slate-800">
                             {Math.round(r.delayProbability * 100)}%
                           </span>
                         </div>
-                        <span className="text-[10px] text-zinc-400">
+                        <span className="text-[10px] text-slate-400">
                           Calculated over 10,000 supply runs
                         </span>
                       </div>
 
-                      <div className="flex flex-col justify-between rounded border border-zinc-100 bg-zinc-50 p-4">
+                      <div className="flex flex-col justify-between rounded border border-slate-100 bg-slate-50 p-4">
                         <div>
-                          <span className="block text-zinc-400">Est Schedule Impact</span>
+                          <span className="block text-slate-400">Est Schedule Impact</span>
                           <span
-                            className={`mt-1 block text-lg font-bold ${r.bottlenecks?.leadTimeDelayDays > 10 ? "text-red-600" : "text-zinc-800"}`}
+                            className={`mt-1 block text-lg font-bold ${r.bottlenecks?.leadTimeDelayDays > 10 ? "text-red-600" : "text-slate-800"}`}
                           >
                             +{r.bottlenecks?.leadTimeDelayDays} Days
                           </span>
                         </div>
-                        <span className="text-[10px] text-zinc-400">
+                        <span className="text-[10px] text-slate-400">
                           Critical path delay estimate
                         </span>
                       </div>

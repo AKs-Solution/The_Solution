@@ -84,10 +84,11 @@ export default function DrawingsDashboardPage() {
         <EmptyState
           icon={<Layers className="size-5" />}
           title="No drawings yet"
-          description="Create a project to start comparing revisions."
+          description="This workspace has no drawing projects. Start here by creating a project and comparing revisions."
           action={
             <Button as="a" href="/drawings/new" className={PAGE_PRIMARY_ACTION_CLASS}>
-              + Create First Record
+              <Plus className="mr-1.5 size-3.5" />
+              Upload first drawing
             </Button>
           }
         />
@@ -130,7 +131,7 @@ export default function DrawingsDashboardPage() {
                           href,
                         })
                       }
-                      className="text-sm font-medium text-zinc-900 no-underline hover:underline"
+                      className="text-sm font-medium text-slate-900 no-underline hover:underline"
                     >
                       View details
                     </Link>

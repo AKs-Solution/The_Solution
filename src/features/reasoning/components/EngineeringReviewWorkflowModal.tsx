@@ -45,10 +45,13 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg space-y-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-          <h3 className="text-base font-bold text-zinc-900">Engineering Review Board Sign-Off</h3>
-          <button onClick={onClose} className="font-mono text-sm text-zinc-500 hover:text-zinc-900">
+      <div className="w-full max-w-lg space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <h3 className="text-base font-bold text-slate-900">Engineering Review Board Sign-Off</h3>
+          <button
+            onClick={onClose}
+            className="font-mono text-sm text-slate-500 hover:text-slate-900"
+          >
             [X]
           </button>
         </div>
@@ -61,7 +64,7 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="mb-1.5 block font-semibold text-zinc-700">Review Decision</label>
+            <label className="mb-1.5 block font-semibold text-slate-700">Review Decision</label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
@@ -69,7 +72,7 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
                 className={`rounded-lg border px-3 py-2 font-semibold transition ${
                   status === "APPROVED"
                     ? "border-emerald-500 bg-emerald-950/80 text-emerald-300"
-                    : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
+                    : "border-slate-200 bg-white text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Approve
@@ -80,7 +83,7 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
                 className={`rounded-lg border px-3 py-2 font-semibold transition ${
                   status === "CHALLENGED"
                     ? "border-amber-500 bg-amber-950/80 text-amber-300"
-                    : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
+                    : "border-slate-200 bg-white text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Challenge
@@ -91,7 +94,7 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
                 className={`rounded-lg border px-3 py-2 font-semibold transition ${
                   status === "REJECTED"
                     ? "border-rose-500 bg-rose-950/80 text-rose-300"
-                    : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
+                    : "border-slate-200 bg-white text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Reject
@@ -100,7 +103,7 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
           </div>
 
           <div>
-            <label className="mb-1.5 block font-semibold text-zinc-700">
+            <label className="mb-1.5 block font-semibold text-slate-700">
               Review Rationale &amp; Comments
             </label>
             <textarea
@@ -109,15 +112,15 @@ export function EngineeringReviewWorkflowModal({ sessionId, isOpen, onClose, onS
               placeholder="Provide engineering rationale, challenge details, or additional test requirements..."
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              className="w-full rounded-lg border border-zinc-200 bg-white p-3 text-xs text-zinc-900 placeholder-slate-600 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-900 placeholder-slate-600 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-zinc-200 pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg bg-zinc-100 px-4 py-2 font-medium text-zinc-700 transition hover:bg-zinc-100"
+              className="rounded-lg bg-slate-100 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
             >
               Cancel
             </button>

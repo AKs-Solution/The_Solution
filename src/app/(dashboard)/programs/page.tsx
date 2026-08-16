@@ -47,14 +47,14 @@ export default function ProgramHealthDashboard() {
           <div className="flex flex-col gap-1 text-left">
             <div className="flex items-center gap-2">
               <Activity className="size-6 text-rose-500" />
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 Program Health & Risk Aggregation
               </h1>
               <Badge className="border-rose-500/20 bg-rose-500/10 text-[9px] text-rose-600">
                 LIVE TELEMETRY
               </Badge>
             </div>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-slate-500">
               Real-time engineering risk drivers, budget vs actuals, and schedule performance across
               active programs.
             </p>
@@ -64,7 +64,7 @@ export default function ProgramHealthDashboard() {
             onClick={fetchPrograms}
             variant="secondary"
             size="sm"
-            className="border-zinc-200 bg-zinc-100 hover:bg-zinc-100"
+            className="border-slate-200 bg-slate-100 hover:bg-slate-100"
           >
             <RefreshCw className="mr-2 size-3.5 animate-spin" /> Refresh Health Metrics
           </Button>
@@ -72,57 +72,57 @@ export default function ProgramHealthDashboard() {
 
         {/* OVERALL HEALTH SUMMARY MATRIX */}
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-4">
-          <Card className="border-zinc-200 bg-zinc-100">
+          <Card className="border-slate-200 bg-slate-100">
             <CardContent className="flex flex-col gap-1 p-5">
-              <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+              <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                 Overall Fleet Health
               </span>
               <span className="text-3xl font-extrabold text-emerald-600">78% Nominal</span>
               <span className="mt-1 text-[10px] text-emerald-500">↑ +5% vs previous quarter</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-200 bg-zinc-100">
+          <Card className="border-slate-200 bg-slate-100">
             <CardContent className="flex flex-col gap-1 p-5">
-              <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+              <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                 Budget Variance
               </span>
-              <span className="text-3xl font-extrabold text-zinc-900">97% Budgeted</span>
+              <span className="text-3xl font-extrabold text-slate-900">97% Budgeted</span>
               <span className="mt-1 text-[10px] text-indigo-600">+$5M favorable variance</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-200 bg-zinc-100">
+          <Card className="border-slate-200 bg-slate-100">
             <CardContent className="flex flex-col gap-1 p-5">
-              <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+              <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                 Schedule Slip Risk
               </span>
               <span className="text-3xl font-extrabold text-amber-600">1.8 Weeks</span>
               <span className="mt-1 text-[10px] text-amber-500">Material sub on critical path</span>
             </CardContent>
           </Card>
-          <Card className="border-zinc-200 bg-zinc-100">
+          <Card className="border-slate-200 bg-slate-100">
             <CardContent className="flex flex-col gap-1 p-5">
-              <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+              <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
                 NCR Quality Rate
               </span>
               <span className="text-3xl font-extrabold text-indigo-600">1.8% Scrap</span>
-              <span className="mt-1 text-[10px] text-zinc-500">Ahead of 2.5% target limit</span>
+              <span className="mt-1 text-[10px] text-slate-500">Ahead of 2.5% target limit</span>
             </CardContent>
           </Card>
         </div>
 
         {/* PROGRAM MATRIX LIST */}
         <div className="flex flex-col gap-6 text-left">
-          <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
             Active Aircraft Programs
           </span>
 
           {isLoading ? (
             <div className="flex justify-center py-20">
-              <RefreshCw className="size-6 animate-spin text-zinc-500" />
+              <RefreshCw className="size-6 animate-spin text-slate-500" />
             </div>
           ) : programs.length === 0 ? (
             /* DEFAULT SAMPLE PROGRAM VIEW WHEN DB EMPTY */
-            <Card className="border-zinc-200 bg-zinc-100 p-6">
+            <Card className="border-slate-200 bg-slate-100 p-6">
               <CardContent className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -130,8 +130,8 @@ export default function ProgramHealthDashboard() {
                       <Layers className="size-6" />
                     </div>
                     <div className="flex flex-col">
-                      <h2 className="text-lg font-bold text-zinc-900">Boeing 787-MAX Program</h2>
-                      <span className="text-xs text-zinc-500">
+                      <h2 className="text-lg font-bold text-slate-900">Boeing 787-MAX Program</h2>
+                      <span className="text-xs text-slate-500">
                         Aircraft: B787 · Target Schedule: 18 Months
                       </span>
                     </div>
@@ -141,34 +141,34 @@ export default function ProgramHealthDashboard() {
                   </Badge>
                 </div>
 
-                <Divider className="border-zinc-200" />
+                <Divider className="border-slate-200" />
 
                 <div className="grid grid-cols-1 gap-6 text-xs md:grid-cols-3">
-                  <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <span className="flex items-center gap-1.5 font-bold text-zinc-600">
+                  <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <span className="flex items-center gap-1.5 font-bold text-slate-600">
                       <DollarSign className="size-4 text-emerald-600" /> COST STATUS
                     </span>
-                    <p className="text-zinc-500">Budget: $500M | Actual: $487M (97%)</p>
+                    <p className="text-slate-500">Budget: $500M | Actual: $487M (97%)</p>
                     <p className="font-semibold text-emerald-600">
                       Trend: Favorable (+$5M vs last month)
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <span className="flex items-center gap-1.5 font-bold text-zinc-600">
+                  <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <span className="flex items-center gap-1.5 font-bold text-slate-600">
                       <Calendar className="size-4 text-amber-600" /> SCHEDULE STATUS
                     </span>
-                    <p className="text-zinc-500">Plan: 18 months | Actual: 17.2 months</p>
+                    <p className="text-slate-500">Plan: 18 months | Actual: 17.2 months</p>
                     <p className="font-semibold text-amber-600">
                       Critical path: Material sub risk (+2 wks)
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <span className="flex items-center gap-1.5 font-bold text-zinc-600">
+                  <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <span className="flex items-center gap-1.5 font-bold text-slate-600">
                       <CheckCircle2 className="size-4 text-indigo-600" /> QUALITY STATUS
                     </span>
-                    <p className="text-zinc-500">NCRs: 23 (Target: 30) | Scrap: 1.8%</p>
+                    <p className="text-slate-500">NCRs: 23 (Target: 30) | Scrap: 1.8%</p>
                     <p className="font-semibold text-indigo-600">
                       Bore tolerance: 3 NCRs (all reworked)
                     </p>
@@ -179,7 +179,7 @@ export default function ProgramHealthDashboard() {
                   <span className="flex items-center gap-1.5 font-bold text-rose-600">
                     <AlertTriangle className="size-4" /> PREDICTIVE RISK ALERTS
                   </span>
-                  <ul className="flex list-inside list-disc flex-col gap-1 text-zinc-600">
+                  <ul className="flex list-inside list-disc flex-col gap-1 text-slate-600">
                     <li>
                       Material substitution on fuselage will likely delay schedule by 1-2 weeks
                       (Historical precedent: 5 changes, avg 1.3w delay).
@@ -194,13 +194,13 @@ export default function ProgramHealthDashboard() {
             </Card>
           ) : (
             programs.map((p) => (
-              <Card key={p.id} className="border-zinc-200 bg-zinc-100 p-6">
+              <Card key={p.id} className="border-slate-200 bg-slate-100 p-6">
                 <CardContent className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-zinc-900">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-slate-900">{p.name}</h3>
                     <Badge variant="secondary">{p.aircraft}</Badge>
                   </div>
-                  <p className="text-xs text-zinc-500">Health Score: {p.healthScore}%</p>
+                  <p className="text-xs text-slate-500">Health Score: {p.healthScore}%</p>
                 </CardContent>
               </Card>
             ))

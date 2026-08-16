@@ -10,12 +10,12 @@ interface Props {
 export function ReasoningChainViewer({ steps }: Props) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-900">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
           <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400"></span>
           14-Stage Reasoning Pipeline Execution
         </h3>
-        <span className="font-mono text-xs text-zinc-500">
+        <span className="font-mono text-xs text-slate-500">
           {steps.filter((s) => s.status === "COMPLETED").length} / {steps.length || 14} Stages
           Complete
         </span>
@@ -34,11 +34,11 @@ export function ReasoningChainViewer({ steps }: Props) {
                   ? "border-cyan-500/30 bg-white shadow-lg shadow-cyan-950/20 hover:border-cyan-500/60"
                   : isFailed
                     ? "border-rose-500/40 bg-rose-950/40"
-                    : "border-zinc-200 bg-white"
+                    : "border-slate-200 bg-white"
               }`}
             >
               <div className="mb-2 flex items-center justify-between">
-                <span className="rounded-md border border-cyan-500/20 bg-zinc-100 px-2 py-0.5 font-mono text-xs text-cyan-400">
+                <span className="rounded-md border border-cyan-500/20 bg-slate-100 px-2 py-0.5 font-mono text-xs text-cyan-400">
                   Stage {step.stageIndex}
                 </span>
                 <span
@@ -54,12 +54,12 @@ export function ReasoningChainViewer({ steps }: Props) {
                 </span>
               </div>
 
-              <h4 className="text-sm font-semibold tracking-wide text-zinc-900 capitalize">
+              <h4 className="text-sm font-semibold tracking-wide text-slate-900 capitalize">
                 {step.stageName.replace(/_/g, " ")}
               </h4>
 
               {step.durationMs !== undefined && (
-                <div className="mt-3 flex items-center justify-between font-mono text-xs text-zinc-500">
+                <div className="mt-3 flex items-center justify-between font-mono text-xs text-slate-500">
                   <span>Execution Time</span>
                   <span>{step.durationMs} ms</span>
                 </div>

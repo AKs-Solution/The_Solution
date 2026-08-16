@@ -343,7 +343,7 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                         className={`group flex w-full flex-col gap-2 rounded-lg border p-3.5 text-left transition-all ${
                           isSelected
                             ? "border-amber-500/30 bg-amber-500/5 ring-1 ring-amber-500/20"
-                            : "bg-background border-border hover:bg-zinc-50/50"
+                            : "bg-background border-border hover:bg-slate-50/50"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -390,7 +390,7 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                                 ? "text-green-600"
                                 : prec.resolutionStatus === "MITIGATED"
                                   ? "text-amber-600"
-                                  : "text-zinc-500"
+                                  : "text-slate-500"
                             }`}
                           >
                             <span
@@ -399,7 +399,7 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
                                   ? "bg-green-500"
                                   : prec.resolutionStatus === "MITIGATED"
                                     ? "bg-amber-500"
-                                    : "bg-zinc-500"
+                                    : "bg-slate-500"
                               }`}
                             />
                             {prec.resolutionStatus}
@@ -416,7 +416,7 @@ export function EntityDetail({ entityId, onEdit, onDelete }: EntityDetailProps) 
               </div>
 
               {/* Right Column: Precedent Details & Rich Explainability */}
-              <div className="rounded-xl border bg-zinc-50/20 p-5 lg:col-span-7">
+              <div className="rounded-xl border bg-slate-50/20 p-5 lg:col-span-7">
                 {(() => {
                   const prec = relatedPrecedents.find((p) => p.id === selectedPrecId);
                   if (!prec) return null;

@@ -18,43 +18,7 @@ import { Card, CardContent, Button, Input, Textarea, Badge } from "@/components/
 import { EpistemicBadge, type EpistemicStatus } from "@/components/ui/epistemic-badge";
 import { cn } from "@/shared/utils";
 
-interface HelpTopic {
-  title: string;
-  category: string;
-  summary: string;
-  keywords: string[];
-}
-
-const QUICK_START_GUIDES: HelpTopic[] = [
-  {
-    title: "Ingesting CAD & Drawings",
-    category: "Quick-Start Guide",
-    summary:
-      "Upload engineering drawings from the Drawings workspace. The ingestion pipeline parses CAD revisions, detects changes, and wires them into the knowledge graph for comparison and rule enforcement.",
-    keywords: ["cad", "drawing", "upload", "ingest", "revision", "comparison"],
-  },
-  {
-    title: "Running Sentinel Surveillance",
-    category: "Quick-Start Guide",
-    summary:
-      "Open the Decision Sentinel workspace to monitor active engineering decisions against expectations. Deviation detection compares observed telemetry against modeled bounds and raises alerts in real time.",
-    keywords: ["sentinel", "surveillance", "monitor", "telemetry", "alert", "deviation"],
-  },
-  {
-    title: "Minting Cryptographic Proofs (AS9100 / FAR Part 25)",
-    category: "Quick-Start Guide",
-    summary:
-      "Evidence and audit records are hashed with SHA-256 and stored as tamper-evident proofs. Use the Compliance Dossier to generate certification packages and the Audit Log to verify every record's integrity chain.",
-    keywords: ["proof", "sha256", "as9100", "far", "compliance", "certification", "audit", "hash"],
-  },
-  {
-    title: "Understanding Epistemic Status Badges",
-    category: "Quick-Start Guide",
-    summary:
-      "Every claim in the platform carries an epistemic badge describing how strongly it is grounded: RECORDED (direct measurement), DERIVED (computed), INFERRED (reasoned), or GAP (unsupported). See the glossary below.",
-    keywords: ["epistemic", "badge", "recorded", "derived", "inferred", "gap", "confidence"],
-  },
-];
+import { searchHelpTopics } from "@/features/help";
 
 const GLOSSARY: { term: string; status: EpistemicStatus; definition: string }[] = [
   {
@@ -124,13 +88,7 @@ export default function HelpPage() {
     };
   }, []);
 
-  const filteredGuides = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return QUICK_START_GUIDES;
-    return QUICK_START_GUIDES.filter((g) =>
-      [g.title, g.category, g.summary, ...g.keywords].join(" ").toLowerCase().includes(q),
-    );
-  }, [query]);
+  const filteredGuides = useMemo(() => searchHelpTopics(query), [query]);
 
   const diagnosticsText = useMemo(() => {
     return [
@@ -201,14 +159,14 @@ export default function HelpPage() {
               placeholder="Search guides, keywords, topics..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-10 border-zinc-200 bg-white pl-9"
+              className="h-10 border-slate-200 bg-white pl-9"
             />
           </div>
         </div>
 
         {/* QUICK-START GUIDES */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
             Quick-Start Guides
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -221,15 +179,20 @@ export default function HelpPage() {
               </Card>
             ) : (
               filteredGuides.map((guide) => (
-                <Card key={guide.title}>
+                <Card key={guide.id}>
                   <CardContent className="flex flex-col gap-2 p-5">
                     <div className="flex items-center gap-2">
                       <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] text-emerald-700">
                         {guide.category.toUpperCase()}
                       </Badge>
                     </div>
-                    <h3 className="text-sm font-bold text-zinc-900">{guide.title}</h3>
-                    <p className="text-sm leading-relaxed text-zinc-600">{guide.summary}</p>
+                    <h3 className="text-sm font-bold text-slate-900">{guide.title}</h3>
+                    <p className="text-sm leading-relaxed text-slate-600">{guide.summary}</p>
+                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-slate-600">
+                      {guide.steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
                   </CardContent>
                 </Card>
               ))
@@ -239,14 +202,14 @@ export default function HelpPage() {
 
         {/* EPISTEMIC GLOSSARY */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
+          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
             Epistemic Glossary
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {GLOSSARY.map((entry) => (
-              <div key={entry.term} className="rounded-lg border border-zinc-200 bg-white p-4">
+              <div key={entry.term} className="rounded-lg border border-slate-200 bg-white p-4">
                 <EpistemicBadge status={entry.status} label={entry.term} size="sm" />
-                <p className="mt-2 text-sm leading-relaxed text-zinc-600">{entry.definition}</p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{entry.definition}</p>
               </div>
             ))}
           </div>
@@ -257,13 +220,13 @@ export default function HelpPage() {
           <Card>
             <CardContent className="flex flex-col gap-4 p-6">
               <div className="flex items-center gap-2">
-                <Wifi className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-bold text-zinc-900">System Status</h3>
+                <Wifi className="size-4 text-slate-500" />
+                <h3 className="text-sm font-bold text-slate-900">System Status</h3>
               </div>
 
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-                  <span className="text-xs font-medium text-zinc-600">API connectivity</span>
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <span className="text-xs font-medium text-slate-600">API connectivity</span>
                   <span
                     className={cn(
                       "flex items-center gap-1.5 font-mono text-[10px] font-semibold",
@@ -271,7 +234,7 @@ export default function HelpPage() {
                         ? "text-emerald-700"
                         : health.api === "down"
                           ? "text-rose-700"
-                          : "text-zinc-500",
+                          : "text-slate-500",
                     )}
                   >
                     {health.api === "ok" ? (
@@ -289,8 +252,8 @@ export default function HelpPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
                     <Database className="size-3.5" /> Database
                   </span>
                   <span
@@ -299,7 +262,7 @@ export default function HelpPage() {
                       health.database === "connected"
                         ? "text-emerald-700"
                         : health.database === "checking"
-                          ? "text-zinc-500"
+                          ? "text-slate-500"
                           : "text-amber-700",
                     )}
                   >
@@ -332,15 +295,15 @@ export default function HelpPage() {
           <Card>
             <CardContent className="flex flex-col gap-4 p-6">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-bold text-zinc-900">Contact Support / Report a Bug</h3>
+                <ShieldCheck className="size-4 text-slate-500" />
+                <h3 className="text-sm font-bold text-slate-900">Contact Support / Report a Bug</h3>
               </div>
 
               {sent ? (
                 <div className="flex flex-col items-center gap-3 py-8 text-center">
                   <CheckCircle2 className="size-8 text-emerald-600" />
-                  <p className="text-sm font-semibold text-zinc-900">Report drafted and copied</p>
-                  <p className="max-w-sm text-xs text-zinc-500">
+                  <p className="text-sm font-semibold text-slate-900">Report drafted and copied</p>
+                  <p className="max-w-sm text-xs text-slate-500">
                     Paste the report into an email to your platform administrator or support
                     channel. Diagnostics are included so the team can act faster.
                   </p>
@@ -359,7 +322,7 @@ export default function HelpPage() {
                     required
                   />
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-zinc-900">Description</label>
+                    <label className="text-sm font-medium text-slate-900">Description</label>
                     <Textarea
                       rows={4}
                       placeholder="Describe what happened, what you expected, and any steps to reproduce..."
@@ -368,7 +331,7 @@ export default function HelpPage() {
                       required
                     />
                   </div>
-                  <label className="flex items-center gap-2 text-xs text-zinc-600">
+                  <label className="flex items-center gap-2 text-xs text-slate-600">
                     <input
                       type="checkbox"
                       checked={includeDiagnostics}
@@ -379,7 +342,7 @@ export default function HelpPage() {
                   </label>
                   <Button
                     type="submit"
-                    className="bg-emerald-600 text-zinc-50 hover:bg-emerald-700"
+                    className="bg-emerald-600 text-slate-50 hover:bg-emerald-700"
                   >
                     <Send className="mr-2 size-3.5" /> Draft report
                   </Button>
@@ -390,9 +353,9 @@ export default function HelpPage() {
           </Card>
         </div>
 
-        <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
           <BadgeCheck className="size-4 text-emerald-600" />
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-slate-600">
             Need deeper help? Reach out to your organization administrator for role-specific
             onboarding.
           </p>

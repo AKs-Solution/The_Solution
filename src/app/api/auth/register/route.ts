@@ -6,7 +6,7 @@ import { ValidationError, AppError, RateLimitedError } from "@/shared/errors";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, name } = body;
+    const { email, password, name, inviteToken } = body;
 
     if (!email || typeof email !== "string") {
       return NextResponse.json(
@@ -32,6 +32,7 @@ export async function POST(request: Request) {
       password,
       name,
       ipAddress,
+      inviteToken: typeof inviteToken === "string" ? inviteToken : undefined,
     });
 
     return NextResponse.json({ data: result.user }, { status: 201 });

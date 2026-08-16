@@ -28,7 +28,7 @@ export function ContinueAsGuest({
     try {
       const res = await fetch("/api/auth/guest", {
         method: "POST",
-        credentials: "same-origin",
+        credentials: "include",
       });
       if (!res.ok) {
         setError("Unable to start a guest session.");

@@ -9,12 +9,12 @@ interface Props {
 export function EvidenceWeightingTable({ weights }: Props) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
         <div>
-          <h3 className="text-lg font-semibold text-zinc-900">
+          <h3 className="text-lg font-semibold text-slate-900">
             Transparent Evidence Weighting Matrix
           </h3>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-slate-500">
             Multi-factor evaluation breakdown for every piece of evidence used in the reasoning
             pipeline.
           </p>
@@ -24,9 +24,9 @@ export function EvidenceWeightingTable({ weights }: Props) {
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full text-left text-xs text-zinc-700">
-          <thead className="border-b border-zinc-200 bg-white font-mono text-[10px] tracking-wider text-zinc-500 uppercase">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full text-left text-xs text-slate-700">
+          <thead className="border-b border-slate-200 bg-white font-mono text-[10px] tracking-wider text-slate-500 uppercase">
             <tr>
               <th className="px-4 py-3">Evidence Title & Type</th>
               <th className="px-3 py-3">Verification</th>
@@ -38,13 +38,13 @@ export function EvidenceWeightingTable({ weights }: Props) {
               <th className="px-4 py-3 text-right">Final Weight</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200">
+          <tbody className="divide-y divide-slate-200">
             {weights.map((w) => (
               <tr key={w.evidenceId} className="transition-colors hover:bg-white">
-                <td className="px-4 py-3 font-medium text-zinc-900">
-                  <div className="font-semibold text-zinc-900">{w.title}</div>
+                <td className="px-4 py-3 font-medium text-slate-900">
+                  <div className="font-semibold text-slate-900">{w.title}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-cyan-400">{w.evidenceType}</div>
-                  <div className="mt-1 text-[11px] leading-relaxed text-zinc-500 italic">
+                  <div className="mt-1 text-[11px] leading-relaxed text-slate-500 italic">
                     &quot;{w.weightExplanation}&quot;
                   </div>
                 </td>
@@ -56,7 +56,7 @@ export function EvidenceWeightingTable({ weights }: Props) {
                   {w.independentConfirmation ? (
                     <span className="font-semibold text-emerald-400">+15% Boost</span>
                   ) : (
-                    <span className="text-zinc-500">None</span>
+                    <span className="text-slate-500">None</span>
                   )}
                 </td>
                 <td className="px-3 py-3 font-mono">
@@ -65,7 +65,7 @@ export function EvidenceWeightingTable({ weights }: Props) {
                       -{Math.round(w.conflictingScore * 100)}%
                     </span>
                   ) : (
-                    <span className="text-zinc-500">0%</span>
+                    <span className="text-slate-500">0%</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-sm font-bold text-cyan-300">

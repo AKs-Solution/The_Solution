@@ -56,10 +56,10 @@ export default function LifecycleTwinPage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Lifecycle Twin</span>
+            <span className="font-medium text-slate-800">Lifecycle Twin</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -87,7 +87,7 @@ export default function LifecycleTwinPage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : twins.length > 0 ? (
               <div className="flex flex-col gap-4">
@@ -97,16 +97,16 @@ export default function LifecycleTwinPage() {
                   return (
                     <div
                       key={t.id}
-                      className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50/10 p-5"
+                      className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50/10 p-5"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <Layers className="size-5 text-zinc-500" />
+                          <Layers className="size-5 text-slate-500" />
                           <div className="flex flex-col text-left">
-                            <h3 className="font-mono text-sm font-bold text-zinc-900">
+                            <h3 className="font-mono text-sm font-bold text-slate-900">
                               PART ID: {t.componentId.slice(0, 15)}...
                             </h3>
-                            <span className="text-[10px] text-zinc-400">Twin ID: {t.id}</span>
+                            <span className="text-[10px] text-slate-400">Twin ID: {t.id}</span>
                           </div>
                         </div>
 
@@ -115,23 +115,25 @@ export default function LifecycleTwinPage() {
                         </Badge>
                       </div>
 
-                      <Divider className="border-zinc-100" />
+                      <Divider className="border-slate-100" />
 
                       <div className="grid grid-cols-3 gap-4 text-left text-xs">
                         <div>
-                          <span className="mb-0.5 block text-zinc-400">As-Flown Hours</span>
-                          <span className="font-bold text-zinc-800">
+                          <span className="mb-0.5 block text-slate-400">As-Flown Hours</span>
+                          <span className="font-bold text-slate-800">
                             {t.flightHours.toLocaleString()} Hrs
                           </span>
                         </div>
                         <div>
-                          <span className="mb-0.5 block text-zinc-400">As-Built Deviation</span>
-                          <span className="font-semibold text-zinc-800">
+                          <span className="mb-0.5 block text-slate-400">As-Built Deviation</span>
+                          <span className="font-semibold text-slate-800">
                             {t.metrologyAnomalyMM} mm (Surface)
                           </span>
                         </div>
                         <div>
-                          <span className="mb-0.5 block text-zinc-400">Remaining Service Life</span>
+                          <span className="mb-0.5 block text-slate-400">
+                            Remaining Service Life
+                          </span>
                           <span className="font-bold text-indigo-600">
                             {t.predictedLifeHrs.toLocaleString()} Hrs
                           </span>
@@ -140,11 +142,11 @@ export default function LifecycleTwinPage() {
 
                       {/* LIFE PROGRESS BAR */}
                       <div className="flex flex-col gap-1 text-left text-xs">
-                        <div className="flex justify-between text-[10px] font-medium text-zinc-500">
+                        <div className="flex justify-between text-[10px] font-medium text-slate-500">
                           <span>Verified Structural Margin</span>
                           <span>{lifePercent}% Remaining</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
                           <div
                             className="h-full rounded-full bg-indigo-500 transition-all"
                             style={{ width: `${lifePercent}%` }}
@@ -153,8 +155,8 @@ export default function LifecycleTwinPage() {
                       </div>
 
                       {/* MANUAL REVIEW CARD */}
-                      <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs">
-                        <span className="font-semibold text-zinc-500">
+                      <div className="mt-1 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 text-left text-xs">
+                        <span className="font-semibold text-slate-500">
                           Sign off on fatigue degradation adjustement based on sensor analysis:
                         </span>
                         <div className="flex gap-2">
@@ -188,23 +190,23 @@ export default function LifecycleTwinPage() {
 
           {/* POLICY GUIDE */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-semibold text-zinc-400 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
                       Attestation Policy
                     </span>
                     <h2 className="text-foreground text-base font-bold">Lifecycle Wear Bounds</h2>
                   </div>
 
-                  <Divider className="border-zinc-200" />
+                  <Divider className="border-slate-200" />
 
-                  <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-left text-xs">
-                    <span className="mb-1 block font-semibold text-zinc-800">
+                  <div className="rounded border border-slate-200 bg-slate-50 p-3 text-left text-xs">
+                    <span className="mb-1 block font-semibold text-slate-800">
                       Fatigue Audit Rules:
                     </span>
-                    <p className="text-[11px] leading-normal text-zinc-500">
+                    <p className="text-[11px] leading-normal text-slate-500">
                       Any modification to remaining flight hours or fatigue bounds must be manually
                       authorized by a named lead engineer. Confabulated or automated lifecycle
                       estimations are blocked.

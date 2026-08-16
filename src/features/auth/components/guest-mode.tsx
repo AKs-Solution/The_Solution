@@ -12,6 +12,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import type { SidebarNavItem } from "@/shared/constants";
 
 const GUEST_RESTRICTED_CODE = "GUEST_RESTRICTED";
 
@@ -34,12 +35,14 @@ function isGuestAllowedPath(pathname: string): boolean {
 interface GuestModeValue {
   isGuest: boolean;
   ready: boolean;
+  identityKey: string | null;
   requestUpgrade: () => void;
 }
 
 const GuestModeContext = createContext<GuestModeValue>({
   isGuest: false,
   ready: false,
+  identityKey: null,
   requestUpgrade: () => undefined,
 });
 
@@ -52,6 +55,7 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isGuest, setIsGuest] = useState(false);
   const [ready, setReady] = useState(false);
+  const [identityKey, setIdentityKey] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const requestUpgrade = useCallback(() => setModalOpen(true), []);
@@ -60,22 +64,29 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", { credentials: "include" });
         if (!res.ok) {
           if (!cancelled) {
             setIsGuest(false);
+            setIdentityKey("anon");
             setReady(true);
           }
           return;
         }
         const json = await res.json();
+        const data = json.data as
+          { id?: string; organizationId?: string | null; guest?: boolean } | undefined;
         if (!cancelled) {
-          setIsGuest(json.data?.guest === true);
+          setIsGuest(data?.guest === true);
+          const userId = data?.id || "anon";
+          const orgId = data?.organizationId || "none";
+          setIdentityKey(`${userId}:${orgId}`);
           setReady(true);
         }
       } catch {
         if (!cancelled) {
           setIsGuest(false);
+          setIdentityKey("anon");
           setReady(true);
         }
       }
@@ -141,8 +152,8 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
   }, [isGuest]);
 
   const value = useMemo(
-    () => ({ isGuest, ready, requestUpgrade }),
-    [isGuest, ready, requestUpgrade],
+    () => ({ isGuest, ready, identityKey, requestUpgrade }),
+    [isGuest, ready, identityKey, requestUpgrade],
   );
 
   return (
@@ -172,11 +183,11 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const GUEST_SIDEBAR_NAV = [
+export const GUEST_SIDEBAR_NAV: SidebarNavItem[] = [
   { label: "Public explorer", href: "/explore", icon: "LayoutDashboard" },
   { label: "Deterministic search", href: "/search", icon: "Search" },
   { label: "Knowledge graph", href: "/knowledge-graph", icon: "GitBranch" },
   { label: "Evidence chains", href: "/evidence", icon: "FileText" },
   { label: "Reasoning traces", href: "/reasoning", icon: "Brain" },
   { label: "Help", href: "/help", icon: "HelpCircle" },
-] as const;
+];

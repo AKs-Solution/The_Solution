@@ -22,6 +22,7 @@ import { QueryError } from "@/components/ui/query-error";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/shared/utils";
+import { MemberList } from "@/features/organizations/components";
 import { DensitySwitcher } from "@/components/layout/workspace-controls";
 import {
   LAYOUT_MODE_OPTIONS,
@@ -36,6 +37,8 @@ interface CurrentUser {
   email: string;
   name: string | null;
   status?: string;
+  organizationId?: string;
+  guest?: boolean;
 }
 
 type ThemePreference = "light" | "dark" | "system";
@@ -283,6 +286,93 @@ function LayoutModeCard() {
   );
 }
 
+function TeamAccessCard({
+  organizationId,
+  currentUserId,
+}: {
+  organizationId: string;
+  currentUserId: string;
+}) {
+  const [members, setMembers] = useState<
+    Array<{
+      id: string;
+      userId: string;
+      email: string;
+      name: string | null;
+      role: string;
+      status: string;
+      joinedAt: string | null;
+    }>
+  >([]);
+  const [invitations, setInvitations] = useState<
+    Array<{
+      id: string;
+      organizationId: string;
+      organizationName: string;
+      email: string | null;
+      role: string;
+      status: string;
+      createdAt: string;
+      expiresAt: string;
+    }>
+  >([]);
+  const [role, setRole] = useState("member");
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [membersRes, invitesRes] = await Promise.all([
+        fetch(`/api/organizations/${organizationId}/members`),
+        fetch(`/api/organizations/${organizationId}/invitations`),
+      ]);
+      const membersJson = membersRes.ok ? await membersRes.json() : { data: [] };
+      const invitesJson = invitesRes.ok ? await invitesRes.json() : { data: [] };
+      const list = Array.isArray(membersJson.data) ? membersJson.data : [];
+      setMembers(list);
+      setInvitations(Array.isArray(invitesJson.data) ? invitesJson.data : []);
+      const self = list.find((member: { userId: string }) => member.userId === currentUserId);
+      if (self?.role) setRole(self.role);
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId, currentUserId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- load org members when the settings card mounts
+    void reload();
+  }, [reload]);
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Building2 className="size-4" aria-hidden="true" />
+          Teammates
+        </CardTitle>
+        <CardDescription>
+          Invite people to this organization. They will share the same drawings, decisions, and
+          other org-scoped work. No placeholder members are shown.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading members...</p>
+        ) : (
+          <MemberList
+            organizationId={organizationId}
+            members={members}
+            invitations={invitations}
+            currentUserId={currentUserId}
+            currentUserRole={role}
+            onInviteCreated={() => void reload()}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SettingsPanel() {
   const router = useRouter();
   const [user, setUser] = useState<CurrentUser | null>(null);
@@ -393,22 +483,23 @@ export function SettingsPanel() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <p className="text-muted-foreground text-sm">
-            Organization name, members, invitations, and role assignments are managed in the
-            Organizations workspace.
+            Organization profile and additional role assignments also live in the Organizations
+            workspace.
           </p>
           <div className="flex flex-wrap gap-2">
             <Link href="/organizations">
-              <Button>Open organizations</Button>
+              <Button variant="secondary">Open organizations</Button>
             </Link>
             <Link href="/audit">
               <Button variant="secondary">View audit log</Button>
             </Link>
-            <Link href="/notifications">
-              <Button variant="secondary">Notifications</Button>
-            </Link>
           </div>
         </CardContent>
       </Card>
+
+      {user?.organizationId && !user.guest ? (
+        <TeamAccessCard organizationId={user.organizationId} currentUserId={user.id} />
+      ) : null}
 
       <Card className="lg:col-span-2">
         <CardHeader>

@@ -46,16 +46,16 @@ export function ForgotPasswordForm() {
           <CheckCircle2 className="size-6" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-zinc-900">Reset link dispatched</h3>
-          <p className="text-xs text-zinc-600">
-            If an account exists for <span className="font-semibold text-zinc-900">{email}</span>,
+          <h3 className="text-base font-semibold text-slate-900">Reset link dispatched</h3>
+          <p className="text-xs text-slate-500">
+            If an account exists for <span className="font-semibold text-slate-900">{email}</span>,
             a secure password recovery link has been dispatched to your inbox.
           </p>
         </div>
         <div className="pt-2">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-900 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
           >
             <ArrowLeft className="size-3.5" /> Return to sign in
           </Link>

@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  matchSuppliersToVariant,
-  seedSupplierCapacities,
-} from "@/server/sourcing/marketplace-service";
+import { matchSuppliersToVariant } from "@/server/sourcing/marketplace-service";
 import { requireActiveOrganization } from "@/server/organizations/organization-context";
 import { getCurrentUser } from "@/server/auth";
 import { AppError } from "@/shared/errors";
@@ -24,9 +21,6 @@ export async function GET(request: Request) {
     if (!variantId) {
       return NextResponse.json({ error: "variantId is required" }, { status: 400 });
     }
-
-    // Run seed to ensure supplier metrics are populated for this demo
-    await seedSupplierCapacities(orgId);
 
     const matches = await matchSuppliersToVariant(orgId, variantId);
     return NextResponse.json({ data: matches });

@@ -12,6 +12,9 @@ export {
   listMembers,
   inviteMember,
   acceptInvitation,
+  acceptInvitationByToken,
+  acceptInvitationForUser,
+  previewInvitationByToken,
   declineInvitation,
   removeMember,
   leaveOrganization,
@@ -19,7 +22,12 @@ export {
   listOrganizationInvitations,
 } from "./membership-service";
 
-export type { MemberResult, InvitationResult } from "./membership-service";
+export type {
+  MemberResult,
+  InvitationResult,
+  InviteCreatedResult,
+  InvitationPreview,
+} from "./membership-service";
 
 export {
   getActiveOrganizationId,

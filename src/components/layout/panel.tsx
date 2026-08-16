@@ -8,8 +8,8 @@ export interface PanelProps extends HTMLAttributes<HTMLDivElement> {
 
 const variantStyles = {
   default: "bg-white",
-  bordered: "rounded-lg border border-zinc-200 bg-white shadow-xs",
-  muted: "rounded-lg bg-zinc-50",
+  bordered: "rounded-lg border border-slate-200 bg-white shadow-xs",
+  muted: "rounded-lg bg-slate-50",
 };
 
 const paddingStyles = {

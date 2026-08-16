@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import {
-  SIDEBAR_NAV,
-  isGroup,
-  type SidebarNavGroup,
-  type SidebarNavItem,
-} from "@/shared/constants";
+import { createPortal } from "react-dom";
+import { SIDEBAR_NAV, isNavItem, type SidebarNavItem } from "@/shared/constants";
 import { cn } from "@/shared/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -14,109 +10,134 @@ import { GUEST_SIDEBAR_NAV, useGuestMode } from "@/features/auth/components";
 import {
   LayoutDashboard,
   FileText,
-  UploadCloud,
   GitBranch,
-  Tags,
-  BookCheck,
-  AlertTriangle,
-  FlaskConical,
-  Truck,
-  Brain,
   Search,
-  BarChart3,
-  Bell,
-  Building2,
   Settings,
   Layers,
-  Cog,
-  ChevronRight,
   Workflow,
-  ScanEye,
-  ScrollText,
   Activity,
   ShieldCheck,
   HelpCircle,
+  Brain,
   X,
+  PanelLeft,
+  PanelLeftClose,
   type LucideIcon,
 } from "lucide-react";
+import { useWorkspacePreferences } from "./workspace-preferences";
 
 const iconMap: Record<string, LucideIcon> = {
   LayoutDashboard,
   FileText,
-  UploadCloud,
   GitBranch,
-  Tags,
-  BookCheck,
-  AlertTriangle,
-  FlaskConical,
-  Truck,
-  Brain,
   Search,
-  BarChart3,
-  Bell,
-  Building2,
   Settings,
   Layers,
-  Cog,
   Workflow,
-  ScanEye,
-  ScrollText,
   Activity,
   ShieldCheck,
   HelpCircle,
+  Brain,
 };
 
 function isItemActive(pathname: string, href: string): boolean {
-  if (href === "/dashboard" && pathname === "/dashboard") return true;
-  if (href === "/dashboard" && pathname === "/") return true;
-  if (href !== "/dashboard" && (pathname === href || pathname.startsWith(`${href}/`))) return true;
-  return false;
+  if (href === "/dashboard") return pathname === "/dashboard" || pathname === "/";
+  if (href === "/explore") return pathname === "/explore";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function groupHasActiveChild(pathname: string, items: SidebarNavItem[]): boolean {
-  return items.some((item) => isItemActive(pathname, item.href));
+function RailTooltip({
+  visible,
+  anchor,
+  label,
+  shortcut,
+}: {
+  visible: boolean;
+  anchor: DOMRect | null;
+  label: string;
+  shortcut?: string;
+}) {
+  if (!visible || !anchor || typeof document === "undefined") return null;
+  return createPortal(
+    <div
+      role="tooltip"
+      className="pointer-events-none fixed z-[80] flex items-center gap-2 rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium whitespace-nowrap text-white shadow-lg"
+      style={{
+        top: anchor.top + anchor.height / 2,
+        left: anchor.right + 10,
+        transform: "translateY(-50%)",
+      }}
+    >
+      {label}
+      {shortcut ? (
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 font-mono text-[10px] text-slate-300">
+          {shortcut}
+        </kbd>
+      ) : null}
+    </div>,
+    document.body,
+  );
 }
 
 function NavItem({
   item,
   isActive,
-  isCollapsed,
+  collapsed,
   onNavigate,
 }: {
   item: SidebarNavItem;
   isActive: boolean;
-  isCollapsed?: boolean;
+  collapsed: boolean;
   onNavigate?: () => void;
 }) {
   const Icon = iconMap[item.icon] ?? FileText;
+  const [tooltip, setTooltip] = useState<{ visible: boolean; anchor: DOMRect | null }>({
+    visible: false,
+    anchor: null,
+  });
+  const itemRef = useRef<HTMLAnchorElement>(null);
 
-  if (isCollapsed) {
+  function showTip() {
+    const rect = itemRef.current?.getBoundingClientRect() ?? null;
+    setTooltip({ visible: true, anchor: rect });
+  }
+
+  function hideTip() {
+    setTooltip({ visible: false, anchor: null });
+  }
+
+  if (collapsed) {
     return (
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        aria-current={isActive ? "page" : undefined}
-        title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
-        className={cn(
-          "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
-          isActive
-            ? "bg-slate-900 text-white shadow-xs"
-            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
-        )}
-      >
-        <Icon
+      <>
+        <Link
+          ref={itemRef}
+          href={item.href}
+          onClick={onNavigate}
+          onMouseEnter={showTip}
+          onMouseLeave={hideTip}
+          onFocus={showTip}
+          onBlur={hideTip}
+          aria-current={isActive ? "page" : undefined}
+          aria-label={item.label}
           className={cn(
-            "size-4 shrink-0",
-            isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
+            "relative flex size-9 items-center justify-center rounded-lg transition-colors",
+            isActive
+              ? "bg-slate-900 text-white shadow-xs"
+              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
           )}
+        >
+          {isActive && (
+            <span className="absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full bg-blue-500" />
+          )}
+          <Icon className="size-4 shrink-0" />
+        </Link>
+        <RailTooltip
+          visible={tooltip.visible}
+          anchor={tooltip.anchor}
+          label={item.label}
+          shortcut={item.shortcut}
         />
-        <span className="pointer-events-none absolute top-1/2 left-[calc(100%+10px)] z-[60] hidden -translate-y-1/2 rounded-md bg-slate-900 px-2 py-1 font-sans text-[11px] font-medium whitespace-nowrap text-white shadow-sm group-hover:block">
-          {item.label}
-          {item.shortcut ? (
-            <span className="ml-2 font-mono text-[10px] text-slate-400">{item.shortcut}</span>
-          ) : null}
-        </span>
-      </Link>
+      </>
     );
   }
 
@@ -126,128 +147,91 @@ function NavItem({
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-2.5 rounded px-2.5 py-1.5 text-xs transition-colors select-none",
+        "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
         isActive
-          ? "bg-blue-600 font-medium text-white"
-          : "font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+          ? "bg-slate-900 text-white shadow-xs"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
       )}
     >
-      <Icon
-        className={cn(
-          "size-4 shrink-0",
-          isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
-        )}
-      />
+      <Icon className="size-4 shrink-0" />
       <span className="flex-1 truncate tracking-tight">{item.label}</span>
-      {item.badge && (
-        <span
-          className={cn(
-            "ml-auto rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold",
-            isActive
-              ? "border-zinc-300 bg-zinc-50 text-zinc-900"
-              : "border-zinc-200 bg-zinc-100 text-zinc-600",
-          )}
-        >
-          {item.badge}
-        </span>
-      )}
+      {item.shortcut ? (
+        <kbd className="rounded border border-slate-200 bg-slate-50 px-1 font-mono text-[10px] text-slate-400">
+          {item.shortcut}
+        </kbd>
+      ) : null}
     </Link>
   );
 }
 
-function NavGroup({
-  group,
+function NavCluster({
+  items,
   pathname,
-  expandedGroups,
-  autoExpandedGroups,
-  isCollapsed,
-  toggleGroup,
+  collapsed,
   onNavigate,
 }: {
-  group: SidebarNavGroup;
+  items: SidebarNavItem[];
   pathname: string;
-  expandedGroups: Set<string>;
-  autoExpandedGroups?: Set<string>;
-  isCollapsed?: boolean;
-  toggleGroup: (label: string) => void;
+  collapsed: boolean;
   onNavigate?: () => void;
 }) {
-  const Icon = iconMap[group.icon] ?? FileText;
-  const isExpanded =
-    (expandedGroups.has(group.label) || autoExpandedGroups?.has(group.label)) ?? false;
-  const hasActiveChild = groupHasActiveChild(pathname, group.items);
-
-  if (isCollapsed) {
-    const landing = group.items[0];
-    if (!landing) return null;
-    return (
-      <Link
-        href={landing.href}
-        onClick={onNavigate}
-        aria-label={group.label}
-        title={group.label}
-        aria-current={hasActiveChild ? "page" : undefined}
-        className={cn(
-          "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
-          hasActiveChild
-            ? "bg-slate-900 text-white shadow-xs"
-            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
-        )}
-      >
-        <Icon
-          className={cn(
-            "size-4 shrink-0",
-            hasActiveChild ? "text-white" : "text-slate-500 group-hover:text-slate-900",
-          )}
+  return (
+    <nav
+      className={cn("flex flex-col", collapsed ? "items-center gap-1" : "gap-0.5")}
+      aria-label="Primary"
+    >
+      {items.map((item) => (
+        <NavItem
+          key={item.href}
+          item={item}
+          isActive={isItemActive(pathname, item.href)}
+          collapsed={collapsed}
+          onNavigate={onNavigate}
         />
-        <span className="pointer-events-none absolute top-1/2 left-[calc(100%+10px)] z-[60] hidden -translate-y-1/2 rounded-md bg-slate-900 px-2 py-1 font-sans text-[11px] font-medium whitespace-nowrap text-white shadow-sm group-hover:block">
-          {group.label}
-        </span>
-      </Link>
-    );
+      ))}
+    </nav>
+  );
+}
+
+function CollapseToggle({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  const [tooltip, setTooltip] = useState<{ visible: boolean; anchor: DOMRect | null }>({
+    visible: false,
+    anchor: null,
+  });
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const label = collapsed ? "Expand navigation" : "Collapse navigation";
+
+  function showTip() {
+    const rect = btnRef.current?.getBoundingClientRect() ?? null;
+    setTooltip({ visible: true, anchor: rect });
   }
 
+  function hideTip() {
+    setTooltip({ visible: false, anchor: null });
+  }
+
+  const Icon = collapsed ? PanelLeft : PanelLeftClose;
+
   return (
-    <div className="mb-0.5">
+    <>
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => toggleGroup(group.label)}
-        aria-expanded={isExpanded}
-        className={cn(
-          "flex w-full cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-xs font-medium tracking-tight transition-colors select-none",
-          hasActiveChild
-            ? "font-semibold text-zinc-900"
-            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
-        )}
+        onClick={onToggle}
+        onMouseEnter={showTip}
+        onMouseLeave={hideTip}
+        onFocus={showTip}
+        onBlur={hideTip}
+        aria-expanded={!collapsed}
+        aria-controls="workspace-sidebar-nav"
+        aria-label={label}
+        title={label}
+        className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
       >
-        <Icon
-          className={cn("size-4 shrink-0", hasActiveChild ? "text-zinc-900" : "text-zinc-500")}
-        />
-        <span className="flex-1 truncate text-left">{group.label}</span>
-        <ChevronRight
-          className={cn(
-            "size-3.5 shrink-0 text-zinc-400 transition-transform duration-200",
-            isExpanded && "rotate-90 text-zinc-800",
-          )}
-        />
+        <Icon className="size-4" />
       </button>
-      {isExpanded && (
-        <nav
-          className="my-0.5 mt-0.5 ml-3.5 flex flex-col gap-0.5 border-l border-zinc-200 pl-2.5"
-          aria-label={group.label}
-        >
-          {group.items.map((item) => (
-            <NavItem
-              key={item.href}
-              item={item}
-              isActive={isItemActive(pathname, item.href)}
-              isCollapsed={false}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </nav>
-      )}
-    </div>
+      <RailTooltip visible={tooltip.visible} anchor={tooltip.anchor} label={label} />
+    </>
   );
 }
 
@@ -262,53 +246,46 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { isGuest } = useGuestMode();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const { sidebarCollapsed, toggleSidebarCollapsed } = useWorkspacePreferences();
   const [focusedIndex, setFocusedIndex] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
   const keyedNavRef = useRef(false);
 
-  const isCollapsedEffective = mobileOpen ? false : true;
+  const collapsed = mobileOpen ? false : sidebarCollapsed;
 
-  // Groups with active children are auto-expanded during render
-  const autoExpandedLabels = useMemo(
+  const primaryItems: SidebarNavItem[] = useMemo(
     () =>
-      new Set(
-        SIDEBAR_NAV.filter(
-          (entry) => isGroup(entry) && groupHasActiveChild(pathname, entry.items),
-        ).map((entry) => entry.label),
-      ),
-    [pathname],
+      isGuest
+        ? GUEST_SIDEBAR_NAV.filter((item) => item.href !== "/help").map((item) => ({ ...item }))
+        : SIDEBAR_NAV.filter(isNavItem),
+    [isGuest],
   );
 
-  const toggleGroup = useCallback((label: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
-      } else {
-        next.add(label);
-      }
-      return next;
-    });
-  }, []);
+  const utilityItems: SidebarNavItem[] = useMemo(
+    () => [
+      ...(!isGuest
+        ? [{ label: "Settings", href: "/settings", icon: "Settings", shortcut: "," }]
+        : []),
+      { label: "Help", href: "/help", icon: "HelpCircle", shortcut: "?" },
+    ],
+    [isGuest],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
       if (target?.isContentEditable) return;
-      const items = isGuest
-        ? GUEST_SIDEBAR_NAV.filter((item) => item.href !== "/help")
-        : SIDEBAR_NAV.filter((entry) => !isGroup(entry));
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const index = Number(e.key) - 1;
-      const dest = items[index];
-      if (!dest || !("href" in dest)) return;
+      const dest = primaryItems[index];
+      if (!dest?.href || Number.isNaN(index)) return;
       e.preventDefault();
       router.push(dest.href);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isGuest, router]);
+  }, [primaryItems, router]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -319,11 +296,8 @@ export function Sidebar({
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen, onNavigate]);
 
-  // Keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const focusable = navRef.current?.querySelectorAll<HTMLElement>(
-      "a[href], button[aria-expanded]",
-    );
+    const focusable = navRef.current?.querySelectorAll<HTMLElement>("a[href]");
     if (!focusable || focusable.length === 0) return;
 
     if (e.key === "ArrowDown") {
@@ -347,109 +321,86 @@ export function Sidebar({
 
   useEffect(() => {
     if (!keyedNavRef.current) return;
-    const focusable = navRef.current?.querySelectorAll<HTMLElement>(
-      "a[href], button[aria-expanded]",
-    );
+    const focusable = navRef.current?.querySelectorAll<HTMLElement>("a[href]");
     focusable?.[focusedIndex]?.focus();
   }, [focusedIndex]);
+
+  const brand = (
+    <div
+      className={cn(
+        "mb-3 flex shrink-0",
+        collapsed ? "flex-col items-center gap-1" : "items-center justify-between gap-2 px-1",
+      )}
+    >
+      {!collapsed && (
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-slate-900">CONSECUENCIA</p>
+          <p className="font-mono text-[10px] tracking-wider text-slate-400">WORKSPACE</p>
+        </div>
+      )}
+      <div className="flex items-center gap-1">
+        <div className="hidden md:flex">
+          <CollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+        </div>
+        {mobileOpen && (
+          <button
+            type="button"
+            onClick={onNavigate}
+            aria-label="Close navigation"
+            className="flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900 md:hidden"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <aside
       className={cn(
-        "z-50 h-full w-14 shrink-0 flex-col items-center overflow-visible border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
+        "z-50 h-full shrink-0 overflow-visible border-r border-slate-200 bg-white text-slate-800",
         mobileOpen
-          ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:w-14 md:shadow-none"
-          : "hidden md:flex",
+          ? cn(
+              "fixed inset-y-0 left-0 flex w-72 flex-col shadow-xl md:relative md:inset-auto md:shadow-none",
+              collapsed ? "md:w-14" : "md:w-60",
+            )
+          : cn("hidden md:flex md:flex-col", collapsed ? "w-14" : "w-60"),
       )}
     >
-      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-visible px-2">
-        <div className={cn("flex flex-col gap-1", isCollapsedEffective && "items-center")}>
-          {/* Top Collapse Button */}
-          <div
-            className={cn(
-              "mb-2 flex items-center justify-between",
-              isCollapsedEffective && "justify-center",
-            )}
-          >
-            {!isCollapsedEffective && (
-              <span className="px-1 font-mono text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
-                Navigation
-              </span>
-            )}
-            <div className="flex items-center gap-1">
-              {mobileOpen && (
-                <button
-                  type="button"
-                  onClick={onNavigate}
-                  title="Close navigation"
-                  aria-label="Close navigation"
-                  className="flex size-8 cursor-pointer items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 md:hidden"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Navigation Items */}
-          <div
-            ref={navRef}
-            onKeyDown={handleKeyDown}
-            className={cn("flex flex-col gap-0.5", isCollapsedEffective && "items-center")}
-          >
-            {isGuest
-              ? GUEST_SIDEBAR_NAV.filter((item) => item.href !== "/help").map((item) => (
-                  <NavItem
-                    key={item.href}
-                    item={item}
-                    isActive={isItemActive(pathname, item.href)}
-                    isCollapsed={isCollapsedEffective}
-                    onNavigate={onNavigate}
-                  />
-                ))
-              : SIDEBAR_NAV.map((entry) =>
-                  isGroup(entry) ? (
-                    <NavGroup
-                      key={entry.label}
-                      group={entry}
-                      pathname={pathname}
-                      expandedGroups={expandedGroups}
-                      autoExpandedGroups={autoExpandedLabels}
-                      isCollapsed={isCollapsedEffective}
-                      toggleGroup={toggleGroup}
-                      onNavigate={onNavigate}
-                    />
-                  ) : (
-                    <NavItem
-                      key={entry.href}
-                      item={entry}
-                      isActive={isItemActive(pathname, entry.href)}
-                      isCollapsed={isCollapsedEffective}
-                      onNavigate={onNavigate}
-                    />
-                  ),
-                )}
-          </div>
-        </div>
-
-        {/* Status Footer */}
-        <div
-          className={cn("mt-auto flex flex-col gap-3 py-1", isCollapsedEffective && "items-center")}
-        >
-          {!isGuest && (
-            <NavItem
-              item={{ label: "Settings", href: "/settings", icon: "Settings", shortcut: "," }}
-              isActive={isItemActive(pathname, "/settings")}
-              isCollapsed={isCollapsedEffective}
-              onNavigate={onNavigate}
-            />
-          )}
-          <NavItem
-            item={{ label: "Help", href: "/help", icon: "HelpCircle", shortcut: "?" }}
-            isActive={isItemActive(pathname, "/help")}
-            isCollapsed={isCollapsedEffective}
+      <div
+        id="workspace-sidebar-nav"
+        ref={navRef}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "flex h-full min-h-0 flex-col py-3",
+          collapsed ? "items-center px-2" : "px-3",
+        )}
+      >
+        {brand}
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <NavCluster
+            items={primaryItems}
+            pathname={pathname}
+            collapsed={collapsed}
             onNavigate={onNavigate}
           />
+        </div>
+        <div
+          className={cn(
+            "mt-2 flex flex-col border-t border-slate-200 pt-2",
+            collapsed ? "items-center gap-1" : "gap-0.5",
+          )}
+        >
+          {utilityItems.map((item) => (
+            <NavItem
+              key={item.href}
+              item={item}
+              isActive={isItemActive(pathname, item.href)}
+              collapsed={collapsed}
+              onNavigate={onNavigate}
+            />
+          ))}
         </div>
       </div>
     </aside>

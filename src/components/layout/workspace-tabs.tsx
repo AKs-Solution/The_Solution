@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useGuestMode } from "@/features/auth/components/guest-mode";
 
 export type WorkspaceTabKind = "decision" | "sentinel" | "drawing" | "failure-graph" | "ledger";
 
@@ -25,8 +26,16 @@ export interface WorkspaceTab {
   auto: boolean;
 }
 
-const TABS_KEY = "consecuencia.tabs.v1";
-const SESSION_KEY = "consecuencia.tabs.session.v1";
+const TABS_KEY_PREFIX = "consecuencia.tabs.v1";
+const SESSION_KEY_PREFIX = "consecuencia.tabs.session.v1";
+
+function tabsStorageKey(identity: string): string {
+  return `${TABS_KEY_PREFIX}:${identity}`;
+}
+
+function sessionStorageKey(identity: string): string {
+  return `${SESSION_KEY_PREFIX}:${identity}`;
+}
 
 export function tabIdFor(kind: WorkspaceTabKind, ref: string): string {
   return `${kind}:${ref}`;
@@ -36,7 +45,7 @@ export const HOME_TAB: WorkspaceTab = {
   id: tabIdFor("ledger", "/dashboard"),
   kind: "ledger",
   ref: "/dashboard",
-  title: "Home",
+  title: "Mission Console",
   subtitle: "Workspace",
   href: "/dashboard",
   pinned: true,
@@ -191,11 +200,27 @@ export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
         ref: match.path,
         title: match.title,
         href: match.path,
-        pinned: false,
+        pinned: match.path === HOME_TAB.href,
         auto: true,
       };
     })() ??
-    null
+    (pathname.startsWith("/") && pathname !== "/"
+      ? {
+          id: tabIdFor("ledger", pathname),
+          kind: "ledger" as const,
+          ref: pathname,
+          title: pathname
+            .split("/")
+            .filter(Boolean)
+            .map((segment) =>
+              segment.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+            )
+            .join(" · "),
+          href: pathname,
+          pinned: false,
+          auto: true,
+        }
+      : null)
   );
 }
 
@@ -203,10 +228,10 @@ interface ScopedStore {
   [tabId: string]: Record<string, unknown>;
 }
 
-function readStoredTabs(): WorkspaceTab[] {
+function readStoredTabs(identity: string): WorkspaceTab[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(TABS_KEY);
+    const raw = window.localStorage.getItem(tabsStorageKey(identity));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -224,14 +249,14 @@ function readStoredTabs(): WorkspaceTab[] {
   }
 }
 
-function readStoredSession(): {
+function readStoredSession(identity: string): {
   activeTabId?: string;
   scoped?: ScopedStore;
   scrollY?: Record<string, number>;
 } | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    const raw = window.sessionStorage.getItem(sessionStorageKey(identity));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
@@ -275,32 +300,71 @@ export interface WorkspaceTabsValue {
 
 const WorkspaceTabsContext = createContext<WorkspaceTabsValue | null>(null);
 
-function persistSession(activeTabId: string | null) {
+function persistSession(identity: string, activeTabId: string | null) {
   if (typeof window === "undefined") return;
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    const raw = window.sessionStorage.getItem(sessionStorageKey(identity));
     const parsed = raw ? JSON.parse(raw) : {};
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...parsed, activeTabId }));
+    window.sessionStorage.setItem(
+      sessionStorageKey(identity),
+      JSON.stringify({ ...parsed, activeTabId }),
+    );
   } catch {
     // Storage unavailable — workspace tabs remain in-memory only.
   }
 }
 
+const MAIN_PANE_ID = "main-content";
+
+function getMainPane(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  return document.getElementById(MAIN_PANE_ID);
+}
+
+function ensureHomeTab(tabs: WorkspaceTab[]): WorkspaceTab[] {
+  const rest = tabs.filter((t) => t.id !== HOME_TAB.id);
+  return [{ ...HOME_TAB }, ...rest];
+}
+
+function upsertDerivedTab(tabs: WorkspaceTab[], derived: WorkspaceTab): WorkspaceTab[] {
+  const next = ensureHomeTab(tabs);
+  if (derived.id === HOME_TAB.id) return next;
+  if (next.some((t) => t.id === derived.id)) {
+    return next.map((t) =>
+      t.id === derived.id
+        ? {
+            ...t,
+            href: derived.href,
+            title: t.auto ? derived.title : t.title,
+            subtitle: derived.subtitle ?? t.subtitle,
+          }
+        : t,
+    );
+  }
+  return [...next, derived];
+}
+
 export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { ready, identityKey } = useGuestMode();
 
-  const initialSession = useMemo(() => readStoredSession(), []);
-  const scopedRef = useRef<ScopedStore>(initialSession?.scoped ?? {});
-  const scrollYRef = useRef<Record<string, number>>(initialSession?.scrollY ?? {});
+  const scopedRef = useRef<ScopedStore>({});
+  const scrollYRef = useRef<Record<string, number>>({});
+  const identityRef = useRef<string | null>(null);
+  const pathnameRef = useRef(pathname);
+  const [hydrated, setHydrated] = useState(false);
+  const [scopedIdentity, setScopedIdentity] = useState<string | null>(null);
 
-  const [tabs, setTabs] = useState<WorkspaceTab[]>(() => readStoredTabs());
-  const [activeTabId, setActiveTabId] = useState<string | null>(
-    initialSession?.activeTabId ?? null,
-  );
+  const [tabs, setTabs] = useState<WorkspaceTab[]>([HOME_TAB]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(HOME_TAB.id);
 
   const activeTabIdRef = useRef<string | null>(activeTabId);
   const tabsRef = useRef<WorkspaceTab[]>(tabs);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   useEffect(() => {
     activeTabIdRef.current = activeTabId;
@@ -310,76 +374,104 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
     tabsRef.current = tabs;
   }, [tabs]);
 
-  // Persist the tab list across reloads.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!ready || !identityKey) return;
+    identityRef.current = identityKey;
+
+    const stored = readStoredTabs(identityKey);
+    const session = readStoredSession(identityKey);
+    scopedRef.current = session?.scoped ?? {};
+    scrollYRef.current = session?.scrollY ?? {};
+
+    const derived = deriveTabFromPathname(pathnameRef.current);
+    let next = ensureHomeTab(stored.length > 0 ? stored : [HOME_TAB]);
+    if (derived) next = upsertDerivedTab(next, derived);
+
+    const sessionActive =
+      session?.activeTabId && next.some((t) => t.id === session.activeTabId)
+        ? session.activeTabId
+        : null;
+
+    setTabs(next);
+    setActiveTabId(derived?.id ?? sessionActive ?? HOME_TAB.id);
+    setScopedIdentity(identityKey);
+    setHydrated(true);
+  }, [ready, identityKey]);
+
+  // Persist the tab list across reloads, scoped to the signed-in identity.
+  useEffect(() => {
+    if (
+      !hydrated ||
+      !identityKey ||
+      scopedIdentity !== identityKey ||
+      typeof window === "undefined"
+    )
+      return;
     try {
-      window.localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+      window.localStorage.setItem(tabsStorageKey(identityKey), JSON.stringify(tabs));
     } catch {
       // Storage unavailable — workspace tabs remain in-memory only.
     }
-  }, [tabs]);
+  }, [tabs, hydrated, identityKey, scopedIdentity]);
 
-  // Persist session shape (active tab) when it changes.
   useEffect(() => {
-    persistSession(activeTabId);
-  }, [activeTabId]);
+    if (!hydrated || !identityKey || scopedIdentity !== identityKey) return;
+    persistSession(identityKey, activeTabId);
+  }, [activeTabId, hydrated, identityKey, scopedIdentity]);
 
   // Keep the active tab synchronized with the current route so opening a
   // record from a ledger automatically surfaces it in the workspace bar.
   useEffect(() => {
+    if (!hydrated || !identityKey || scopedIdentity !== identityKey) return;
     const derived = deriveTabFromPathname(pathname);
     if (derived) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- route is the source of truth for the tab model
-      setTabs((prev) => (prev.some((t) => t.id === derived.id) ? prev : [...prev, derived]));
+      setTabs((prev) => upsertDerivedTab(prev, derived));
       setActiveTabId(derived.id);
       return;
     }
 
-    const matchingTab = tabsRef.current.find(
-      (tab) => tab.href === pathname || (tab.href !== "/" && pathname.startsWith(`${tab.href}/`)),
-    );
+    const matchingTab = tabsRef.current.find((tab) => tab.href === pathname);
     if (matchingTab) {
       setActiveTabId(matchingTab.id);
       return;
     }
 
-    if (pathname === "/dashboard") {
-      setTabs((prev) => (prev.some((t) => t.id === HOME_TAB.id) ? prev : [HOME_TAB, ...prev]));
-      setActiveTabId(HOME_TAB.id);
-      return;
-    }
-
     setActiveTabId(null);
-  }, [pathname]);
+  }, [pathname, hydrated, identityKey, scopedIdentity]);
 
-  // Capture scroll depth continuously so switching tabs can restore it.
   useEffect(() => {
     let raf = 0;
-    const onScroll = () => {
+    const onScroll = (event: Event) => {
+      const pane = getMainPane();
+      if (!pane || event.target !== pane) return;
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
         const id = activeTabIdRef.current;
-        if (id && typeof window !== "undefined") scrollYRef.current[id] = window.scrollY;
+        if (id) scrollYRef.current[id] = pane.scrollTop;
       });
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("scroll", onScroll, true);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
   const saveScrollPosition = useCallback((tabId: string) => {
-    if (typeof window === "undefined") return;
-    scrollYRef.current[tabId] = window.scrollY;
+    const pane = getMainPane();
+    if (!pane) return;
+    scrollYRef.current[tabId] = pane.scrollTop;
   }, []);
 
   const restoreScrollPosition = useCallback((tabId: string) => {
-    if (typeof window === "undefined") return;
+    const pane = getMainPane();
+    if (!pane) return;
     const y = scrollYRef.current[tabId] ?? 0;
-    window.setTimeout(() => window.scrollTo(0, y), 60);
+    window.setTimeout(() => {
+      pane.scrollTo({ top: y, behavior: "auto" });
+    }, 60);
   }, []);
 
   const getScopedValue = useCallback(<T,>(tabId: string, key: string): T | undefined => {
@@ -388,12 +480,13 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
 
   const setScopedValue = useCallback((tabId: string, key: string, value: unknown) => {
     scopedRef.current[tabId] = { ...scopedRef.current[tabId], [key]: value };
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !identityRef.current) return;
     try {
-      const raw = window.sessionStorage.getItem(SESSION_KEY);
+      const key = sessionStorageKey(identityRef.current);
+      const raw = window.sessionStorage.getItem(key);
       const parsed = raw ? JSON.parse(raw) : {};
       window.sessionStorage.setItem(
-        SESSION_KEY,
+        key,
         JSON.stringify({ ...parsed, scoped: scopedRef.current, scrollY: scrollYRef.current }),
       );
     } catch {
@@ -436,7 +529,8 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       });
       setActiveTabId(id);
       const outgoing = activeTabIdRef.current;
-      if (outgoing && typeof window !== "undefined") scrollYRef.current[outgoing] = window.scrollY;
+      const pane = getMainPane();
+      if (outgoing && pane) scrollYRef.current[outgoing] = pane.scrollTop;
       const current =
         typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
       if (current !== options.href) router.push(options.href, { scroll: false });
@@ -450,11 +544,12 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       const tab = tabsRef.current.find((t) => t.id === id);
       if (!tab) return;
       const outgoing = activeTabIdRef.current;
-      if (outgoing && typeof window !== "undefined") scrollYRef.current[outgoing] = window.scrollY;
+      const pane = getMainPane();
+      if (outgoing && pane) scrollYRef.current[outgoing] = pane.scrollTop;
       setActiveTabId(id);
       const current =
         typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
-      if (current !== tab.href && tab.href) router.push(tab.href);
+      if (current !== tab.href && tab.href) router.push(tab.href, { scroll: false });
       restoreScrollPosition(id);
     },
     [router, restoreScrollPosition],
@@ -466,16 +561,12 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       const index = tabsRef.current.findIndex((t) => t.id === id);
       if (index === -1) return;
       const wasActive = activeTabIdRef.current === id;
-      const remaining = tabsRef.current.filter((t) => t.id !== id);
-      setTabs((prev) => prev.filter((t) => t.id !== id));
+      const remaining = ensureHomeTab(tabsRef.current.filter((t) => t.id !== id));
+      setTabs(remaining);
       if (!wasActive) return;
-      const neighbor = remaining[Math.min(index, remaining.length - 1)];
-      if (neighbor) {
-        setActiveTabId(neighbor.id);
-        router.push(neighbor.href, { scroll: false });
-      } else {
-        setActiveTabId(null);
-      }
+      const neighbor = remaining[Math.min(index, remaining.length - 1)] ?? HOME_TAB;
+      setActiveTabId(neighbor.id);
+      router.push(neighbor.href, { scroll: false });
     },
     [router],
   );
@@ -485,18 +576,14 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       const target = new Set(
         (ids ?? tabsRef.current.map((t) => t.id)).filter((id) => !isHomeTab(id)),
       );
-      const remaining = tabsRef.current.filter((t) => !target.has(t.id));
-      setTabs((prev) => prev.filter((t) => !target.has(t.id)));
+      const remaining = ensureHomeTab(tabsRef.current.filter((t) => !target.has(t.id)));
+      setTabs(remaining);
       const active = activeTabIdRef.current;
       if (!active || !target.has(active)) return;
       const index = tabsRef.current.findIndex((t) => t.id === active);
-      const neighbor = remaining[Math.min(index, remaining.length - 1)];
-      if (neighbor) {
-        setActiveTabId(neighbor.id);
-        router.push(neighbor.href, { scroll: false });
-      } else {
-        setActiveTabId(null);
-      }
+      const neighbor = remaining[Math.min(index, remaining.length - 1)] ?? HOME_TAB;
+      setActiveTabId(neighbor.id);
+      router.push(neighbor.href, { scroll: false });
     },
     [router],
   );

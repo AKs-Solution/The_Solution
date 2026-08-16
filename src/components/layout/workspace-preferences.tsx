@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useGuestMode } from "@/features/auth/components/guest-mode";
 
 export type WorkspaceDensity = "compact" | "comfortable" | "spacious";
 
@@ -101,6 +102,7 @@ export interface WorkspacePreferencesState {
   density: WorkspaceDensity;
   layout: WorkspaceLayout;
   layoutMode: WorkspaceLayoutMode;
+  sidebarCollapsed: boolean;
   activeViewId: string;
   views: WorkspaceView[];
   widgetPrefs: WidgetPrefs;
@@ -109,9 +111,23 @@ export interface WorkspacePreferencesState {
   lastUpdated: string;
 }
 
-const STORAGE_KEY = "consecuencia.workspace.v1";
+const STORAGE_KEY_PREFIX = "consecuencia.workspace.v1";
+const LAYOUT_MODE_STORAGE_KEY_PREFIX = "consecuencia.layout.mode";
+const SIDEBAR_COLLAPSED_STORAGE_KEY_PREFIX = "consecuencia.sidebar.collapsed";
 
-export const LAYOUT_MODE_STORAGE_KEY = "consecuencia.layout.mode";
+export const LAYOUT_MODE_STORAGE_KEY = LAYOUT_MODE_STORAGE_KEY_PREFIX;
+
+function workspaceStorageKey(identity: string): string {
+  return `${STORAGE_KEY_PREFIX}:${identity}`;
+}
+
+function layoutModeStorageKey(identity: string): string {
+  return `${LAYOUT_MODE_STORAGE_KEY_PREFIX}:${identity}`;
+}
+
+function sidebarCollapsedStorageKey(identity: string): string {
+  return `${SIDEBAR_COLLAPSED_STORAGE_KEY_PREFIX}:${identity}`;
+}
 
 export const DENSITY_LABELS: Record<WorkspaceDensity, string> = {
   compact: "Compact",
@@ -189,6 +205,7 @@ function getDefaultState(): WorkspacePreferencesState {
     density: "comfortable",
     layout: "studio",
     layoutMode: "tab-driven",
+    sidebarCollapsed: true,
     activeViewId: "mission-control",
     views: WORKSPACE_PRESETS,
     widgetPrefs: { ...DEFAULT_WIDGET_PREFS },
@@ -238,6 +255,8 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
       r.layoutMode === "minimal-focus"
         ? r.layoutMode
         : fallback.layoutMode,
+    sidebarCollapsed:
+      typeof r.sidebarCollapsed === "boolean" ? r.sidebarCollapsed : fallback.sidebarCollapsed,
     activeViewId: activeView.id,
     views,
     widgetPrefs:
@@ -256,10 +275,10 @@ function sanitizeState(raw: unknown): WorkspacePreferencesState {
   };
 }
 
-function readLocal(): WorkspacePreferencesState | null {
+function readLocal(identity: string): WorkspacePreferencesState | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(workspaceStorageKey(identity));
     if (!raw) return null;
     return sanitizeState(JSON.parse(raw));
   } catch {
@@ -267,10 +286,10 @@ function readLocal(): WorkspacePreferencesState | null {
   }
 }
 
-function readLayoutMode(): WorkspaceLayoutMode {
+function readLayoutMode(identity: string): WorkspaceLayoutMode {
   if (typeof window === "undefined") return "tab-driven";
   try {
-    const stored = window.localStorage.getItem(LAYOUT_MODE_STORAGE_KEY);
+    const stored = window.localStorage.getItem(layoutModeStorageKey(identity));
     if (stored === "tab-driven" || stored === "sidebar-expanded" || stored === "minimal-focus") {
       return stored;
     }
@@ -280,11 +299,25 @@ function readLayoutMode(): WorkspaceLayoutMode {
   return "tab-driven";
 }
 
+function readSidebarCollapsed(identity: string, fallback: boolean): boolean {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(sidebarCollapsedStorageKey(identity));
+    if (stored === "true") return true;
+    if (stored === "false") return false;
+  } catch {
+    // Storage unavailable — fall back to the default.
+  }
+  return fallback;
+}
+
 export interface WorkspacePreferencesValue extends WorkspacePreferencesState {
   activeView: WorkspaceView | null;
   setDensity: (density: WorkspaceDensity) => void;
   setLayout: (layout: WorkspaceLayout) => void;
   setLayoutMode: (mode: WorkspaceLayoutMode) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebarCollapsed: () => void;
   applyView: (viewId: string) => void;
   saveCurrentView: (name: string, icon?: WorkspaceViewIcon) => WorkspaceView | null;
   deleteView: (viewId: string) => void;
@@ -298,11 +331,11 @@ export interface WorkspacePreferencesValue extends WorkspacePreferencesState {
 const WorkspacePreferencesContext = createContext<WorkspacePreferencesValue | null>(null);
 
 export function WorkspacePreferencesProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<WorkspacePreferencesState>(() => {
-    const snapshot = sanitizeState(readLocal() ?? getDefaultState());
-    return { ...snapshot, layoutMode: readLayoutMode() };
-  });
+  const { ready, identityKey } = useGuestMode();
+  const identityRef = useRef<string | null>(null);
+  const [state, setState] = useState<WorkspacePreferencesState>(() => getDefaultState());
   const [hydrated, setHydrated] = useState(false);
+  const [scopedIdentity, setScopedIdentity] = useState<string | null>(null);
   const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Apply the density attribute to the document root so global CSS scales views.
@@ -312,42 +345,81 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
 
   // Mirror the layout mode to its dedicated key so the shell reflects it instantly.
   useEffect(() => {
+    if (!hydrated || !identityKey || scopedIdentity !== identityKey) return;
     try {
-      window.localStorage.setItem(LAYOUT_MODE_STORAGE_KEY, state.layoutMode);
+      window.localStorage.setItem(layoutModeStorageKey(identityKey), state.layoutMode);
     } catch {
       // Storage unavailable — the layout mode remains in the shared snapshot.
     }
-  }, [state.layoutMode]);
+  }, [state.layoutMode, hydrated, identityKey, scopedIdentity]);
 
-  // Hydrate from the server when no local snapshot exists yet.
   useEffect(() => {
-    let cancelled = false;
-    if (readLocal()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!hydrated || !identityKey || scopedIdentity !== identityKey) return;
+    try {
+      window.localStorage.setItem(
+        sidebarCollapsedStorageKey(identityKey),
+        state.sidebarCollapsed ? "true" : "false",
+      );
+    } catch {
+      // Storage unavailable — the rail preference remains in the shared snapshot.
+    }
+  }, [state.sidebarCollapsed, hydrated, identityKey, scopedIdentity]);
+
+  useEffect(() => {
+    if (!ready || !identityKey) return;
+    identityRef.current = identityKey;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- identity change must reset before reading scoped storage
+    setHydrated(false);
+
+    const local = readLocal(identityKey);
+    if (local) {
+      setState({
+        ...local,
+        layoutMode: readLayoutMode(identityKey),
+        sidebarCollapsed: readSidebarCollapsed(identityKey, local.sidebarCollapsed),
+      });
+      setScopedIdentity(identityKey);
       setHydrated(true);
       return;
     }
+
+    let cancelled = false;
     fetch("/api/settings/preferences")
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (cancelled || !json?.data) return;
-        const remote = sanitizeState(json.data);
-        setState(remote);
+        if (cancelled) return;
+        if (!json?.data) {
+          setState(getDefaultState());
+          return;
+        }
+        setState({
+          ...sanitizeState(json.data),
+          layoutMode: readLayoutMode(identityKey),
+          sidebarCollapsed: readSidebarCollapsed(
+            identityKey,
+            sanitizeState(json.data).sidebarCollapsed,
+          ),
+        });
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setState(getDefaultState());
+      })
       .finally(() => {
-        if (!cancelled) setHydrated(true);
+        if (!cancelled) {
+          setScopedIdentity(identityKey);
+          setHydrated(true);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ready, identityKey]);
 
   // Persist local changes to localStorage and, debounced, to the user profile.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !identityKey || scopedIdentity !== identityKey) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.localStorage.setItem(workspaceStorageKey(identityKey), JSON.stringify(state));
     } catch {
       // Storage unavailable — continue without local persistence.
     }
@@ -364,7 +436,7 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
     return () => {
       if (persistTimer.current) clearTimeout(persistTimer.current);
     };
-  }, [state, hydrated]);
+  }, [state, hydrated, identityKey, scopedIdentity]);
 
   const setDensity = useCallback((density: WorkspaceDensity) => {
     setState((prev) => ({ ...prev, density }));
@@ -375,7 +447,24 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
   }, []);
 
   const setLayoutMode = useCallback((layoutMode: WorkspaceLayoutMode) => {
-    setState((prev) => ({ ...prev, layoutMode }));
+    setState((prev) => ({
+      ...prev,
+      layoutMode,
+      sidebarCollapsed:
+        layoutMode === "sidebar-expanded"
+          ? false
+          : layoutMode === "tab-driven"
+            ? true
+            : prev.sidebarCollapsed,
+    }));
+  }, []);
+
+  const setSidebarCollapsed = useCallback((sidebarCollapsed: boolean) => {
+    setState((prev) => ({ ...prev, sidebarCollapsed }));
+  }, []);
+
+  const toggleSidebarCollapsed = useCallback(() => {
+    setState((prev) => ({ ...prev, sidebarCollapsed: !prev.sidebarCollapsed }));
   }, []);
 
   const applyView = useCallback((viewId: string) => {
@@ -482,6 +571,8 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       setDensity,
       setLayout,
       setLayoutMode,
+      setSidebarCollapsed,
+      toggleSidebarCollapsed,
       applyView,
       saveCurrentView,
       deleteView,
@@ -496,6 +587,8 @@ export function WorkspacePreferencesProvider({ children }: { children: ReactNode
       setDensity,
       setLayout,
       setLayoutMode,
+      setSidebarCollapsed,
+      toggleSidebarCollapsed,
       applyView,
       saveCurrentView,
       deleteView,

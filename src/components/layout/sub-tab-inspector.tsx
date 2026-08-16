@@ -84,7 +84,7 @@ export function SubTabInspector({
   };
 
   return (
-    <div className={cn("border-b border-zinc-200 bg-white px-3 py-1 select-none", className)}>
+    <div className={cn("border-b border-slate-200 bg-white px-3 py-1 select-none", className)}>
       <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
         {DEFAULT_SUB_TABS.map((tab) => {
           const Icon = tab.icon;
@@ -98,19 +98,19 @@ export function SubTabInspector({
               className={cn(
                 "flex h-7.5 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-all duration-150 select-none",
                 isActive
-                  ? "border-zinc-900 bg-zinc-900 font-semibold text-zinc-50"
-                  : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-800",
+                  ? "border-slate-900 bg-slate-900 font-semibold text-slate-50"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800",
               )}
             >
-              <Icon className={cn("size-3.5", isActive ? "text-zinc-50" : "text-zinc-400")} />
+              <Icon className={cn("size-3.5", isActive ? "text-slate-50" : "text-slate-400")} />
               <span>{tab.label}</span>
               {tab.badge && (
                 <span
                   className={cn(
                     "rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold",
                     isActive
-                      ? "border-white/30 bg-white/20 text-zinc-100"
-                      : "border-zinc-200 bg-zinc-100 text-zinc-500",
+                      ? "border-white/30 bg-white/20 text-slate-100"
+                      : "border-slate-200 bg-slate-100 text-slate-500",
                   )}
                 >
                   {tab.badge}

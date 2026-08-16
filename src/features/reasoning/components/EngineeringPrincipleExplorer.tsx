@@ -28,10 +28,10 @@ export function EngineeringPrincipleExplorer({ principles }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
-          <h3 className="text-lg font-semibold text-zinc-900">Engineering Principle Library</h3>
-          <p className="text-xs text-zinc-500">
+          <h3 className="text-lg font-semibold text-slate-900">Engineering Principle Library</h3>
+          <p className="text-xs text-slate-500">
             Reusable, versioned, governing physical and systemic principles.
           </p>
         </div>
@@ -42,13 +42,13 @@ export function EngineeringPrincipleExplorer({ principles }: Props) {
             placeholder="Search principles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-48 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 focus:border-cyan-500 focus:outline-none"
+            className="w-48 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-cyan-500 focus:outline-none"
           />
 
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 focus:border-cyan-500 focus:outline-none"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-cyan-500 focus:outline-none"
           >
             <option value="ALL">All Categories ({principles.length})</option>
             {categories.map((c) => (
@@ -64,24 +64,24 @@ export function EngineeringPrincipleExplorer({ principles }: Props) {
         {filtered.map((pr) => (
           <div
             key={pr.code}
-            className="rounded-xl border border-zinc-200 bg-white p-4 backdrop-blur-md transition-all hover:border-zinc-200"
+            className="rounded-xl border border-slate-200 bg-white p-4 backdrop-blur-md transition-all hover:border-slate-200"
           >
             <div className="mb-2 flex items-center justify-between">
               <span className="rounded border border-purple-800 bg-purple-950 px-2 py-0.5 font-mono text-xs text-purple-300">
                 {pr.code}
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-zinc-500">Category: {pr.category}</span>
-                <span className="font-mono text-xs text-zinc-500">v{pr.version}</span>
+                <span className="font-mono text-xs text-slate-500">Category: {pr.category}</span>
+                <span className="font-mono text-xs text-slate-500">v{pr.version}</span>
               </div>
             </div>
 
-            <h4 className="text-sm font-bold text-zinc-900">{pr.name}</h4>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-700">{pr.description}</p>
+            <h4 className="text-sm font-bold text-slate-900">{pr.name}</h4>
+            <p className="mt-1 text-xs leading-relaxed text-slate-700">{pr.description}</p>
 
             {pr.governingEquations && pr.governingEquations.length > 0 && (
-              <div className="mt-3 rounded-lg border border-zinc-200 bg-white p-2.5">
-                <span className="mb-1 block font-mono text-[10px] text-zinc-500 uppercase">
+              <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2.5">
+                <span className="mb-1 block font-mono text-[10px] text-slate-500 uppercase">
                   Governing Equations:
                 </span>
                 {pr.governingEquations.map((eq, i) => (
@@ -94,11 +94,11 @@ export function EngineeringPrincipleExplorer({ principles }: Props) {
 
             {pr.supportingEvidenceRefs && pr.supportingEvidenceRefs.length > 0 && (
               <div className="mt-2.5 flex flex-wrap items-center gap-1">
-                <span className="text-[10px] text-zinc-500">Refs:</span>
+                <span className="text-[10px] text-slate-500">Refs:</span>
                 {pr.supportingEvidenceRefs.map((ref, i) => (
                   <span
                     key={i}
-                    className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500"
+                    className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500"
                   >
                     {ref}
                   </span>

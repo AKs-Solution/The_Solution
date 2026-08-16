@@ -96,7 +96,7 @@ export default function ProposeDecisionPage() {
 
       <form
         onSubmit={handleCreateDecision}
-        className="max-w-xl space-y-5 rounded-lg border border-zinc-200 bg-white p-6 shadow-xs"
+        className="max-w-xl space-y-5 rounded-lg border border-slate-200 bg-white p-6 shadow-xs"
       >
         {formError && (
           <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
@@ -105,11 +105,11 @@ export default function ProposeDecisionPage() {
         )}
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">Decision type</label>
+          <label className="text-sm font-medium text-slate-700">Decision type</label>
           <select
             value={decisionType}
             onChange={(e) => setDecisionType(e.target.value)}
-            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-800"
+            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800"
           >
             <option value="TOLERANCE_CHANGE">Tolerance change</option>
             <option value="MATERIAL_SUB">Material substitution</option>
@@ -119,7 +119,7 @@ export default function ProposeDecisionPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">Summary</label>
+          <label className="text-sm font-medium text-slate-700">Summary</label>
           <Input
             ref={summaryInputRef}
             required
@@ -130,7 +130,7 @@ export default function ProposeDecisionPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">Rationale</label>
+          <label className="text-sm font-medium text-slate-700">Rationale</label>
           <Input
             required
             value={rationale}
@@ -142,7 +142,7 @@ export default function ProposeDecisionPage() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
+          className="bg-slate-900 text-slate-50 hover:bg-slate-800"
         >
           {isSubmitting ? "Saving..." : "Record decision"}
         </Button>

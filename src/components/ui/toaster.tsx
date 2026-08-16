@@ -37,10 +37,10 @@ const ICONS: Record<ToastVariant, ReactNode> = {
 };
 
 const BORDER: Record<ToastVariant, string> = {
-  info: "border-sky-200 bg-white text-zinc-900",
-  success: "border-emerald-200 bg-white text-zinc-900",
-  warning: "border-amber-200 bg-white text-zinc-900",
-  error: "border-rose-200 bg-white text-zinc-900",
+  info: "border-sky-200 bg-white text-slate-900",
+  success: "border-emerald-200 bg-white text-slate-900",
+  warning: "border-amber-200 bg-white text-slate-900",
+  error: "border-rose-200 bg-white text-slate-900",
 };
 
 const VIEWPORT_ID = "consecuencia-toast-viewport";
@@ -101,11 +101,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             >
               <span className="mt-0.5 shrink-0">{ICONS[t.variant] ?? ICONS.info}</span>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-semibold tracking-tight text-zinc-900">
+                <span className="text-sm font-semibold tracking-tight text-slate-900">
                   {t.title}
                 </span>
                 {t.description && (
-                  <span className="mt-0.5 text-xs leading-relaxed text-zinc-500">
+                  <span className="mt-0.5 text-xs leading-relaxed text-slate-500">
                     {t.description}
                   </span>
                 )}
@@ -113,7 +113,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => dismiss(t.id)}
-                className="cursor-pointer rounded p-0.5 text-zinc-400 transition-colors hover:text-zinc-900"
+                className="cursor-pointer rounded p-0.5 text-slate-400 transition-colors hover:text-slate-900"
                 aria-label="Dismiss notification"
               >
                 <X className="size-3.5" aria-hidden="true" />

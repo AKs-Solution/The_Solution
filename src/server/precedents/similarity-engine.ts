@@ -1,5 +1,4 @@
 import { Precedent, PrecedentMatchContext, MatchedPrecedent } from "@/features/precedents/types";
-import { INDUSTRY_FAILURE_SEEDS } from "@/server/precedents/seed-industry-graph";
 import { prisma } from "@/server/db";
 
 interface MatchResult {
@@ -259,22 +258,6 @@ function categorySimilarity(a: string, b: string): number {
   return Math.max(jaccard, containment);
 }
 
-function seedIndustryMatches(context: IndustryFailureQuery, limit: number): IndustryFailureMatch[] {
-  const records: RawIndustryFailureMatch[] = INDUSTRY_FAILURE_SEEDS.map((seed) => ({
-    id: seed.id,
-    componentType: seed.componentType,
-    material: seed.material,
-    failureMode: seed.failureMode,
-    rootCause: seed.rootCause,
-    invalidatedAssumption: seed.invalidatedAssumption,
-    provenCorrectiveAction: seed.provenCorrectiveAction,
-    evidenceHashes: seed.evidenceHashes,
-    programContext: seed.programContext,
-    occurredAt: seed.occurredAt,
-  }));
-  return scoreIndustryMatches(records, context, limit);
-}
-
 function scoreIndustryMatches(
   records: RawIndustryFailureMatch[],
   context: IndustryFailureQuery,
@@ -322,7 +305,7 @@ function scoreIndustryMatches(
  * Queries real Industry Failure Graph records (PublicFailureRecord, AD, SDR,
  * NTSB) categorized by componentType, material, and failureMode, then scores
  * them against the provided context using the shared token-overlap matcher.
- * Falls back to the curated seed dataset when the database is unavailable.
+ * Returns an empty list when the public corpus is empty — never fabricates matches.
  */
 export async function queryIndustryFailureRecords(
   _organizationId: string,
@@ -380,13 +363,12 @@ export async function queryIndustryFailureRecords(
     ];
 
     if (records.length === 0) {
-      return seedIndustryMatches(context, limit);
+      return [];
     }
 
-    const scored = scoreIndustryMatches(records, context, limit);
-    return scored.length > 0 ? scored : seedIndustryMatches(context, limit);
+    return scoreIndustryMatches(records, context, limit);
   } catch (err) {
-    console.warn("[SimilarityEngine] DB offline fallback execution:", err);
-    return seedIndustryMatches(context, limit);
+    console.warn("[SimilarityEngine] Public corpus unavailable:", err);
+    return [];
   }
 }

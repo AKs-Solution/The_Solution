@@ -18,70 +18,61 @@ export interface PredictedSupplierEvent {
 }
 
 export async function predictSupplierRisk(supplierId: string, geometryType: string = "all") {
-  const supplier = await (prisma as any).supplier?.findUnique({
-    where: { id: supplierId },
-  }).catch(() => null);
+  const supplier = await (prisma as any).supplier
+    ?.findUnique({
+      where: { id: supplierId },
+    })
+    .catch(() => null);
 
   if (!supplier) {
     throw new Error("Supplier not found");
   }
 
   // Get historical performance indicators or construct default from live capacity
-  const indicators = await (prisma as any).supplierRiskIndicator?.findMany({
-    where: { supplierId, ...(geometryType !== "all" ? { geometryType } : {}) },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-  }).catch(() => []) ?? [];
+  const indicators =
+    (await (prisma as any).supplierRiskIndicator
+      ?.findMany({
+        where: { supplierId, ...(geometryType !== "all" ? { geometryType } : {}) },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      })
+      .catch(() => [])) ?? [];
 
-  const liveCapacity = supplier.liveCapacityScore || 1.0;
-  const rating = supplier.rating || 5.0;
+  const liveCapacity =
+    typeof supplier.liveCapacityScore === "number" ? supplier.liveCapacityScore : null;
+  const rating = typeof supplier.rating === "number" ? supplier.rating : null;
 
-  // Base risk calculations from capacity & rating
-  let riskProbability = 0.2;
+  let riskProbability = 0;
   let riskLevel: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" = "LOW";
-  let predictedEvent = "Stable operations expected";
-  let timeframe = "Next 12 weeks";
-  let precedents = 3;
+  let predictedEvent = "Insufficient supplier metrics to predict risk.";
+  let timeframe = "Unavailable";
+  const precedents = indicators.length;
 
-  if (liveCapacity > 0.9) {
+  if (liveCapacity !== null && liveCapacity > 0.9) {
     riskProbability = 0.78;
     riskLevel = "CRITICAL";
-    predictedEvent =
-      "Lead time slip of 2-4 weeks on precision bore work due to capacity congestion (95%+ utilization)";
+    predictedEvent = "Lead time slip risk due to recorded capacity congestion.";
     timeframe = "Within 4-8 weeks";
-    precedents = 6;
-  } else if (rating < 3.5 || (indicators[0] && indicators[0].riskLevel === "HIGH")) {
+  } else if (
+    (rating !== null && rating < 3.5) ||
+    (indicators[0] && indicators[0].riskLevel === "HIGH")
+  ) {
     riskProbability = 0.62;
     riskLevel = "HIGH";
-    predictedEvent = "Scrap rate increase (+4.5%) during batch production ramp";
+    predictedEvent = "Quality risk indicated by recorded rating or risk indicators.";
     timeframe = "Within 6 weeks";
-    precedents = 4;
   } else if (indicators.length > 0) {
-    riskProbability = indicators[0].confidenceScore || 0.45;
+    riskProbability = indicators[0].confidenceScore || 0;
     riskLevel =
       (indicators[0].riskLevel as unknown as "CRITICAL" | "HIGH" | "MEDIUM" | "LOW") || "MEDIUM";
+    predictedEvent = "Risk derived from recorded supplier indicators.";
+    timeframe = "Based on latest indicator";
+  } else if (liveCapacity !== null || rating !== null) {
+    predictedEvent = "Stable operations expected from recorded metrics.";
+    timeframe = "Next 12 weeks";
   }
 
-  const mitigations = [
-    {
-      action: "Qualify backup supplier (e.g. Precision Components Inc)",
-      successRate: 0.92,
-      cost: 15000,
-      timeImpact: -14, // saves 14 days delay
-    },
-    {
-      action: "Pre-expedite carbide tooling & add 2-week buffer to schedule",
-      successRate: 0.85,
-      cost: 5000,
-      timeImpact: -10,
-    },
-    {
-      action: "Require 100% CMM inspection on first 20 units",
-      successRate: 0.78,
-      cost: 3500,
-      timeImpact: 0,
-    },
-  ];
+  const mitigations: PredictedSupplierEvent["recommendedMitigation"] = [];
 
   return {
     supplierId: supplier.id,
@@ -96,21 +87,24 @@ export async function predictSupplierRisk(supplierId: string, geometryType: stri
 }
 
 export async function getSuppliersAtRisk(organizationId: string) {
-  const suppliers = await (prisma as any).supplier?.findMany({
-    where: { organizationId },
-    take: 20,
-  }).catch(() => []) ?? [];
+  const suppliers =
+    (await (prisma as any).supplier
+      ?.findMany({
+        where: { organizationId },
+        take: 20,
+      })
+      .catch(() => [])) ?? [];
 
   if (suppliers.length === 0) {
     return {
       suppliersAtRisk: [],
-      supplyChainHealth: 100,
+      supplyChainHealth: 0,
       recommendations: [],
     };
   }
 
   const risks = await Promise.all(
-    suppliers.map((s: any) => predictSupplierRisk(s.id, "all").catch(() => null))
+    suppliers.map((s: any) => predictSupplierRisk(s.id, "all").catch(() => null)),
   );
 
   const filtered = risks
@@ -125,10 +119,12 @@ export async function getSuppliersAtRisk(organizationId: string) {
 
   return {
     suppliersAtRisk: filtered,
-    supplyChainHealth: Math.max(10, Math.min(100, healthScore)),
-    recommendations: [
-      "Review high-capacity suppliers for critical path geometry assignments.",
-      "Implement pre-expedited tool ordering for high-risk suppliers.",
-    ],
+    supplyChainHealth: Math.max(0, Math.min(100, healthScore)),
+    recommendations: filtered.length
+      ? [
+          "Review high-capacity suppliers for critical path geometry assignments.",
+          "Implement pre-expedited tool ordering for high-risk suppliers.",
+        ]
+      : [],
   };
 }

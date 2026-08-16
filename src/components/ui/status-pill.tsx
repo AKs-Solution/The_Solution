@@ -29,10 +29,10 @@ export function StatusPill({ status }: { status?: string | null }) {
           mapped === "DERIVED"
             ? "bg-emerald-600"
             : mapped === "INFERRED"
-              ? "bg-amber-600"
+              ? "bg-amber-500"
               : mapped === "RECORDED"
-                ? "bg-slate-400"
-                : "bg-rose-600"
+                ? "bg-slate-500"
+                : "bg-rose-500"
         }`}
         aria-hidden="true"
       />

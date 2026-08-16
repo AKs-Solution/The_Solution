@@ -25,15 +25,15 @@ export function IntegrationsHub({ connectors, onTriggerSync }: IntegrationsHubPr
   };
 
   return (
-    <div className="w-full space-y-6 rounded-xl border border-zinc-200 bg-white p-6 font-sans text-zinc-900 shadow-2xl">
+    <div className="w-full space-y-6 rounded-xl border border-slate-200 bg-white p-6 font-sans text-slate-900 shadow-2xl">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-bold text-zinc-900">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
             <Cpu className="h-5 w-5 text-indigo-400" /> Enterprise Integration Hub (PLM / ERP / QMS
             / ALM)
           </h2>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-slate-500">
             Bi-directional incremental sync connectors for Siemens Teamcenter, PTC Windchill, SAP
             S/4HANA, Veeva QMS, and IBM DOORS.
           </p>
@@ -45,19 +45,19 @@ export function IntegrationsHub({ connectors, onTriggerSync }: IntegrationsHubPr
         {connectors.map((conn) => (
           <div
             key={conn.id}
-            className="flex flex-col justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-100 p-5 shadow-md transition-all hover:border-zinc-200 sm:flex-row sm:items-center"
+            className="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-slate-100 p-5 shadow-md transition-all hover:border-slate-200 sm:flex-row sm:items-center"
           >
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-mono text-xs font-bold text-indigo-400">
                   {conn.type}
                 </span>
-                <span className="text-xs font-semibold text-zinc-700">{conn.provider}</span>
+                <span className="text-xs font-semibold text-slate-700">{conn.provider}</span>
               </div>
 
-              <h3 className="text-sm font-bold text-zinc-900">{conn.name}</h3>
+              <h3 className="text-sm font-bold text-slate-900">{conn.name}</h3>
 
-              <div className="flex items-center gap-4 pt-1 font-mono text-[11px] text-zinc-500">
+              <div className="flex items-center gap-4 pt-1 font-mono text-[11px] text-slate-500">
                 <span>Synced: {conn.recordsSynced.toLocaleString()} records</span>
                 <span>•</span>
                 <span>Last Sync: {new Date(conn.lastSyncAt).toLocaleTimeString()}</span>
@@ -72,7 +72,7 @@ export function IntegrationsHub({ connectors, onTriggerSync }: IntegrationsHubPr
               <button
                 onClick={() => handleSync(conn.id)}
                 disabled={syncingId === conn.id}
-                className="flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-100 px-3.5 py-2 text-xs font-semibold text-zinc-900 transition-all hover:bg-zinc-100 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-900 transition-all hover:bg-slate-100 disabled:opacity-50"
               >
                 <RefreshCw
                   className={`h-3.5 w-3.5 ${syncingId === conn.id ? "animate-spin text-indigo-400" : ""}`}

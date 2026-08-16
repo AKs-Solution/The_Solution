@@ -123,7 +123,7 @@ export default function SentinelPage() {
                         href: `/sentinel/${alert.id}`,
                       })
                     }
-                    className="text-sm font-medium text-zinc-900 no-underline hover:underline"
+                    className="text-sm font-medium text-slate-900 no-underline hover:underline"
                   >
                     View details
                   </Link>

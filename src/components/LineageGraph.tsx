@@ -27,27 +27,27 @@ export function LineageGraph({ nodes, edges }: LineageGraphProps) {
       case "assessment":
         return "bg-purple-500/20 border-purple-500 text-purple-600";
       default:
-        return "bg-zinc-100 border-zinc-300 text-zinc-600";
+        return "bg-slate-100 border-slate-300 text-slate-600";
     }
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h3 className="text-base font-bold text-zinc-900">
+          <h3 className="text-base font-bold text-slate-900">
             Dependency & Provenance Lineage Graph
           </h3>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-slate-500">
             Traceable evidence relationships from records to downstream assessments
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-500">Filter Relationship:</span>
+          <span className="text-xs text-slate-500">Filter Relationship:</span>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="rounded-md border border-zinc-200 bg-zinc-100 px-3 py-1.5 text-xs text-zinc-700 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="rounded-md border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs text-slate-700 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           >
             <option value="ALL">All Relationships</option>
             <option value="supplied_by">Supplied By</option>
@@ -60,7 +60,7 @@ export function LineageGraph({ nodes, edges }: LineageGraphProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Node Matrix Canvas */}
-        <div className="flex flex-col gap-4 rounded-lg border border-zinc-200 bg-zinc-100 p-6 lg:col-span-2">
+        <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-100 p-6 lg:col-span-2">
           <div className="flex flex-wrap gap-3">
             {nodes.map((node) => {
               const isSelected = selectedNode?.id === node.id;
@@ -70,7 +70,7 @@ export function LineageGraph({ nodes, edges }: LineageGraphProps) {
                   onClick={() => setSelectedNode(node)}
                   className={`flex flex-col gap-1 rounded-lg border p-4 text-left transition-all hover:scale-[1.02] ${getNodeColor(
                     node.type,
-                  )} ${isSelected ? "shadow-lg ring-2 ring-indigo-500 ring-offset-2 ring-offset-zinc-50" : ""}`}
+                  )} ${isSelected ? "shadow-lg ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-50" : ""}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-bold tracking-wider uppercase opacity-75">
@@ -78,19 +78,19 @@ export function LineageGraph({ nodes, edges }: LineageGraphProps) {
                     </span>
                     <span className="h-2 w-2 rounded-full bg-current" />
                   </div>
-                  <span className="text-sm font-semibold text-zinc-900">{node.label}</span>
-                  <span className="font-mono text-[10px] text-zinc-500">{node.id}</span>
+                  <span className="text-sm font-semibold text-slate-900">{node.label}</span>
+                  <span className="font-mono text-[10px] text-slate-500">{node.id}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Edge Connector Summary */}
-          <div className="mt-4 flex flex-col gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-4">
-            <span className="text-xs font-semibold text-zinc-600">
+          <div className="mt-4 flex flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-4">
+            <span className="text-xs font-semibold text-slate-600">
               Edge Relationships ({filteredEdges.length})
             </span>
-            <div className="flex flex-col gap-1 font-mono text-xs text-zinc-500">
+            <div className="flex flex-col gap-1 font-mono text-xs text-slate-500">
               {filteredEdges.map((edge, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                   <span className="text-indigo-600">{edge.source}</span>
@@ -106,37 +106,37 @@ export function LineageGraph({ nodes, edges }: LineageGraphProps) {
         </div>
 
         {/* Selected Node Details Inspector */}
-        <div className="flex flex-col gap-4 rounded-lg border border-zinc-200 bg-zinc-100 p-6">
-          <h4 className="border-b border-zinc-200 pb-2 text-sm font-bold text-zinc-900">
+        <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-100 p-6">
+          <h4 className="border-b border-slate-200 pb-2 text-sm font-bold text-slate-900">
             Node Inspector
           </h4>
           {selectedNode ? (
-            <div className="flex flex-col gap-3 text-xs text-zinc-600">
+            <div className="flex flex-col gap-3 text-xs text-slate-600">
               <div>
-                <span className="block text-zinc-500">ID:</span>
+                <span className="block text-slate-500">ID:</span>
                 <span className="font-mono text-indigo-600">{selectedNode.id}</span>
               </div>
               <div>
-                <span className="block text-zinc-500">Type:</span>
-                <span className="font-bold tracking-wide text-zinc-700 uppercase">
+                <span className="block text-slate-500">Type:</span>
+                <span className="font-bold tracking-wide text-slate-700 uppercase">
                   {selectedNode.type}
                 </span>
               </div>
               <div>
-                <span className="block text-zinc-500">Label:</span>
-                <span className="text-sm font-semibold text-zinc-900">{selectedNode.label}</span>
+                <span className="block text-slate-500">Label:</span>
+                <span className="text-sm font-semibold text-slate-900">{selectedNode.label}</span>
               </div>
               {selectedNode.metadata && (
                 <div>
-                  <span className="mb-1 block text-zinc-500">Metadata:</span>
-                  <pre className="overflow-x-auto rounded border border-zinc-200 bg-zinc-50 p-3 font-mono text-[11px] text-zinc-600">
+                  <span className="mb-1 block text-slate-500">Metadata:</span>
+                  <pre className="overflow-x-auto rounded border border-slate-200 bg-slate-50 p-3 font-mono text-[11px] text-slate-600">
                     {JSON.stringify(selectedNode.metadata, null, 2)}
                   </pre>
                 </div>
               )}
             </div>
           ) : (
-            <span className="text-xs text-zinc-500 italic">
+            <span className="text-xs text-slate-500 italic">
               Select any node on the graph to inspect metadata
             </span>
           )}

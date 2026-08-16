@@ -6,6 +6,8 @@ import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { WorkspaceTabBar } from "./workspace-tab-bar";
 import { SearchCommandPalette } from "@/features/search";
+import { HelpPanel } from "@/features/help";
+import { InviteLauncher } from "@/features/organizations/components/invite-launcher";
 import { useWorkspacePreferences } from "./workspace-preferences";
 import { cn } from "@/shared/utils";
 import { useGuestMode } from "@/features/auth/components";
@@ -16,7 +18,7 @@ interface ShellProps {
 
 export function Shell({ children }: ShellProps) {
   const { layoutMode } = useWorkspacePreferences();
-  const { isGuest } = useGuestMode();
+  const { isGuest, requestUpgrade } = useGuestMode();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const showSidebar = layoutMode !== "minimal-focus";
@@ -63,10 +65,17 @@ export function Shell({ children }: ShellProps) {
     <div className="m-0 flex h-dvh w-full max-w-full flex-col overflow-hidden bg-slate-50 p-0 text-slate-900 antialiased">
       <Header onOpenMobileNav={() => setMobileNavOpen(true)} />
       {isGuest && (
-        <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 px-6 py-2 text-center text-xs leading-relaxed text-slate-600">
-          You&apos;re exploring Consecuencia with public aerospace data. Create an account to upload
-          your organization&apos;s knowledge, validate engineering decisions, and enable Decision
-          Sentinel.
+        <div className="flex shrink-0 items-center justify-center gap-3 border-b border-slate-200 bg-white px-6 py-2 text-xs text-slate-600">
+          <span>
+            Guest sandbox on public aerospace data. Create an account to ingest program artifacts.
+          </span>
+          <button
+            type="button"
+            onClick={requestUpgrade}
+            className="font-medium text-blue-600 hover:text-blue-700"
+          >
+            Create account
+          </button>
         </div>
       )}
       <div className="relative flex min-h-0 w-full flex-1 overflow-hidden">
@@ -96,6 +105,8 @@ export function Shell({ children }: ShellProps) {
         </div>
       </div>
       <SearchCommandPalette />
+      <HelpPanel />
+      <InviteLauncher />
     </div>
   );
 }

@@ -57,10 +57,10 @@ export default function SupplierAttestationPage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Supplier Attestation</span>
+            <span className="font-medium text-slate-800">Supplier Attestation</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function SupplierAttestationPage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : sessions.length > 0 ? (
               <div className="flex flex-col gap-4">
@@ -102,15 +102,17 @@ export default function SupplierAttestationPage() {
                       className={`flex flex-col gap-3 rounded-xl border p-5 transition-all ${
                         isAttested
                           ? "border-emerald-200 bg-emerald-50/5"
-                          : "border-zinc-200 bg-zinc-50/10"
+                          : "border-slate-200 bg-slate-50/10"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <Building className="size-5 text-indigo-600" />
                           <div className="flex flex-col text-left">
-                            <span className="text-sm font-bold text-zinc-900">{s.componentId}</span>
-                            <span className="text-[10px] text-zinc-400">Proposal ID: {s.id}</span>
+                            <span className="text-sm font-bold text-slate-900">
+                              {s.componentId}
+                            </span>
+                            <span className="text-[10px] text-slate-400">Proposal ID: {s.id}</span>
                           </div>
                         </div>
 
@@ -119,34 +121,34 @@ export default function SupplierAttestationPage() {
                             Capability Attested
                           </Badge>
                         ) : (
-                          <Badge className="border-zinc-200 bg-zinc-100 text-zinc-800">
+                          <Badge className="border-slate-200 bg-slate-100 text-slate-800">
                             Proposed Match
                           </Badge>
                         )}
                       </div>
 
-                      <Divider className="border-zinc-100" />
+                      <Divider className="border-slate-100" />
 
                       <div className="grid grid-cols-2 gap-4 text-left text-xs">
                         <div>
-                          <span className="mb-0.5 block text-zinc-400">OEM Target Cost Limit</span>
-                          <span className="font-semibold text-zinc-800">
+                          <span className="mb-0.5 block text-slate-400">OEM Target Cost Limit</span>
+                          <span className="font-semibold text-slate-800">
                             ${s.oemTargetCost.toLocaleString()}
                           </span>
                         </div>
                         <div>
-                          <span className="mb-0.5 block text-zinc-400">
+                          <span className="mb-0.5 block text-slate-400">
                             Supplier Estimated Price
                           </span>
-                          <span className="font-semibold text-zinc-800">
+                          <span className="font-semibold text-slate-800">
                             ${s.supplierPrice.toLocaleString()}
                           </span>
                         </div>
                       </div>
 
                       {!isAttested && (
-                        <div className="mt-1 flex flex-col gap-3 rounded-xl bg-zinc-50 p-4 text-left text-xs">
-                          <span className="text-zinc-500">
+                        <div className="mt-1 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 text-left text-xs">
+                          <span className="text-slate-500">
                             Verify this supplier's capability matching based on AS9100 tooling
                             certifications.
                           </span>
@@ -192,23 +194,23 @@ export default function SupplierAttestationPage() {
 
           {/* SOURCING COMPLIANCE */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-semibold text-zinc-400 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
                       Sourcing Governance
                     </span>
                     <h2 className="text-foreground text-base font-bold">Policy Guide</h2>
                   </div>
 
-                  <Divider className="border-zinc-200" />
+                  <Divider className="border-slate-200" />
 
-                  <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-left text-xs">
-                    <span className="mb-1 block font-semibold text-zinc-800">
+                  <div className="rounded border border-slate-200 bg-slate-50 p-3 text-left text-xs">
+                    <span className="mb-1 block font-semibold text-slate-800">
                       Manual Provenance Rule:
                     </span>
-                    <p className="text-[11px] leading-normal text-zinc-500">
+                    <p className="text-[11px] leading-normal text-slate-500">
                       Sourcing links remain in a non-certified draft state until verified against
                       physical supplier capability logs by a named engineering authority.
                     </p>

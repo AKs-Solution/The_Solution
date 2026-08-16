@@ -25,10 +25,12 @@ export async function queryHistoricalEvidence(
 ): Promise<HistoricalEvidenceResult> {
   try {
     const precedents = organizationId
-      ? await (prisma as any).historicalPrecedent?.findMany({
-          where: { organizationId },
-          take: 20,
-        }).catch(() => []) ?? []
+      ? ((await (prisma as any).historicalPrecedent
+          ?.findMany({
+            where: { organizationId },
+            take: 20,
+          })
+          .catch(() => [])) ?? [])
       : [];
 
     if (precedents.length > 0) {
@@ -45,13 +47,18 @@ export async function queryHistoricalEvidence(
       if (matched.length > 0) {
         const totalNCRs = matched.reduce((acc: number, p: any) => {
           const metrics = (p as any).qualityMetrics as { totalNCRs?: number } | null;
-          return acc + (metrics?.totalNCRs || 1);
+          return acc + (typeof metrics?.totalNCRs === "number" ? metrics.totalNCRs : 0);
         }, 0);
-        const avgScrap =
-          matched.reduce((acc: number, p: any) => {
+        const scrapValues = matched
+          .map((p: any) => {
             const metrics = (p as any).qualityMetrics as { averageScrapRate?: number } | null;
-            return acc + (metrics?.averageScrapRate || 4.5);
-          }, 0) / matched.length;
+            return typeof metrics?.averageScrapRate === "number" ? metrics.averageScrapRate : null;
+          })
+          .filter((v: number | null): v is number => v !== null);
+        const avgScrap =
+          scrapValues.length > 0
+            ? scrapValues.reduce((acc: number, v: number) => acc + v, 0) / scrapValues.length
+            : 0;
 
         const histRisk = Math.min(100, Math.round(avgScrap * 8 + totalNCRs * 5));
         const histConf = Math.min(0.95, 0.4 + matched.length * 0.15);
@@ -62,52 +69,36 @@ export async function queryHistoricalEvidence(
           matchedPrecedentsCount: matched.length,
           averageScrapRatePct: parseFloat(avgScrap.toFixed(2)),
           totalHistoricalNCRs: totalNCRs,
-          summary: `Matched ${matched.length} historical engineering precedents for ${metadata.materialFamily || metadata.material}. Verified scrap and anomaly trends.`,
+          summary: `Matched ${matched.length} historical engineering precedents for ${metadata.materialFamily || metadata.material || "this drawing"}.`,
           precedentMatches: matched.map((m: any) => ({
-            title: m.title || "Precedent Study",
-            decisionMade: m.decisionMade || "Standard tooling parameters",
-            outcome: m.outcome || "Yield within acceptable aerospace tolerances",
-            confidence: 0.92,
-            similarityScore: 0.88,
+            title: m.title || "Untitled precedent",
+            decisionMade: m.decisionMade || "",
+            outcome: m.outcome || "",
+            confidence: typeof m.confidence === "number" ? m.confidence : 0,
+            similarityScore: typeof m.similarityScore === "number" ? m.similarityScore : 0,
           })),
         };
       }
     }
 
-    // Default Baseline Precedents
     return {
-      historicalRiskScore: 32,
-      historicalConfidence: 0.85,
-      matchedPrecedentsCount: 2,
-      averageScrapRatePct: 3.8,
-      totalHistoricalNCRs: 4,
-      summary: `Baseline precedent reference: Inconel & Titanium aerospace alloys show manageable machining risk with strict coolant flood protocols.`,
-      precedentMatches: [
-        {
-          title: "Inconel 718 High-Pressure Flange Tooling Precedent",
-          decisionMade: "Switched to ceramic insert cutters with high-pressure flood coolant.",
-          outcome: "Reduced tool wear by 44% and eliminated micro-burrs.",
-          confidence: 0.94,
-          similarityScore: 0.91,
-        },
-        {
-          title: "Titanium 6Al-4V Thin-Wall Vibration Mitigation",
-          decisionMade: "Applied adaptive feedrate and H7 bore fit class.",
-          outcome: "Zero joint loosening observed across 100 flight-hour vibration qualification.",
-          confidence: 0.91,
-          similarityScore: 0.86,
-        },
-      ],
+      historicalRiskScore: 0,
+      historicalConfidence: 0,
+      matchedPrecedentsCount: 0,
+      averageScrapRatePct: 0,
+      totalHistoricalNCRs: 0,
+      summary: "No historical precedents in this workspace yet.",
+      precedentMatches: [],
     };
   } catch (err) {
     console.warn("Error querying historical evidence:", err);
     return {
-      historicalRiskScore: 25,
-      historicalConfidence: 0.8,
-      matchedPrecedentsCount: 1,
-      averageScrapRatePct: 2.5,
-      totalHistoricalNCRs: 2,
-      summary: "Default historical baseline loaded.",
+      historicalRiskScore: 0,
+      historicalConfidence: 0,
+      matchedPrecedentsCount: 0,
+      averageScrapRatePct: 0,
+      totalHistoricalNCRs: 0,
+      summary: "Historical evidence is unavailable.",
       precedentMatches: [],
     };
   }

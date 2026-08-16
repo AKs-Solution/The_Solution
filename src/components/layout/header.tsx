@@ -12,9 +12,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Search, Settings, LogOut, HelpCircle } from "lucide-react";
+import {
+  Menu,
+  Search,
+  Settings,
+  LogOut,
+  HelpCircle,
+  PanelLeft,
+  PanelLeftClose,
+  UserPlus,
+} from "lucide-react";
 import { useGuestMode } from "@/features/auth/components";
 import { NotificationMenu } from "./notification-menu";
+import { useWorkspacePreferences } from "./workspace-preferences";
 
 function openSearchPalette() {
   window.dispatchEvent(new CustomEvent("consecuencia:open-search"));
@@ -34,6 +44,7 @@ function initialsFrom(name?: string | null, email?: string | null): string {
 export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   const router = useRouter();
   const { isGuest, requestUpgrade } = useGuestMode();
+  const { sidebarCollapsed, toggleSidebarCollapsed, layoutMode } = useWorkspacePreferences();
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [modKey] = useState(() =>
@@ -90,6 +101,22 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         >
           <Menu className="size-4" />
         </button>
+        {layoutMode !== "minimal-focus" && (
+          <button
+            type="button"
+            onClick={toggleSidebarCollapsed}
+            title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+            aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+            aria-expanded={!sidebarCollapsed}
+            className="hidden size-8 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:flex"
+          >
+            {sidebarCollapsed ? (
+              <PanelLeft className="size-4" />
+            ) : (
+              <PanelLeftClose className="size-4" />
+            )}
+          </button>
+        )}
         <Link
           href={isGuest ? "/explore" : "/dashboard"}
           title="Consecuencia Aerospace Intelligence"
@@ -118,7 +145,7 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         <button
           type="button"
           onClick={openSearchPalette}
-          className="flex h-9 w-full max-w-md cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          className="flex h-9 w-full max-w-md cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 text-left text-sm text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-700"
           aria-label="Open search"
         >
           <Search className="size-3.5 shrink-0" aria-hidden="true" />
@@ -139,16 +166,37 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         >
           <Search className="size-3.5" aria-hidden="true" />
         </button>
-        <span className="hidden rounded border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[10px] tracking-wide text-slate-500 uppercase lg:inline-flex">
+        <span className="hidden items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[10px] tracking-wide text-slate-500 uppercase lg:inline-flex">
+          <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
           STATUS · NOMINAL
         </span>
         <NotificationMenu />
+        {!isGuest && (
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("consecuencia:open-invite"))}
+            title="Invite teammates"
+            aria-label="Invite teammates"
+            className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            <UserPlus className="size-3.5" aria-hidden="true" />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("consecuencia:open-help"))}
+          title="Open help"
+          aria-label="Open help"
+          className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        >
+          <HelpCircle className="size-3.5" aria-hidden="true" />
+        </button>
         <DropdownMenu
           align="end"
           trigger={
             <button
               type="button"
-              className="focus-visible:ring-ring cursor-pointer rounded-full transition-transform hover:ring-zinc-300 focus-visible:ring-2 focus-visible:outline-none active:scale-95"
+              className="focus-visible:ring-ring cursor-pointer rounded-full transition-transform hover:ring-slate-300 focus-visible:ring-2 focus-visible:outline-none active:scale-95"
               aria-label="Open user menu"
             >
               <Avatar
@@ -161,13 +209,13 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         >
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-zinc-900">
+              <span className="text-sm font-medium text-slate-900">
                 {isGuest ? "Guest Mode" : (userName ?? "Engineer")}
               </span>
               {isGuest ? (
-                <span className="text-xs text-zinc-500">Public aerospace corpus</span>
+                <span className="text-xs text-slate-500">Public aerospace corpus</span>
               ) : (
-                userEmail && <span className="font-mono text-xs text-zinc-500">{userEmail}</span>
+                userEmail && <span className="font-mono text-xs text-slate-500">{userEmail}</span>
               )}
             </div>
           </DropdownMenuLabel>

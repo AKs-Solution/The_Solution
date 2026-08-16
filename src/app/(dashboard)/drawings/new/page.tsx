@@ -51,7 +51,7 @@ export default function NewDrawingPage() {
 
       <form
         onSubmit={handleCreateProject}
-        className="max-w-xl space-y-5 rounded-lg border border-zinc-200 bg-white p-6 shadow-xs"
+        className="max-w-xl space-y-5 rounded-lg border border-slate-200 bg-white p-6 shadow-xs"
       >
         {errorMessage && (
           <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
@@ -59,7 +59,7 @@ export default function NewDrawingPage() {
           </div>
         )}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">Project name</label>
+          <label className="text-sm font-medium text-slate-700">Project name</label>
           <Input
             required
             value={name}
@@ -68,7 +68,7 @@ export default function NewDrawingPage() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-700">Description</label>
+          <label className="text-sm font-medium text-slate-700">Description</label>
           <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -78,7 +78,7 @@ export default function NewDrawingPage() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
+          className="bg-slate-900 text-slate-50 hover:bg-slate-800"
         >
           {isSubmitting ? "Creating..." : "Create project"}
         </Button>

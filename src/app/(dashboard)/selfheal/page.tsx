@@ -56,10 +56,10 @@ export default function DisruptionRecoveryPage() {
     <PageContainer>
       <Stack gap={6}>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="font-medium text-zinc-800">Recovery Router</span>
+            <span className="font-medium text-slate-800">Recovery Router</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export default function DisruptionRecoveryPage() {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <RefreshCw className="size-6 animate-spin text-zinc-400" />
+                <RefreshCw className="size-6 animate-spin text-slate-400" />
               </div>
             ) : reroutes.length > 0 ? (
               <div className="flex flex-col gap-4">
@@ -106,8 +106,8 @@ export default function DisruptionRecoveryPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex flex-col text-left">
-                          <h3 className="text-sm font-bold text-zinc-900">{r.programName}</h3>
-                          <span className="text-[10px] text-zinc-400">Reroute ID: {r.id}</span>
+                          <h3 className="text-sm font-bold text-slate-900">{r.programName}</h3>
+                          <span className="text-[10px] text-slate-400">Reroute ID: {r.id}</span>
                         </div>
 
                         {isResolved ? (
@@ -121,19 +121,19 @@ export default function DisruptionRecoveryPage() {
                         )}
                       </div>
 
-                      <Divider className="border-zinc-100" />
+                      <Divider className="border-slate-100" />
 
                       <div className="grid grid-cols-1 gap-4 text-left text-xs sm:grid-cols-2">
-                        <div className="rounded border border-zinc-100 bg-zinc-50 p-3">
-                          <span className="mb-0.5 block text-zinc-400">Disrupted Node</span>
+                        <div className="rounded border border-slate-100 bg-slate-50 p-3">
+                          <span className="mb-0.5 block text-slate-400">Disrupted Node</span>
                           <span className="block font-bold text-rose-600">{r.disruptedNode}</span>
                         </div>
-                        <div className="rounded border border-zinc-100 bg-zinc-50 p-3">
-                          <span className="mb-0.5 block text-zinc-400">
+                        <div className="rounded border border-slate-100 bg-slate-50 p-3">
+                          <span className="mb-0.5 block text-slate-400">
                             Alternate Sourcing Path
                           </span>
                           <span
-                            className={`${isResolved ? "font-bold text-emerald-600" : "font-semibold text-zinc-800"} block`}
+                            className={`${isResolved ? "font-bold text-emerald-600" : "font-semibold text-slate-800"} block`}
                           >
                             {r.alternateNode}
                           </span>
@@ -191,23 +191,23 @@ export default function DisruptionRecoveryPage() {
 
           {/* SOURCING RULES */}
           <div className="lg:col-span-1">
-            <Card className="border-zinc-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <Stack gap={4}>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-semibold text-zinc-400 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
                       Resilience Sourcing
                     </span>
                     <h2 className="text-foreground text-base font-bold">Policy Rules</h2>
                   </div>
 
-                  <Divider className="border-zinc-200" />
+                  <Divider className="border-slate-200" />
 
-                  <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-left text-xs">
-                    <span className="mb-1 block font-semibold text-zinc-800">
+                  <div className="rounded border border-slate-200 bg-slate-50 p-3 text-left text-xs">
+                    <span className="mb-1 block font-semibold text-slate-800">
                       Rerouting Protocol:
                     </span>
-                    <p className="text-[11px] leading-normal text-zinc-500">
+                    <p className="text-[11px] leading-normal text-slate-500">
                       Geopolitical or supplier disruption recovery paths are proposed by similarity
                       calculations, but remain inactive until G-code compatibility is manually
                       certified.

@@ -1,14 +1,13 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isResetSuccess = searchParams.get("reset") === "true";
   const [email, setEmail] = useState("");
@@ -34,6 +33,7 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password, rememberMe }),
       });
 
@@ -43,8 +43,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push(postLoginDestination());
-      router.refresh();
+      window.location.assign(postLoginDestination());
     } catch {
       setError("An unexpected error occurred");
     } finally {
@@ -84,17 +83,17 @@ export function LoginForm() {
         />
         <Link
           href="/forgot-password"
-          className="text-muted-foreground hover:text-foreground self-end text-xs"
+          className="self-end text-xs text-slate-500 hover:text-blue-600"
         >
           Forgot password?
         </Link>
       </div>
-      <label className="text-muted-foreground flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-slate-500">
         <input
           type="checkbox"
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
-          className="border-border accent-foreground size-4 rounded"
+          className="size-4 rounded border-slate-300 accent-blue-600"
         />
         Remember me
       </label>
