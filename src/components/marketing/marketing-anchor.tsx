@@ -3,15 +3,23 @@
 import { useEffect } from "react";
 import Link from "next/link";
 
-const HEADER_OFFSET = 88;
+function unlockDocumentScroll() {
+  const html = document.documentElement;
+  const { body } = document;
+  html.style.removeProperty("overflow");
+  html.style.removeProperty("height");
+  body.style.removeProperty("overflow");
+  body.style.removeProperty("height");
+  html.style.overflow = "visible";
+  body.style.overflow = "visible";
+}
 
 export function scrollToHash(hash: string) {
   const id = hash.replace(/^#/, "");
   if (!id) return false;
   const el = document.getElementById(id);
   if (!el) return false;
-  const top = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
   if (window.location.hash !== `#${id}`) {
     history.replaceState(null, "", `#${id}`);
   }
@@ -71,8 +79,9 @@ export function MarketingAnchor({
   );
 }
 
-export function HashRestore() {
+export function MarketingViewport({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    unlockDocumentScroll();
     const run = () => {
       if (window.location.hash) retryScrollToHash(window.location.hash);
     };
@@ -80,5 +89,13 @@ export function HashRestore() {
     window.addEventListener("hashchange", run);
     return () => window.removeEventListener("hashchange", run);
   }, []);
-  return null;
+
+  return (
+    <div
+      id="marketing-root"
+      className="h-dvh overflow-x-hidden overflow-y-auto bg-slate-50 font-sans text-slate-900 antialiased"
+    >
+      {children}
+    </div>
+  );
 }
