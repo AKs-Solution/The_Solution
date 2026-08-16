@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/utils";
 
@@ -11,14 +10,15 @@ export function ContinueAsGuest({
   label = "Continue as Guest",
   compact = false,
   variant = "secondary",
+  next = "/explore",
 }: {
   className?: string;
   buttonClassName?: string;
   label?: string;
   compact?: boolean;
   variant?: "primary" | "secondary";
+  next?: string;
 }) {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,16 +26,18 @@ export function ContinueAsGuest({
     setError("");
     setPending(true);
     try {
-      const res = await fetch("/api/auth/guest", { method: "POST" });
+      const res = await fetch("/api/auth/guest", {
+        method: "POST",
+        credentials: "same-origin",
+      });
       if (!res.ok) {
         setError("Unable to start a guest session.");
+        setPending(false);
         return;
       }
-      router.push("/explore");
-      router.refresh();
+      window.location.assign(next);
     } catch {
       setError("Unable to start a guest session.");
-    } finally {
       setPending(false);
     }
   }
@@ -50,7 +52,7 @@ export function ContinueAsGuest({
         disabled={pending}
         onClick={() => void handleGuest()}
       >
-        {pending ? "Opening public corpus..." : label}
+        {pending ? "Opening console..." : label}
       </Button>
       {!compact && (
         <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-500">

@@ -73,8 +73,12 @@ export function WorkspaceTabBar() {
     };
   }, [showMenu, openTab, router]);
 
-  const handleTabClick = (tabId: string) => {
+  const handleTabClick = (tabId: string, href: string) => {
     activateTab(tabId);
+    if (typeof window !== "undefined") {
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (current !== href) router.push(href);
+    }
   };
 
   const handleTabKeyDown = (
@@ -174,7 +178,7 @@ export function WorkspaceTabBar() {
               role="tab"
               tabIndex={0}
               aria-selected={isActive}
-              onClick={() => handleTabClick(tab.id)}
+              onClick={() => handleTabClick(tab.id, tab.href)}
               onKeyDown={(e) => handleTabKeyDown(e, tab.id, index)}
               onFocus={() => handleFocus(index)}
               onMouseDown={(e) => {

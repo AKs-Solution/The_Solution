@@ -8,9 +8,8 @@ import {
   type SidebarNavItem,
 } from "@/shared/constants";
 import { cn } from "@/shared/utils";
-import { Tooltip } from "@/components/ui/tooltip";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { GUEST_SIDEBAR_NAV, useGuestMode } from "@/features/auth/components";
 import {
   LayoutDashboard,
@@ -93,40 +92,31 @@ function NavItem({
 
   if (isCollapsed) {
     return (
-      <Tooltip
-        content={
-          <span className="flex items-center gap-2">
-            {item.label}
-            {item.shortcut && (
-              <span className="font-mono text-[10px] text-slate-300">{item.shortcut}</span>
-            )}
-          </span>
-        }
-        side="right"
-        delay={120}
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        aria-current={isActive ? "page" : undefined}
+        title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
+        className={cn(
+          "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
+          isActive
+            ? "bg-slate-900 text-white shadow-xs"
+            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+        )}
       >
-        <Link
-          href={item.href}
-          onClick={onNavigate}
-          aria-current={isActive ? "page" : undefined}
+        <Icon
           className={cn(
-            "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
-            isActive
-              ? "bg-slate-900 text-white shadow-xs"
-              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+            "size-4 shrink-0",
+            isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
           )}
-        >
-          <Icon
-            className={cn(
-              "size-4 shrink-0",
-              isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
-            )}
-          />
-          {item.badge && (
-            <span className="absolute top-1 right-1 size-1.5 rounded-full bg-zinc-400" />
-          )}
-        </Link>
-      </Tooltip>
+        />
+        <span className="pointer-events-none absolute top-1/2 left-[calc(100%+10px)] z-[60] hidden -translate-y-1/2 rounded-md bg-slate-900 px-2 py-1 font-sans text-[11px] font-medium whitespace-nowrap text-white shadow-sm group-hover:block">
+          {item.label}
+          {item.shortcut ? (
+            <span className="ml-2 font-mono text-[10px] text-slate-400">{item.shortcut}</span>
+          ) : null}
+        </span>
+      </Link>
     );
   }
 
@@ -191,27 +181,29 @@ function NavGroup({
     const landing = group.items[0];
     if (!landing) return null;
     return (
-      <Tooltip content={group.label} side="right" delay={120}>
-        <Link
-          href={landing.href}
-          onClick={onNavigate}
-          aria-label={group.label}
-          aria-current={hasActiveChild ? "page" : undefined}
+      <Link
+        href={landing.href}
+        onClick={onNavigate}
+        aria-label={group.label}
+        title={group.label}
+        aria-current={hasActiveChild ? "page" : undefined}
+        className={cn(
+          "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
+          hasActiveChild
+            ? "bg-slate-900 text-white shadow-xs"
+            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+        )}
+      >
+        <Icon
           className={cn(
-            "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
-            hasActiveChild
-              ? "bg-slate-900 text-white shadow-xs"
-              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+            "size-4 shrink-0",
+            hasActiveChild ? "text-white" : "text-slate-500 group-hover:text-slate-900",
           )}
-        >
-          <Icon
-            className={cn(
-              "size-4 shrink-0",
-              hasActiveChild ? "text-white" : "text-slate-500 group-hover:text-slate-900",
-            )}
-          />
-        </Link>
-      </Tooltip>
+        />
+        <span className="pointer-events-none absolute top-1/2 left-[calc(100%+10px)] z-[60] hidden -translate-y-1/2 rounded-md bg-slate-900 px-2 py-1 font-sans text-[11px] font-medium whitespace-nowrap text-white shadow-sm group-hover:block">
+          {group.label}
+        </span>
+      </Link>
     );
   }
 
@@ -268,6 +260,7 @@ export function Sidebar({
   mobileOpen?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isGuest } = useGuestMode();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -298,6 +291,24 @@ export function Sidebar({
       return next;
     });
   }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+      const items = isGuest
+        ? GUEST_SIDEBAR_NAV.filter((item) => item.href !== "/help")
+        : SIDEBAR_NAV.filter((entry) => !isGroup(entry));
+      const index = Number(e.key) - 1;
+      const dest = items[index];
+      if (!dest || !("href" in dest)) return;
+      e.preventDefault();
+      router.push(dest.href);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isGuest, router]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -345,13 +356,13 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "z-50 h-full w-14 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
+        "z-50 h-full w-14 shrink-0 flex-col overflow-visible border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
         mobileOpen
           ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:w-14 md:shadow-none"
           : "hidden md:flex",
       )}
     >
-      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto px-2">
+      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-visible px-2">
         <div className={cn("flex flex-col gap-1", isCollapsedEffective && "items-center")}>
           {/* Top Collapse Button */}
           <div

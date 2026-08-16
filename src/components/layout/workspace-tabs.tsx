@@ -50,6 +50,12 @@ function isHomeTab(id: string): boolean {
 export function isWorkspaceRoute(pathname: string): boolean {
   return (
     pathname === "/dashboard" ||
+    pathname === "/explore" ||
+    pathname === "/search" ||
+    pathname === "/help" ||
+    pathname === "/settings" ||
+    pathname === "/evidence" ||
+    pathname === "/reasoning" ||
     pathname === "/decisions" ||
     pathname.startsWith("/decisions/") ||
     pathname === "/sentinel" ||
@@ -86,6 +92,12 @@ export function isWorkspaceRoute(pathname: string): boolean {
 
 const LEDGER_TABS: Array<{ path: string; title: string }> = [
   { path: "/dashboard", title: "Mission Console" },
+  { path: "/explore", title: "Public Explorer" },
+  { path: "/help", title: "Help" },
+  { path: "/settings", title: "Settings" },
+  { path: "/search", title: "Search" },
+  { path: "/evidence", title: "Evidence" },
+  { path: "/reasoning", title: "Reasoning" },
   { path: "/executive-dashboard", title: "Executive Dashboard" },
   { path: "/precedents", title: "Precedent Engine" },
   { path: "/certification", title: "Certification Readiness" },
@@ -442,7 +454,7 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       setActiveTabId(id);
       const current =
         typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
-      if (current !== tab.href) router.push(tab.href, { scroll: false });
+      if (current !== tab.href && tab.href) router.push(tab.href);
       restoreScrollPosition(id);
     },
     [router, restoreScrollPosition],

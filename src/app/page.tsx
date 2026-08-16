@@ -102,8 +102,12 @@ export default function Home() {
   return (
     <MarketingShell>
       <HomeStructuredData />
-      <div className="px-6">
-        <section className="mx-auto max-w-5xl pt-20 pb-4 text-center sm:pt-28">
+      <div className="relative px-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.08),transparent_58%)]"
+        />
+        <section className="relative mx-auto max-w-5xl pt-20 pb-4 text-center sm:pt-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-mono text-xs text-slate-700">
             <span className="relative flex size-1.5" aria-hidden="true">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-blue-400 opacity-60" />
@@ -111,7 +115,7 @@ export default function Home() {
             </span>
             AS9100 Rev D & FAR Part 25 Deterministic Verification Engine
           </div>
-          <h1 className="mx-auto max-w-4xl text-center text-4xl leading-[1.15] font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+          <h1 className="mx-auto max-w-4xl text-center text-4xl leading-[1.12] font-semibold tracking-[-0.035em] text-slate-950 sm:text-5xl lg:text-[3.5rem]">
             Aerospace Decision Intelligence, Grounded in Mathematical Truth.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-slate-600 sm:text-xl">
@@ -208,10 +212,10 @@ export default function Home() {
             </Link>
             <span className="mx-2 text-slate-300">·</span>
             <Link
-              href="/help"
+              href="/#faq"
               className="font-medium text-blue-600 no-underline hover:text-blue-700"
             >
-              Open documentation
+              Read the FAQ
             </Link>
           </p>
         </section>

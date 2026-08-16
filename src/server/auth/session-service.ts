@@ -51,6 +51,7 @@ export async function createGuestSession(): Promise<string> {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60 * 12,
   });
   return token;
 }
