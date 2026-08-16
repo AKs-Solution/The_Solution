@@ -58,7 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full font-sans antialiased">
-      <body className="m-0 min-h-screen bg-white p-0 text-slate-900">
+      <body className="m-0 min-h-screen bg-slate-50 p-0 text-slate-900">
         <RootStructuredData />
         <AppProvider>{children}</AppProvider>
       </body>

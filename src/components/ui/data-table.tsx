@@ -123,7 +123,7 @@ export function DataTable<T>({
         <div
           ref={scrollRef}
           className={cn(
-            "border-border relative w-full overflow-x-auto rounded-lg border",
+            "relative w-full overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-xs",
             maxHeight && "overflow-y-auto",
           )}
           style={maxHeight ? { maxHeight } : undefined}
@@ -131,12 +131,12 @@ export function DataTable<T>({
           <table className="w-full caption-bottom text-sm">
             <thead
               className={cn(
-                "border-border sticky top-0 z-10 bg-white backdrop-blur-md",
+                "sticky top-0 z-10 border-b border-slate-200 bg-slate-50",
                 canScrollLeft && "scroll-edge-left",
                 canScrollRight && "scroll-edge-right",
               )}
             >
-              <tr className="border-b">
+              <tr>
                 {visibleColumns.map((col) => {
                   const isSorted = sort?.key === col.key;
                   const canSort = Boolean(col.sortValue);
@@ -148,7 +148,7 @@ export function DataTable<T>({
                         isSorted ? (sort!.dir === "asc" ? "ascending" : "descending") : "none"
                       }
                       className={cn(
-                        "text-muted-foreground density-px-sm density-py-sm font-mono text-xs font-semibold tracking-wider whitespace-nowrap uppercase",
+                        "p-3.5 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase",
                         alignClass(col.align),
                         col.className,
                       )}
@@ -183,16 +183,13 @@ export function DataTable<T>({
               </tr>
             </thead>
 
-            <tbody className="divide-border divide-y">
+            <tbody>
               {loading ? (
                 Array.from({ length: skeletonRows }).map((_, rowIndex) => (
                   <tr key={`skeleton-${rowIndex}`} aria-hidden="true">
                     {visibleColumns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={cn("density-px-sm density-py-sm", alignClass(col.align))}
-                      >
-                        <Skeleton className="h-4 w-full max-w-[140px]" shimmer />
+                      <td key={col.key} className={cn("p-3.5", alignClass(col.align))}>
+                        <Skeleton className="h-4 w-full max-w-[140px] animate-pulse rounded bg-slate-200/70" />
                       </td>
                     ))}
                   </tr>
@@ -201,7 +198,7 @@ export function DataTable<T>({
                 <tr>
                   <td colSpan={visibleColumns.length} className="p-0">
                     {emptyState ?? (
-                      <div className="text-muted-foreground flex items-center justify-center gap-2 py-12 text-sm">
+                      <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500">
                         No records to display.
                       </div>
                     )}
@@ -213,7 +210,7 @@ export function DataTable<T>({
                     key={rowKey(row)}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
                     className={cn(
-                      "border-border hover:bg-surface-hover transition-colors",
+                      "border-b border-slate-100 text-sm text-slate-800 transition-colors hover:bg-slate-50/80",
                       onRowClick && "cursor-pointer",
                     )}
                   >
@@ -221,7 +218,7 @@ export function DataTable<T>({
                       <td
                         key={col.key}
                         className={cn(
-                          "density-px-sm density-py-sm align-middle text-[var(--density-font)]",
+                          "p-3.5 align-middle text-sm text-slate-800",
                           alignClass(col.align),
                           col.className,
                         )}

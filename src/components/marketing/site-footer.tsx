@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { FRESHNESS_LINE } from "@/features/marketing/content";
+import { MarketingAnchor } from "./marketing-anchor";
 
 export function SiteFooter() {
   return (
@@ -9,33 +9,42 @@ export function SiteFooter() {
         engineering.
       </p>
       <nav className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
-        <Link href="/pricing" className="text-slate-500 no-underline hover:text-slate-800">
+        <MarketingAnchor
+          href="/pricing"
+          className="text-slate-500 no-underline hover:text-slate-800"
+        >
           Pricing
-        </Link>
-        <Link href="/demo" className="text-slate-500 no-underline hover:text-slate-800">
+        </MarketingAnchor>
+        <MarketingAnchor href="/demo" className="text-slate-500 no-underline hover:text-slate-800">
           Request demo
-        </Link>
-        <Link href="/contact" className="text-slate-500 no-underline hover:text-slate-800">
+        </MarketingAnchor>
+        <MarketingAnchor
+          href="/contact"
+          className="text-slate-500 no-underline hover:text-slate-800"
+        >
           Contact
-        </Link>
-        <Link href="/#faq" className="text-slate-500 no-underline hover:text-slate-800">
+        </MarketingAnchor>
+        <MarketingAnchor href="/#faq" className="text-slate-500 no-underline hover:text-slate-800">
           FAQ
-        </Link>
-        <Link
+        </MarketingAnchor>
+        <MarketingAnchor
           href="/use-cases/as9100-compliance"
           className="text-slate-500 no-underline hover:text-slate-800"
         >
           AS9100
-        </Link>
-        <Link
+        </MarketingAnchor>
+        <MarketingAnchor
           href="/use-cases/flight-systems"
           className="text-slate-500 no-underline hover:text-slate-800"
         >
           Flight systems
-        </Link>
-        <Link href="/vs/predictive-ai" className="text-slate-500 no-underline hover:text-slate-800">
+        </MarketingAnchor>
+        <MarketingAnchor
+          href="/vs/predictive-ai"
+          className="text-slate-500 no-underline hover:text-slate-800"
+        >
           vs. predictive AI
-        </Link>
+        </MarketingAnchor>
       </nav>
       <p className="mt-6 font-mono text-[11px] text-slate-400">{FRESHNESS_LINE}</p>
     </footer>

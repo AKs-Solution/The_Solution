@@ -356,7 +356,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "z-50 h-full w-14 shrink-0 flex-col overflow-visible border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
+        "z-50 h-full w-14 shrink-0 flex-col items-center overflow-visible border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
         mobileOpen
           ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:w-14 md:shadow-none"
           : "hidden md:flex",

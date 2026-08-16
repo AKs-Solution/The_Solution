@@ -1,5 +1,6 @@
 export { ConsolePreview } from "./console-preview";
 export { DemoInquiryForm } from "./demo-inquiry-form";
+export { MarketingAnchor } from "./marketing-anchor";
 export { MarketingFaq } from "./marketing-faq";
 export { MarketingShell } from "./marketing-shell";
 export { NavHeader } from "./nav-header";

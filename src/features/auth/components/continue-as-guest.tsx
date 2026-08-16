@@ -48,7 +48,7 @@ export function ContinueAsGuest({
       <Button
         type="button"
         variant={variant}
-        className={cn("w-full", buttonClassName)}
+        className={cn(!compact && "w-full", buttonClassName)}
         disabled={pending}
         onClick={() => void handleGuest()}
       >

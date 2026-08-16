@@ -21,7 +21,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         )}
         {...props}
       >
-        {icon && <div className="mb-3 rounded-full bg-slate-100 p-3 text-slate-600">{icon}</div>}
+        {icon && <div className="mb-4 text-slate-400">{icon}</div>}
         <div className="max-w-md">
           <p className="text-sm font-semibold text-slate-900">{title}</p>
           {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}

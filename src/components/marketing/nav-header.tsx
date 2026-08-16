@@ -1,67 +1,56 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { ContinueAsGuest } from "@/features/auth/components";
+import { MarketingAnchor } from "./marketing-anchor";
 
 const NAV = [
-  { href: "/#capabilities", hash: "#capabilities", label: "Capabilities" },
-  { href: "/#workflow", hash: "#workflow", label: "Workflow" },
-  { href: "/#compliance", hash: "#compliance", label: "Compliance" },
-  { href: "/#use-cases", hash: "#use-cases", label: "Use Cases" },
-  { href: "/pricing", hash: null, label: "Pricing" },
+  { href: "/#capabilities", label: "Capabilities" },
+  { href: "/#workflow", label: "Workflow" },
+  { href: "/#compliance", label: "Compliance" },
+  { href: "/#use-cases", label: "Use Cases" },
+  { href: "/pricing", label: "Pricing" },
 ] as const;
 
 export function NavHeader() {
-  const pathname = usePathname();
-
-  function onHashClick(event: React.MouseEvent<HTMLAnchorElement>, hash: string) {
-    if (pathname !== "/") return;
-    const target = document.querySelector(hash);
-    if (!target) return;
-    event.preventDefault();
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-200/70 bg-white/85 px-6 backdrop-blur-md">
+    <header className="relative sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white/80 px-6 backdrop-blur-md">
       <Link href="/" className="flex items-center gap-2.5 no-underline">
-        <span className="flex size-7 items-center justify-center rounded-md bg-slate-950 font-mono text-[10px] font-semibold text-white">
+        <span className="flex size-7 items-center justify-center rounded-md bg-slate-900 font-mono text-[10px] font-semibold text-white">
           C
         </span>
         <span className="flex flex-col leading-none">
-          <span className="text-[13px] font-semibold tracking-[0.14em] text-slate-950">
+          <span className="text-[13px] font-semibold tracking-[0.16em] text-slate-900">
             CONSECUENCIA
           </span>
-          <span className="mt-0.5 font-mono text-[10px] tracking-[0.18em] text-slate-400">
+          <span className="mt-0.5 font-mono text-[10px] tracking-[0.2em] text-slate-500">
             BY AK
           </span>
         </span>
       </Link>
-      <nav className="hidden items-center gap-8 text-[13px] text-slate-500 lg:flex">
+
+      <nav className="hidden items-center gap-7 text-[13px] text-slate-500 md:flex">
         {NAV.map((item) => (
-          <a
+          <MarketingAnchor
             key={item.href}
-            href={item.hash && pathname === "/" ? item.hash : item.href}
-            onClick={item.hash ? (event) => onHashClick(event, item.hash) : undefined}
-            className="font-medium no-underline transition-colors hover:text-slate-950"
+            href={item.href}
+            className="font-medium no-underline transition-colors hover:text-slate-900"
           >
             {item.label}
-          </a>
+          </MarketingAnchor>
         ))}
       </nav>
-      <div className="flex items-center gap-2.5">
+
+      <div className="flex items-center gap-3">
         <Link
           href="/login"
-          className="hidden text-[13px] font-medium text-slate-500 no-underline hover:text-slate-950 sm:inline"
+          className="hidden text-sm font-medium text-slate-500 no-underline hover:text-slate-900 sm:inline"
         >
           Sign In
-        </Link>
-        <Link
-          href="/demo"
-          className="hidden rounded-md border border-slate-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-slate-800 no-underline hover:bg-slate-50 sm:inline"
-        >
-          Request Demo
         </Link>
         <ContinueAsGuest
           compact
@@ -69,9 +58,42 @@ export function NavHeader() {
           label="Launch Console"
           next="/explore"
           className="inline-flex"
-          buttonClassName="h-auto w-auto rounded-md bg-blue-600 px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-700"
+          buttonClassName="h-auto rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         />
+        <button
+          type="button"
+          className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 text-slate-700 md:hidden"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? <X className="size-4" /> : <Menu className="size-4" />}
+        </button>
       </div>
+
+      {open && (
+        <div className="absolute top-16 right-0 left-0 border-b border-slate-200 bg-white px-6 py-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {NAV.map((item) => (
+              <MarketingAnchor
+                key={item.href}
+                href={item.href}
+                onNavigate={() => setOpen(false)}
+                className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 no-underline hover:bg-slate-50"
+              >
+                {item.label}
+              </MarketingAnchor>
+            ))}
+            <Link
+              href="/login"
+              className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 no-underline hover:bg-slate-50"
+              onClick={() => setOpen(false)}
+            >
+              Sign In
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

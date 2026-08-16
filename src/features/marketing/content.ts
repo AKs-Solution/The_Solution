@@ -4,8 +4,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://ak-consecuen
 export const DATE_PUBLISHED = "2026-01-15T00:00:00Z";
 export const DATE_MODIFIED = "2026-08-16T00:00:00Z";
 
-export const FRESHNESS_LINE =
-  "Last updated: August 2026 · Deterministic Engine v4.2.1 · AS9100 Rev D Aligned";
+export const FRESHNESS_LINE = "Last updated: August 2026 · Engine v4.2.1 · AS9100 Rev D Aligned";
 
 export const DEFAULT_TITLE = "Consecuencia — Deterministic Verification for Aerospace Engineering";
 export const TITLE_TEMPLATE = "%s | Consecuencia — Aerospace Decision Intelligence";

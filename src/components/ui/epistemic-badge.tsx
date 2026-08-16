@@ -2,7 +2,6 @@
 
 import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "@/shared/utils";
-import { Badge } from "./badge";
 
 export type EpistemicStatus = "RECORDED" | "DERIVED" | "INFERRED" | "UNKNOWN" | "GAP" | "CRITICAL";
 
@@ -16,7 +15,7 @@ export interface EpistemicBadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const STATUS_STYLES: Record<EpistemicStatus, { badge: string; dot: string }> = {
   RECORDED: {
     badge: "bg-slate-100 text-slate-700 border-slate-200",
-    dot: "bg-slate-400",
+    dot: "bg-slate-500",
   },
   DERIVED: {
     badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -24,29 +23,29 @@ const STATUS_STYLES: Record<EpistemicStatus, { badge: string; dot: string }> = {
   },
   INFERRED: {
     badge: "bg-amber-50 text-amber-700 border-amber-200",
-    dot: "bg-amber-600",
+    dot: "bg-amber-500",
   },
   UNKNOWN: {
     badge: "bg-rose-50 text-rose-700 border-rose-200",
-    dot: "bg-rose-600",
+    dot: "bg-rose-500",
   },
   GAP: {
     badge: "bg-rose-50 text-rose-700 border-rose-200",
-    dot: "bg-rose-600",
+    dot: "bg-rose-500",
   },
   CRITICAL: {
     badge: "bg-rose-50 text-rose-700 border-rose-200",
-    dot: "bg-rose-600",
+    dot: "bg-rose-500",
   },
 };
 
 const DEFAULT_LABELS: Record<EpistemicStatus, string> = {
-  RECORDED: "Recorded",
-  DERIVED: "Derived",
-  INFERRED: "Inferred",
-  UNKNOWN: "Unknown",
-  GAP: "Gap",
-  CRITICAL: "Critical",
+  RECORDED: "RECORDED",
+  DERIVED: "DERIVED",
+  INFERRED: "INFERRED",
+  UNKNOWN: "UNKNOWN",
+  GAP: "GAP",
+  CRITICAL: "CRITICAL",
 };
 
 function normalizeStatus(value: string | null | undefined): EpistemicStatus {
@@ -61,20 +60,19 @@ export const EpistemicBadge = forwardRef<HTMLSpanElement, EpistemicBadgeProps>(
     const normalized = normalizeStatus(status);
     const styles = STATUS_STYLES[normalized];
     return (
-      <Badge
+      <span
         ref={ref}
-        size={size}
-        variant="outline"
         className={cn(
           "inline-flex items-center gap-1.5 rounded border px-2.5 py-0.5 font-mono text-xs",
           styles.badge,
+          size === "md" && "px-3 py-1",
           className,
         )}
         {...props}
       >
         {showDot && <span className={cn("size-1.5 rounded-full", styles.dot)} aria-hidden="true" />}
         {label ?? DEFAULT_LABELS[normalized]}
-      </Badge>
+      </span>
     );
   },
 );

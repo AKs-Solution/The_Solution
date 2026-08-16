@@ -15,6 +15,7 @@ import {
   ChevronRight,
   MoreVertical,
   Command,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
@@ -229,7 +230,7 @@ export function WorkspaceTabBar() {
                     }}
                     className="rounded p-0.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-700"
                   >
-                    ✕
+                    <X className="size-3" />
                   </button>
                 )}
               </div>
