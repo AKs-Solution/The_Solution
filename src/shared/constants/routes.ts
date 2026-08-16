@@ -28,6 +28,7 @@ export interface SidebarNavItem {
   href: string;
   icon: string;
   badge?: string | number;
+  shortcut?: string;
 }
 
 export interface SidebarNavGroup {
@@ -45,12 +46,11 @@ function isGroup(entry: SidebarNavEntry): entry is SidebarNavGroup {
 export { isGroup };
 
 export const SIDEBAR_NAV: SidebarNavEntry[] = [
-  { label: "Mission Console", href: ROUTES.dashboard, icon: "LayoutDashboard" },
-  { label: "Decisions", href: "/decisions", icon: "Workflow" },
-  { label: "Drawings", href: "/drawings", icon: "Layers" },
-  { label: "Sentinel", href: "/sentinel", icon: "Activity" },
-  { label: "Compliance", href: "/compliance", icon: "ShieldCheck" },
-  { label: "Help", href: ROUTES.help, icon: "HelpCircle" },
+  { label: "Mission Console", href: ROUTES.dashboard, icon: "LayoutDashboard", shortcut: "1" },
+  { label: "Decisions", href: "/decisions", icon: "Workflow", shortcut: "2" },
+  { label: "Drawings", href: "/drawings", icon: "Layers", shortcut: "3" },
+  { label: "Sentinel", href: "/sentinel", icon: "Activity", shortcut: "4" },
+  { label: "Compliance", href: "/compliance", icon: "ShieldCheck", shortcut: "5" },
 ];
 
 export type RouteKey = keyof typeof ROUTES;

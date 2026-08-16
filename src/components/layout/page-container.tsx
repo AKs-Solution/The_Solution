@@ -16,7 +16,11 @@ const maxWidths = {
 export const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(
   ({ className = "", maxWidth = "xl", ...props }, ref) => {
     return (
-      <div ref={ref} className={cn("mx-auto w-full", maxWidths[maxWidth], className)} {...props} />
+      <div
+        ref={ref}
+        className={cn("mx-auto min-h-full w-full", maxWidths[maxWidth], className)}
+        {...props}
+      />
     );
   },
 );

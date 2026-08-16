@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Activity } from "lucide-react";
 import { PageContainer, PageHeader, useWorkspaceTabs } from "@/components/layout";
 import {
   Button,
@@ -14,6 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableSkeleton,
 } from "@/components/ui";
 
 interface SentinelAlert {
@@ -82,11 +83,10 @@ export default function SentinelPage() {
       />
 
       {isLoading ? (
-        <div className="rounded-lg border border-zinc-200 bg-white py-16 text-center text-sm text-zinc-500">
-          Loading alerts...
-        </div>
+        <TableSkeleton />
       ) : alerts.length === 0 ? (
         <EmptyState
+          icon={<Activity className="size-5" />}
           title="No alerts"
           description="When surveillance finds a deviation, it will appear here."
         />
@@ -104,12 +104,14 @@ export default function SentinelPage() {
           <TableBody>
             {alerts.map((alert) => (
               <TableRow key={alert.id}>
-                <TableCell className="font-medium text-zinc-900">{alert.title}</TableCell>
-                <TableCell className="text-zinc-500">{alert.type.replaceAll("_", " ")}</TableCell>
+                <TableCell className="font-medium text-slate-900">{alert.title}</TableCell>
+                <TableCell className="text-slate-500">{alert.type.replaceAll("_", " ")}</TableCell>
                 <TableCell>
                   <StatusPill status="INFERRED" />
                 </TableCell>
-                <TableCell className="text-zinc-500">{formatWhen(alert.timestamp)}</TableCell>
+                <TableCell className="font-mono text-xs text-slate-600">
+                  {formatWhen(alert.timestamp)}
+                </TableCell>
                 <TableCell className="text-right">
                   <Link
                     href={`/sentinel/${alert.id}`}

@@ -93,15 +93,26 @@ function NavItem({
 
   if (isCollapsed) {
     return (
-      <Tooltip content={item.label} side="right" delay={120}>
+      <Tooltip
+        content={
+          <span className="flex items-center gap-2">
+            {item.label}
+            {item.shortcut && (
+              <span className="font-mono text-[10px] text-slate-300">{item.shortcut}</span>
+            )}
+          </span>
+        }
+        side="right"
+        delay={120}
+      >
         <Link
           href={item.href}
           onClick={onNavigate}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
+            "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
             isActive
-              ? "bg-blue-600 text-white"
+              ? "bg-slate-900 text-white shadow-xs"
               : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
           )}
         >
@@ -187,9 +198,9 @@ function NavGroup({
           aria-label={group.label}
           aria-current={hasActiveChild ? "page" : undefined}
           className={cn(
-            "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
+            "group relative mx-auto flex items-center justify-center rounded-lg p-2.5 transition-colors select-none",
             hasActiveChild
-              ? "bg-blue-600 text-white"
+              ? "bg-slate-900 text-white shadow-xs"
               : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
           )}
         >
@@ -334,13 +345,13 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "z-50 h-full w-14 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white p-2 text-slate-800 select-none",
+        "z-50 h-full w-14 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white py-4 text-slate-800 select-none",
         mobileOpen
           ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:w-14 md:shadow-none"
           : "hidden md:flex",
       )}
     >
-      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto">
+      <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto px-2">
         <div className={cn("flex flex-col gap-1", isCollapsedEffective && "items-center")}>
           {/* Top Collapse Button */}
           <div
@@ -376,7 +387,7 @@ export function Sidebar({
             className={cn("flex flex-col gap-0.5", isCollapsedEffective && "items-center")}
           >
             {isGuest
-              ? GUEST_SIDEBAR_NAV.map((item) => (
+              ? GUEST_SIDEBAR_NAV.filter((item) => item.href !== "/help").map((item) => (
                   <NavItem
                     key={item.href}
                     item={item}
@@ -411,8 +422,23 @@ export function Sidebar({
         </div>
 
         {/* Status Footer */}
-        <div className="mt-auto flex justify-center py-2">
-          <span className="size-1.5 rounded-full bg-emerald-500" title="System ready" />
+        <div
+          className={cn("mt-auto flex flex-col gap-3 py-1", isCollapsedEffective && "items-center")}
+        >
+          {!isGuest && (
+            <NavItem
+              item={{ label: "Settings", href: "/settings", icon: "Settings", shortcut: "," }}
+              isActive={isItemActive(pathname, "/settings")}
+              isCollapsed={isCollapsedEffective}
+              onNavigate={onNavigate}
+            />
+          )}
+          <NavItem
+            item={{ label: "Help", href: "/help", icon: "HelpCircle", shortcut: "?" }}
+            isActive={isItemActive(pathname, "/help")}
+            isCollapsed={isCollapsedEffective}
+            onNavigate={onNavigate}
+          />
         </div>
       </div>
     </aside>

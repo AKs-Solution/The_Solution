@@ -10,7 +10,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ className = "", ...
     <div
       ref={ref}
       className={cn(
-        "rounded-lg border border-zinc-200 bg-white text-zinc-900 shadow-xs transition-colors",
+        "rounded-lg border border-slate-200 bg-white text-slate-900 shadow-xs transition-colors",
         className,
       )}
       {...props}
@@ -60,7 +60,7 @@ export type CardContentProps = HTMLAttributes<HTMLDivElement>;
 
 export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
   ({ className = "", ...props }, ref) => {
-    return <div ref={ref} className={cn("p-5", className)} {...props} />;
+    return <div ref={ref} className={cn("p-6", className)} {...props} />;
   },
 );
 

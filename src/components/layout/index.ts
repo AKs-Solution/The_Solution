@@ -3,7 +3,7 @@ export { Sidebar } from "./sidebar";
 export { Header } from "./header";
 export { Footer } from "./footer";
 export { PageContainer } from "./page-container";
-export { PageHeader } from "./page-header";
+export { PageHeader, PAGE_PRIMARY_ACTION_CLASS } from "./page-header";
 export { Section } from "./section";
 export { Panel } from "./panel";
 export { Stack } from "./stack";

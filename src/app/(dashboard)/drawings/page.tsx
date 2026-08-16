@@ -3,8 +3,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
-import { PageContainer, PageHeader, useWorkspaceTabs } from "@/components/layout";
+import { Plus, Layers } from "lucide-react";
+import {
+  PageContainer,
+  PageHeader,
+  PAGE_PRIMARY_ACTION_CLASS,
+  useWorkspaceTabs,
+} from "@/components/layout";
 import {
   Button,
   EmptyState,
@@ -15,6 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableSkeleton,
 } from "@/components/ui";
 
 function formatWhen(value?: string | Date | null) {
@@ -65,11 +71,7 @@ export default function DrawingsDashboardPage() {
         title="Drawings"
         subtitle="Revision comparisons for this workspace."
         action={
-          <Button
-            as="a"
-            href="/drawings/new"
-            className="h-9 bg-zinc-900 px-4 text-sm text-zinc-50 hover:bg-zinc-800"
-          >
+          <Button as="a" href="/drawings/new" className={PAGE_PRIMARY_ACTION_CLASS}>
             <Plus className="mr-1.5 size-3.5" />
             New drawing
           </Button>
@@ -77,20 +79,15 @@ export default function DrawingsDashboardPage() {
       />
 
       {isLoading ? (
-        <div className="rounded-lg border border-zinc-200 bg-white py-16 text-center text-sm text-zinc-500">
-          Loading drawings...
-        </div>
+        <TableSkeleton />
       ) : rows.length === 0 ? (
         <EmptyState
+          icon={<Layers className="size-5" />}
           title="No drawings yet"
           description="Create a project to start comparing revisions."
           action={
-            <Button
-              as="a"
-              href="/drawings/new"
-              className="bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
-            >
-              New drawing
+            <Button as="a" href="/drawings/new" className={PAGE_PRIMARY_ACTION_CLASS}>
+              + Create First Record
             </Button>
           }
         />
@@ -114,12 +111,12 @@ export default function DrawingsDashboardPage() {
                 `Comparison ${String(row.id).slice(0, 8)}`;
               return (
                 <TableRow key={row.id}>
-                  <TableCell className="font-medium text-zinc-900">{name}</TableCell>
-                  <TableCell className="text-zinc-500">{row.projectName || "Drawing"}</TableCell>
+                  <TableCell className="font-medium text-slate-900">{name}</TableCell>
+                  <TableCell className="text-slate-500">{row.projectName || "Drawing"}</TableCell>
                   <TableCell>
                     <StatusPill status={row.status || "RECORDED"} />
                   </TableCell>
-                  <TableCell className="text-zinc-500">
+                  <TableCell className="font-mono text-xs text-slate-600">
                     {formatWhen(row.createdAt || row.updatedAt)}
                   </TableCell>
                   <TableCell className="text-right">

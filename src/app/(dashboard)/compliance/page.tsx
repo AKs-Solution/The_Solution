@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ShieldCheck } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/layout";
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableSkeleton,
 } from "@/components/ui";
 
 function formatWhen(value?: string | Date | null) {
@@ -70,11 +71,10 @@ export default function CompliancePage() {
       />
 
       {isLoading ? (
-        <div className="rounded-lg border border-zinc-200 bg-white py-16 text-center text-sm text-zinc-500">
-          Loading components...
-        </div>
+        <TableSkeleton />
       ) : entities.length === 0 ? (
         <EmptyState
+          icon={<ShieldCheck className="size-5" />}
           title="No components yet"
           description="Entities ingested into this workspace will appear here for certification review."
         />
@@ -92,14 +92,14 @@ export default function CompliancePage() {
           <TableBody>
             {entities.map((entity) => (
               <TableRow key={entity.id}>
-                <TableCell className="font-medium text-zinc-900">{entity.name}</TableCell>
-                <TableCell className="text-zinc-500">
+                <TableCell className="font-medium text-slate-900">{entity.name}</TableCell>
+                <TableCell className="font-mono text-xs text-slate-600">
                   {entity.entityType || entity.identifier || "—"}
                 </TableCell>
                 <TableCell>
                   <StatusPill status="RECORDED" />
                 </TableCell>
-                <TableCell className="text-zinc-500">
+                <TableCell className="font-mono text-xs text-slate-600">
                   {formatWhen(entity.updatedAt || entity.createdAt)}
                 </TableCell>
                 <TableCell className="text-right">

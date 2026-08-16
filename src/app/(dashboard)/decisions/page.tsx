@@ -3,8 +3,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
-import { PageContainer, PageHeader, useWorkspaceTabs } from "@/components/layout";
+import { Plus, FileText } from "lucide-react";
+import {
+  PageContainer,
+  PageHeader,
+  PAGE_PRIMARY_ACTION_CLASS,
+  useWorkspaceTabs,
+} from "@/components/layout";
 import {
   Button,
   EmptyState,
@@ -15,6 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableSkeleton,
 } from "@/components/ui";
 
 function formatWhen(value?: string | Date | null) {
@@ -55,11 +61,7 @@ export default function DecisionAuditTrailPage() {
         title="Decisions"
         subtitle="Engineering intent, approvals, and outcomes for this workspace."
         action={
-          <Button
-            as="a"
-            href="/decisions/new"
-            className="h-9 bg-zinc-900 px-4 text-sm text-zinc-50 hover:bg-zinc-800"
-          >
+          <Button as="a" href="/decisions/new" className={PAGE_PRIMARY_ACTION_CLASS}>
             <Plus className="mr-1.5 size-3.5" />
             Propose decision
           </Button>
@@ -67,20 +69,15 @@ export default function DecisionAuditTrailPage() {
       />
 
       {isLoading ? (
-        <div className="rounded-lg border border-zinc-200 bg-white py-16 text-center text-sm text-zinc-500">
-          Loading decisions...
-        </div>
+        <TableSkeleton />
       ) : decisions.length === 0 ? (
         <EmptyState
+          icon={<FileText className="size-5" />}
           title="No decisions yet"
           description="Propose a decision to start the audit trail for this workspace."
           action={
-            <Button
-              as="a"
-              href="/decisions/new"
-              className="bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
-            >
-              Propose decision
+            <Button as="a" href="/decisions/new" className={PAGE_PRIMARY_ACTION_CLASS}>
+              + Create First Record
             </Button>
           }
         />
@@ -101,14 +98,14 @@ export default function DecisionAuditTrailPage() {
               const system = d.decisionType || d.status || "Engineering";
               return (
                 <TableRow key={d.id}>
-                  <TableCell className="font-medium text-zinc-900">{name}</TableCell>
-                  <TableCell className="text-zinc-500">
+                  <TableCell className="font-medium text-slate-900">{name}</TableCell>
+                  <TableCell className="text-slate-500">
                     {String(system).replaceAll("_", " ")}
                   </TableCell>
                   <TableCell>
                     <StatusPill status={d.epistemicStatus || "RECORDED"} />
                   </TableCell>
-                  <TableCell className="text-zinc-500">
+                  <TableCell className="font-mono text-xs text-slate-600">
                     {formatWhen(d.createdAt || d.proposedAt)}
                   </TableCell>
                   <TableCell className="text-right">

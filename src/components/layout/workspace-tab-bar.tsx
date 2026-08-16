@@ -9,7 +9,6 @@ import {
   Gauge,
   Monitor,
   Plus,
-  X,
   Pin,
   PinOff,
   ChevronLeft,
@@ -92,6 +91,8 @@ export function WorkspaceTabBar() {
       const direction = e.key === "ArrowRight" ? 1 : -1;
       const next = (index + direction + tabs.length) % tabs.length;
       tabRefs.current[next]?.focus();
+      const nextTab = tabs[next];
+      if (nextTab) activateTab(nextTab.id);
     }
   };
 
@@ -140,7 +141,7 @@ export function WorkspaceTabBar() {
   };
 
   return (
-    <div className="z-20 flex h-10 w-full flex-shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200 bg-zinc-100/70 px-3 text-zinc-500 select-none">
+    <div className="no-scrollbar z-20 flex h-10 w-full flex-shrink-0 items-center gap-1.5 overflow-x-auto border-b border-slate-200 bg-slate-100/80 px-3 text-slate-500 select-none">
       {/* Scroll Left */}
       <button
         type="button"
@@ -184,10 +185,10 @@ export function WorkspaceTabBar() {
               }}
               title={`${tab.title} (Middle-click to close)`}
               className={cn(
-                "group flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-t px-3.5 py-1.5 text-xs transition-colors select-none focus-visible:ring-2 focus-visible:ring-zinc-900/60 focus-visible:outline-none",
+                "group relative flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-t px-3.5 py-1.5 text-xs transition-colors select-none focus-visible:ring-2 focus-visible:ring-slate-900/40 focus-visible:outline-none",
                 isActive
-                  ? "border-b-2 border-zinc-900 bg-white font-medium text-zinc-900 shadow-xs"
-                  : "border-b-2 border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900",
+                  ? "border-b-2 border-slate-900 bg-white font-medium text-slate-900 shadow-xs"
+                  : "border-b-2 border-transparent text-slate-500 hover:bg-slate-200/60 hover:text-slate-900",
               )}
             >
               <Icon
@@ -208,7 +209,7 @@ export function WorkspaceTabBar() {
                     e.stopPropagation();
                     togglePin(tab.id);
                   }}
-                  className="rounded p-0.5 text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-zinc-200 hover:text-zinc-900"
+                  className="rounded p-0.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-700"
                 >
                   {tab.pinned ? <PinOff className="size-2.5" /> : <Pin className="size-2.5" />}
                 </button>
@@ -222,11 +223,9 @@ export function WorkspaceTabBar() {
                       e.stopPropagation();
                       closeTab(tab.id);
                     }}
-                    className={cn(
-                      "rounded p-0.5 text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-rose-100 hover:text-rose-600",
-                    )}
+                    className="rounded p-0.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-700"
                   >
-                    <X className="size-2.5" />
+                    ✕
                   </button>
                 )}
               </div>
@@ -239,7 +238,7 @@ export function WorkspaceTabBar() {
           type="button"
           onClick={handleNewTab}
           title="Open Command Palette (Ctrl+K)"
-          className="flex h-6 shrink-0 cursor-pointer items-center justify-center gap-1 rounded border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+          className="flex h-6 shrink-0 cursor-pointer items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
         >
           <Plus className="size-3" />
           <Command className="size-2.5" />

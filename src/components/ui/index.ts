@@ -68,7 +68,7 @@ export { Progress } from "./progress";
 export type { ProgressProps } from "./progress";
 export { LoadingSpinner } from "./loading-spinner";
 export type { LoadingSpinnerProps } from "./loading-spinner";
-export { Skeleton } from "./skeleton";
+export { Skeleton, TableSkeleton, MetricTileSkeleton } from "./skeleton";
 export type { SkeletonProps } from "./skeleton";
 export { Pagination } from "./pagination";
 export type { PaginationProps } from "./pagination";

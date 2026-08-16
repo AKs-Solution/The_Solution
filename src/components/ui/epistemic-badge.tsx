@@ -57,7 +57,7 @@ function normalizeStatus(value: string | null | undefined): EpistemicStatus {
 }
 
 export const EpistemicBadge = forwardRef<HTMLSpanElement, EpistemicBadgeProps>(
-  ({ className = "", status, label, size = "sm", showDot = false, ...props }, ref) => {
+  ({ className = "", status, label, size = "sm", showDot = true, ...props }, ref) => {
     const normalized = normalizeStatus(status);
     const styles = STATUS_STYLES[normalized];
     return (
@@ -65,12 +65,14 @@ export const EpistemicBadge = forwardRef<HTMLSpanElement, EpistemicBadgeProps>(
         ref={ref}
         size={size}
         variant="outline"
-        className={cn("rounded border px-2.5 py-0.5 font-mono text-xs", styles.badge, className)}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded border px-2.5 py-0.5 font-mono text-xs",
+          styles.badge,
+          className,
+        )}
         {...props}
       >
-        {showDot && (
-          <span className={cn("mr-1.5 size-1.5 rounded-full", styles.dot)} aria-hidden="true" />
-        )}
+        {showDot && <span className={cn("size-1.5 rounded-full", styles.dot)} aria-hidden="true" />}
         {label ?? DEFAULT_LABELS[normalized]}
       </Badge>
     );

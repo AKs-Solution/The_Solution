@@ -183,11 +183,11 @@ export default function HelpPage() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <LifeBuoy className="size-6 text-emerald-600" />
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
               Help & Documentation
             </h1>
           </div>
-          <p className="max-w-2xl text-sm text-zinc-500">
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
             Quick-start guides, reference material, system diagnostics, and a channel to report
             issues to the platform team.
           </p>

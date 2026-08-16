@@ -22,8 +22,20 @@ export function StatusPill({ status }: { status?: string | null }) {
 
   return (
     <span
-      className={`inline-flex rounded border px-2.5 py-0.5 font-mono text-xs ${PILL[mapped] ?? PILL.UNKNOWN}`}
+      className={`inline-flex items-center gap-1.5 rounded border px-2.5 py-0.5 font-mono text-xs ${PILL[mapped] ?? PILL.UNKNOWN}`}
     >
+      <span
+        className={`size-1.5 rounded-full ${
+          mapped === "DERIVED"
+            ? "bg-emerald-600"
+            : mapped === "INFERRED"
+              ? "bg-amber-600"
+              : mapped === "RECORDED"
+                ? "bg-slate-400"
+                : "bg-rose-600"
+        }`}
+        aria-hidden="true"
+      />
       {mapped}
     </span>
   );
