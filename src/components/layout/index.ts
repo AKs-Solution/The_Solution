@@ -3,6 +3,7 @@ export { Sidebar } from "./sidebar";
 export { Header } from "./header";
 export { Footer } from "./footer";
 export { PageContainer } from "./page-container";
+export { PageHeader } from "./page-header";
 export { Section } from "./section";
 export { Panel } from "./panel";
 export { Stack } from "./stack";
@@ -29,10 +30,27 @@ export type {
   WidgetPrefs,
 } from "./workspace-preferences";
 export { Widget, WidgetGrid, WidgetCustomizeMenu } from "./widget";
-export type { WidgetConfig, WidgetProps, WidgetGridProps, WidgetCustomizeMenuProps } from "./widget";
+export type {
+  WidgetConfig,
+  WidgetProps,
+  WidgetGridProps,
+  WidgetCustomizeMenuProps,
+} from "./widget";
 export { DensitySwitcher, ViewSwitcher } from "./workspace-controls";
-export { WorkspaceTabsProvider, useWorkspaceTabs, useScopedTabState, tabIdFor, deriveTabFromPathname, isWorkspaceRoute } from "./workspace-tabs";
-export type { WorkspaceTab, WorkspaceTabKind, WorkspaceTabsValue, OpenTabOptions } from "./workspace-tabs";
+export {
+  WorkspaceTabsProvider,
+  useWorkspaceTabs,
+  useScopedTabState,
+  tabIdFor,
+  deriveTabFromPathname,
+  isWorkspaceRoute,
+} from "./workspace-tabs";
+export type {
+  WorkspaceTab,
+  WorkspaceTabKind,
+  WorkspaceTabsValue,
+  OpenTabOptions,
+} from "./workspace-tabs";
 export { WorkspaceTabBar } from "./workspace-tab-bar";
 export { RecordTabs } from "./record-tabs";
 export type { RecordTabItem, RecordTabsProps } from "./record-tabs";
@@ -42,4 +60,3 @@ export { useRecordScroll } from "./workspace-tabs";
 export { DensityToggle } from "./density-toggle";
 export { SubTabInspector } from "./sub-tab-inspector";
 export type { SubTabId, SubTabOption } from "./sub-tab-inspector";
-

@@ -1,8 +1,8 @@
 "use server";
 
 import { prisma } from "@/server/db";
-import { createSession, validateSession } from "@/server/auth/session-service";
-import { ForbiddenError } from "@/shared/errors";
+import { createSession, isGuestSession, validateSession } from "@/server/auth/session-service";
+import { ForbiddenError, GuestRestrictedError } from "@/shared/errors";
 
 export async function getActiveOrganizationId(): Promise<string | null> {
   const session = await validateSession();
@@ -14,12 +14,15 @@ export async function setActiveOrganizationId(organizationId: string): Promise<v
   if (!session) {
     throw new ForbiddenError("Not authenticated");
   }
+  if (isGuestSession(session)) {
+    throw new GuestRestrictedError();
+  }
   await createSession(session.userId, organizationId);
 }
 
 export async function clearActiveOrganizationId(): Promise<void> {
   const session = await validateSession();
-  if (!session) return;
+  if (!session || isGuestSession(session)) return;
   await createSession(session.userId, session.organizationId);
 }
 
@@ -27,6 +30,9 @@ export async function requireActiveOrganization(): Promise<string> {
   const session = await validateSession();
   if (!session) {
     throw new ForbiddenError("Not authenticated");
+  }
+  if (isGuestSession(session)) {
+    throw new GuestRestrictedError();
   }
 
   const membership = await prisma.organizationMember.findUnique({

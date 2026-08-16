@@ -8,7 +8,7 @@ export type TableProps = HTMLAttributes<HTMLTableElement>;
 export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ className = "", ...props }, ref) => {
     return (
-      <div className="w-full overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+      <div className="w-full overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-xs">
         <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
       </div>
     );
@@ -25,7 +25,7 @@ export const TableHeader = forwardRef<HTMLTableSectionElement, TableHeaderProps>
       <thead
         ref={ref}
         className={cn(
-          "sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 [&_tr]:border-b-0",
+          "sticky top-0 z-10 border-b border-slate-200 bg-slate-50 [&_tr]:border-b-0",
           className,
         )}
         {...props}
@@ -54,7 +54,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
       <tr
         ref={ref}
         className={cn(
-          "border-b border-zinc-100 text-sm text-zinc-800 transition-colors hover:bg-zinc-50/80",
+          "border-b border-slate-100 text-sm text-slate-800 transition-colors hover:bg-slate-50/80",
           className,
         )}
         {...props}
@@ -73,7 +73,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         className={cn(
-          "border-b border-zinc-200 p-3.5 text-left text-xs font-semibold tracking-wider text-zinc-500 uppercase",
+          "border-b border-slate-200 p-3.5 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase",
           className,
         )}
         {...props}
@@ -91,7 +91,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(
     return (
       <td
         ref={ref}
-        className={cn("p-3.5 align-middle text-sm text-zinc-800", className)}
+        className={cn("p-3.5 align-middle text-sm text-slate-800", className)}
         {...props}
       />
     );

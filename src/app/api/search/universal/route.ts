@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { validateSession } from "@/server/auth/session-service";
+import { isGuestSession, validateSession } from "@/server/auth/session-service";
 import { getActiveOrganizationId } from "@/server/organizations/organization-context";
 import { executeUnifiedSearch } from "@/server/retrieval/unified-search";
+import { searchPublicCorpus } from "@/server/public-aerospace/corpus";
 
 export async function GET(request: Request) {
   try {
@@ -10,16 +11,26 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getActiveOrganizationId();
-    if (!orgId) {
-      return NextResponse.json({ error: "No active organization" }, { status: 400 });
-    }
-
     const { searchParams } = new URL(request.url);
     const query = (searchParams.get("q") || "").trim();
 
     if (!query) {
       return NextResponse.json({ data: [] });
+    }
+
+    if (isGuestSession(session)) {
+      const results = searchPublicCorpus(query, 16).map((record) => ({
+        id: record.id,
+        title: record.title,
+        type: record.kind,
+        href: record.href,
+      }));
+      return NextResponse.json({ data: results });
+    }
+
+    const orgId = await getActiveOrganizationId();
+    if (!orgId) {
+      return NextResponse.json({ error: "No active organization" }, { status: 400 });
     }
 
     const unifiedResult = await executeUnifiedSearch({

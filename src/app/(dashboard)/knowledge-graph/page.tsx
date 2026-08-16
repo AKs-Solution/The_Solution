@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { GraphExplorer } from "@/features/knowledge-graph/components/graph-explorer";
 import { Button } from "@/components/ui/button";
+import { useGuestMode } from "@/features/auth/components";
 
 export default function KnowledgeGraphPage() {
+  const { isGuest } = useGuestMode();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
 
@@ -33,12 +35,16 @@ export default function KnowledgeGraphPage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-foreground text-3xl font-bold tracking-tight">Knowledge Graph</h1>
           <p className="text-muted-foreground text-sm">
-            Explore and navigate the engineering knowledge graph
+            {isGuest
+              ? "Public NTSB, AD, and SDR relationships. Recorded sources only."
+              : "Explore and navigate the engineering knowledge graph"}
           </p>
         </div>
-        <Button onClick={handleSync} disabled={syncing}>
-          {syncing ? "Syncing..." : "Sync graph indexes"}
-        </Button>
+        {!isGuest && (
+          <Button onClick={handleSync} disabled={syncing}>
+            {syncing ? "Syncing..." : "Sync graph indexes"}
+          </Button>
+        )}
       </div>
 
       {syncResult && (

@@ -18,10 +18,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-zinc-900 text-zinc-50 hover:bg-zinc-800 border border-zinc-900 active:scale-[0.98]",
+  primary: "bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 active:scale-[0.98]",
   secondary:
-    "border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100 shadow-xs active:scale-[0.98]",
-  ghost: "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 active:scale-[0.98]",
+    "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 shadow-xs active:scale-[0.98]",
+  ghost: "text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:scale-[0.98]",
   destructive:
     "bg-rose-600 text-white hover:bg-rose-500 border border-rose-600 active:scale-[0.98]",
 };

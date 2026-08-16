@@ -5,10 +5,10 @@ import { requireActiveOrganization } from "@/server/organizations/organization-c
 import { requirePermission } from "@/server/rbac";
 import { getCurrentUser } from "@/server/auth";
 import { AppError } from "@/shared/errors";
+import { getPublicGraphStats, getPublicSubgraph } from "@/server/public-aerospace/corpus";
 
 export async function GET(request: Request) {
   try {
-    const orgId = await requireActiveOrganization();
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
@@ -16,7 +16,6 @@ export async function GET(request: Request) {
         { status: 401 },
       );
     }
-    await requirePermission(orgId, user.id, "knowledge_graph:read");
 
     const url = new URL(request.url);
     const parsed = nodesQuerySchema.safeParse(Object.fromEntries(url.searchParams.entries()));
@@ -26,6 +25,24 @@ export async function GET(request: Request) {
         { status: 400 },
       );
     }
+
+    if (user.guest) {
+      const graph = getPublicSubgraph(parsed.data.entityType, parsed.data.pageSize ?? 50);
+      const stats = getPublicGraphStats();
+      const page = parsed.data.page ?? 1;
+      const pageSize = parsed.data.pageSize ?? 50;
+      return NextResponse.json({
+        data: graph.nodes,
+        total: graph.nodes.length,
+        page,
+        pageSize,
+        totalPages: 1,
+        stats,
+      });
+    }
+
+    const orgId = await requireActiveOrganization();
+    await requirePermission(orgId, user.id, "knowledge_graph:read");
     const [stats, nodes] = await Promise.all([
       getGraphStats(orgId),
       getGraphNodes(orgId, parsed.data),

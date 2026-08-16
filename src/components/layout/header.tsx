@@ -12,7 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Search, Settings, User, LogOut, HelpCircle } from "lucide-react";
+import { Menu, Search, Settings, LogOut, HelpCircle } from "lucide-react";
+import { useGuestMode } from "@/features/auth/components";
 
 function openSearchPalette() {
   window.dispatchEvent(new CustomEvent("consecuencia:open-search"));
@@ -31,6 +32,7 @@ function initialsFrom(name?: string | null, email?: string | null): string {
 
 export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   const router = useRouter();
+  const { isGuest, requestUpgrade } = useGuestMode();
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -73,49 +75,50 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   }
 
   return (
-    <header className="z-30 flex h-14 w-full flex-shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-6 text-zinc-900">
+    <header className="z-30 flex h-14 w-full flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 text-slate-900">
       <div className="flex shrink-0 items-center gap-3">
         <button
           type="button"
           onClick={onOpenMobileNav}
           title="Open navigation"
           aria-label="Open navigation"
-          className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 md:hidden"
+          className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:hidden"
         >
           <Menu className="size-4" />
         </button>
         <Link
-          href="/dashboard"
+          href={isGuest ? "/explore" : "/dashboard"}
           title="Consecuencia Aerospace Intelligence"
-          className="flex items-center gap-2 rounded-md px-1 py-1 no-underline transition-colors hover:bg-zinc-100 sm:px-2"
+          className="flex items-center gap-2 rounded-md px-1 py-1 no-underline transition-colors hover:bg-slate-100 sm:px-2"
         >
-          <div className="flex size-6 shrink-0 items-center justify-center rounded bg-zinc-900 text-zinc-50">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded bg-blue-600 text-white">
             <AerospaceLogo className="size-3.5" />
           </div>
-          <span className="truncate font-mono text-xs font-bold tracking-wider text-zinc-900 uppercase">
-            CONSECUENCIA BY AK
+          <span className="truncate text-xs font-semibold tracking-tight text-slate-900">
+            CONSECUENCIA
           </span>
         </Link>
-        <div className="hidden md:block">
-          <OrganizationSelector />
-        </div>
+        {!isGuest && (
+          <div className="hidden md:block">
+            <OrganizationSelector />
+          </div>
+        )}
+        {isGuest && (
+          <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-semibold tracking-wide text-slate-600 uppercase sm:inline">
+            Guest Mode
+          </span>
+        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
         <button
           type="button"
           onClick={openSearchPalette}
-          title="Search Command Palette (Ctrl+K)"
-          className="flex h-8 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 sm:w-44 sm:justify-start sm:px-2.5"
-          aria-label="Open search palette"
+          title="Search (Ctrl+K)"
+          className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          aria-label="Open search"
         >
-          <Search className="size-3.5 shrink-0 text-zinc-500" aria-hidden="true" />
-          <span className="hidden flex-1 text-left text-[11px] tracking-tight sm:inline">
-            Search...
-          </span>
-          <kbd className="hidden rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 font-mono text-[9px] text-zinc-400 sm:inline">
-            Ctrl K
-          </kbd>
+          <Search className="size-3.5" aria-hidden="true" />
         </button>
 
         <DropdownMenu
@@ -128,30 +131,35 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
             >
               <Avatar
                 size="sm"
-                initials={initialsFrom(userName, userEmail)}
-                alt={userName ?? "User"}
+                initials={isGuest ? "G" : initialsFrom(userName, userEmail)}
+                alt={isGuest ? "Guest" : (userName ?? "User")}
               />
             </button>
           }
         >
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-zinc-900">{userName ?? "Engineer"}</span>
-              {userEmail && <span className="font-mono text-xs text-zinc-500">{userEmail}</span>}
+              <span className="text-sm font-medium text-zinc-900">
+                {isGuest ? "Guest Mode" : (userName ?? "Engineer")}
+              </span>
+              {isGuest ? (
+                <span className="text-xs text-zinc-500">Public aerospace corpus</span>
+              ) : (
+                userEmail && <span className="font-mono text-xs text-zinc-500">{userEmail}</span>
+              )}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push("/settings")}>
-            <Settings className="mr-2 size-4" aria-hidden="true" />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/organizations")}>
-            <User className="mr-2 size-4" aria-hidden="true" />
-            Organizations
-          </DropdownMenuItem>
+          {!isGuest && (
+            <DropdownMenuItem onClick={() => router.push("/settings")}>
+              <Settings className="mr-2 size-4" aria-hidden="true" />
+              Settings
+            </DropdownMenuItem>
+          )}
+          {isGuest && <DropdownMenuItem onClick={requestUpgrade}>Create account</DropdownMenuItem>}
           <DropdownMenuItem onClick={() => router.push("/help")}>
             <HelpCircle className="mr-2 size-4" aria-hidden="true" />
-            Help & Documentation
+            Help
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => void handleLogout()}>

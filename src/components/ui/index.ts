@@ -84,6 +84,7 @@ export type {
 export { DataTable } from "./data-table";
 export type { DataTableColumn, DataTableProps } from "./data-table";
 export { EmptyState } from "./empty-state";
+export { StatusPill } from "./status-pill";
 export type { EmptyStateProps } from "./empty-state";
 export { QueryError } from "./query-error";
 export type { QueryErrorProps } from "./query-error";

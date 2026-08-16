@@ -62,6 +62,13 @@ export class ForbiddenError extends AppError {
   }
 }
 
+export class GuestRestrictedError extends AppError {
+  constructor(message: string = "This capability requires an organization account.") {
+    super(message, "GUEST_RESTRICTED", 403);
+    this.name = "GuestRestrictedError";
+  }
+}
+
 export class ConfigurationError extends AppError {
   constructor(key: string) {
     super(`Missing required configuration: ${key}`, "CONFIGURATION_ERROR", 500);

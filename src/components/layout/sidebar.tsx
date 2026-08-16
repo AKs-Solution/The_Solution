@@ -11,6 +11,7 @@ import { cn } from "@/shared/utils";
 import { Tooltip } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GUEST_SIDEBAR_NAV, useGuestMode } from "@/features/auth/components";
 import {
   LayoutDashboard,
   FileText,
@@ -30,7 +31,6 @@ import {
   Layers,
   Cog,
   ChevronRight,
-  ChevronLeft,
   Workflow,
   ScanEye,
   ScrollText,
@@ -101,14 +101,14 @@ function NavItem({
           className={cn(
             "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
             isActive
-              ? "bg-zinc-900 text-zinc-50"
-              : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
+              ? "bg-blue-600 text-white"
+              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
           )}
         >
           <Icon
             className={cn(
               "size-4 shrink-0",
-              isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
+              isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
             )}
           />
           {item.badge && (
@@ -127,14 +127,14 @@ function NavItem({
       className={cn(
         "group relative flex items-center gap-2.5 rounded px-2.5 py-1.5 text-xs transition-colors select-none",
         isActive
-          ? "bg-zinc-900 font-medium text-zinc-50"
-          : "font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+          ? "bg-blue-600 font-medium text-white"
+          : "font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900",
       )}
     >
       <Icon
         className={cn(
           "size-4 shrink-0",
-          isActive ? "text-zinc-50" : "text-zinc-500 group-hover:text-zinc-900",
+          isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900",
         )}
       />
       <span className="flex-1 truncate tracking-tight">{item.label}</span>
@@ -177,18 +177,30 @@ function NavGroup({
   const hasActiveChild = groupHasActiveChild(pathname, group.items);
 
   if (isCollapsed) {
+    const landing = group.items[0];
+    if (!landing) return null;
     return (
-      <div className="flex flex-col items-center gap-1">
-        {group.items.map((item) => (
-          <NavItem
-            key={item.href}
-            item={item}
-            isActive={isItemActive(pathname, item.href)}
-            isCollapsed={true}
-            onNavigate={onNavigate}
+      <Tooltip content={group.label} side="right" delay={120}>
+        <Link
+          href={landing.href}
+          onClick={onNavigate}
+          aria-label={group.label}
+          aria-current={hasActiveChild ? "page" : undefined}
+          className={cn(
+            "group relative mx-auto flex size-9 items-center justify-center rounded transition-colors select-none",
+            hasActiveChild
+              ? "bg-blue-600 text-white"
+              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+          )}
+        >
+          <Icon
+            className={cn(
+              "size-4 shrink-0",
+              hasActiveChild ? "text-white" : "text-slate-500 group-hover:text-slate-900",
+            )}
           />
-        ))}
-      </div>
+        </Link>
+      </Tooltip>
     );
   }
 
@@ -238,7 +250,6 @@ function NavGroup({
 
 export function Sidebar({
   onNavigate,
-  forceExpanded = false,
   mobileOpen = false,
 }: {
   onNavigate?: () => void;
@@ -246,59 +257,13 @@ export function Sidebar({
   mobileOpen?: boolean;
 }) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const { isGuest } = useGuestMode();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState(0);
   const navRef = useRef<HTMLDivElement>(null);
   const keyedNavRef = useRef(false);
 
-  const isCollapsedEffective = mobileOpen || forceExpanded ? false : isCollapsed;
-
-  // Initialize and persist collapsed state (default: collapsed)
-  useEffect(() => {
-    const t = setTimeout(() => {
-      try {
-        const saved = localStorage.getItem("consecuencia.sidebar.collapsed");
-        if (saved !== null) {
-          setIsCollapsed(saved === "true");
-        }
-      } catch {
-        // Ignore
-      }
-    }, 0);
-    return () => clearTimeout(t);
-  }, []);
-
-  const toggleCollapse = useCallback(() => {
-    setIsCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("consecuencia.sidebar.collapsed", String(next));
-      } catch {
-        // Ignore
-      }
-      return next;
-    });
-  }, []);
-
-  // Listen for global toggle events and keyboard shortcuts
-  useEffect(() => {
-    const handleToggle = () => toggleCollapse();
-    window.addEventListener("consecuencia:toggle-sidebar", handleToggle);
-
-    const handleKeyDownGlobal = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-        e.preventDefault();
-        toggleCollapse();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDownGlobal);
-
-    return () => {
-      window.removeEventListener("consecuencia:toggle-sidebar", handleToggle);
-      window.removeEventListener("keydown", handleKeyDownGlobal);
-    };
-  }, [toggleCollapse]);
+  const isCollapsedEffective = mobileOpen ? false : true;
 
   // Groups with active children are auto-expanded during render
   const autoExpandedLabels = useMemo(
@@ -369,12 +334,10 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "z-50 h-full shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white p-2 text-zinc-800 transition-all duration-200 ease-in-out select-none",
+        "z-50 h-full w-14 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white p-2 text-slate-800 select-none",
         mobileOpen
-          ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:shadow-none"
+          ? "fixed inset-y-0 left-0 flex w-72 shadow-xl md:relative md:inset-auto md:w-14 md:shadow-none"
           : "hidden md:flex",
-        isCollapsedEffective ? "md:w-14" : "md:w-64",
-        mobileOpen && "md:w-64",
       )}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between overflow-y-auto">
@@ -398,28 +361,11 @@ export function Sidebar({
                   onClick={onNavigate}
                   title="Close navigation"
                   aria-label="Close navigation"
-                  className="flex size-8 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900 md:hidden"
+                  className="flex size-8 cursor-pointer items-center justify-center rounded border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 md:hidden"
                 >
                   <X className="size-3.5" />
                 </button>
               )}
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                title={
-                  isCollapsedEffective ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"
-                }
-                className={cn(
-                  "hidden size-6 cursor-pointer items-center justify-center rounded border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-50 hover:text-zinc-900 md:flex",
-                  isCollapsedEffective && "mx-auto size-8",
-                )}
-              >
-                {isCollapsedEffective ? (
-                  <ChevronRight className="size-3.5" />
-                ) : (
-                  <ChevronLeft className="size-3.5" />
-                )}
-              </button>
             </div>
           </div>
 
@@ -429,58 +375,44 @@ export function Sidebar({
             onKeyDown={handleKeyDown}
             className={cn("flex flex-col gap-0.5", isCollapsedEffective && "items-center")}
           >
-            {SIDEBAR_NAV.map((entry) =>
-              isGroup(entry) ? (
-                <NavGroup
-                  key={entry.label}
-                  group={entry}
-                  pathname={pathname}
-                  expandedGroups={expandedGroups}
-                  autoExpandedGroups={autoExpandedLabels}
-                  isCollapsed={isCollapsedEffective}
-                  toggleGroup={toggleGroup}
-                  onNavigate={onNavigate}
-                />
-              ) : (
-                <NavItem
-                  key={entry.href}
-                  item={entry}
-                  isActive={isItemActive(pathname, entry.href)}
-                  isCollapsed={isCollapsedEffective}
-                  onNavigate={onNavigate}
-                />
-              ),
-            )}
+            {isGuest
+              ? GUEST_SIDEBAR_NAV.map((item) => (
+                  <NavItem
+                    key={item.href}
+                    item={item}
+                    isActive={isItemActive(pathname, item.href)}
+                    isCollapsed={isCollapsedEffective}
+                    onNavigate={onNavigate}
+                  />
+                ))
+              : SIDEBAR_NAV.map((entry) =>
+                  isGroup(entry) ? (
+                    <NavGroup
+                      key={entry.label}
+                      group={entry}
+                      pathname={pathname}
+                      expandedGroups={expandedGroups}
+                      autoExpandedGroups={autoExpandedLabels}
+                      isCollapsed={isCollapsedEffective}
+                      toggleGroup={toggleGroup}
+                      onNavigate={onNavigate}
+                    />
+                  ) : (
+                    <NavItem
+                      key={entry.href}
+                      item={entry}
+                      isActive={isItemActive(pathname, entry.href)}
+                      isCollapsed={isCollapsedEffective}
+                      onNavigate={onNavigate}
+                    />
+                  ),
+                )}
           </div>
         </div>
 
         {/* Status Footer */}
-        <div
-          className={cn(
-            "mt-3 rounded border border-zinc-200 bg-white p-2 font-mono text-[10px] text-zinc-500",
-            isCollapsedEffective && "border-0 bg-transparent p-1.5 text-center",
-          )}
-        >
-          {isCollapsedEffective ? (
-            <div className="flex flex-col items-center gap-1 font-mono text-[8px]">
-              <span className="size-1.5 rounded-full bg-zinc-400" />
-              <span className="text-[8px] font-medium text-zinc-700">OK</span>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-400">STATUS</span>
-                <span className="flex items-center gap-1 font-medium text-zinc-800">
-                  <span className="size-1 rounded-full bg-emerald-600" />
-                  DETERMINISTIC
-                </span>
-              </div>
-              <div className="mt-1 flex items-center justify-between">
-                <span className="text-zinc-400">COMPLIANCE</span>
-                <span className="font-medium text-zinc-700">AS9100 / FAR 25</span>
-              </div>
-            </>
-          )}
+        <div className="mt-auto flex justify-center py-2">
+          <span className="size-1.5 rounded-full bg-emerald-500" title="System ready" />
         </div>
       </div>
     </aside>

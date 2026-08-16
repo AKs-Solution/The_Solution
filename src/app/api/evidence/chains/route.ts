@@ -4,10 +4,10 @@ import { requireActiveOrganization } from "@/server/organizations/organization-c
 import { requirePermission } from "@/server/rbac";
 import { getCurrentUser } from "@/server/auth";
 import { AppError } from "@/shared/errors";
+import { getPublicEvidenceChain } from "@/server/public-aerospace/corpus";
 
 export async function GET(request: Request) {
   try {
-    const orgId = await requireActiveOrganization();
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
@@ -15,7 +15,6 @@ export async function GET(request: Request) {
         { status: 401 },
       );
     }
-    await requirePermission(orgId, user.id, "evidence:read");
 
     const url = new URL(request.url);
     const entityId = url.searchParams.get("entityId");
@@ -24,6 +23,17 @@ export async function GET(request: Request) {
     if (!entityId) {
       return NextResponse.json({ error: "entityId is required" }, { status: 400 });
     }
+
+    if (user.guest) {
+      const chain = getPublicEvidenceChain(entityId);
+      if (!chain) {
+        return NextResponse.json({ error: "Record not found in public corpus" }, { status: 404 });
+      }
+      return NextResponse.json({ data: [chain] });
+    }
+
+    const orgId = await requireActiveOrganization();
+    await requirePermission(orgId, user.id, "evidence:read");
 
     const graph = await buildEvidenceGraph(orgId, entityId, maxDepth);
     const chains = buildEvidenceChains(graph, graph.rootId, maxDepth);

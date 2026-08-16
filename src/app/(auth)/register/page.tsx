@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { RegisterForm } from "@/features/auth/components";
+import { RegisterForm, ContinueAsGuest } from "@/features/auth/components";
 
 export default function RegisterPage() {
   return (
@@ -10,6 +10,9 @@ export default function RegisterPage() {
           <p className="text-muted-foreground mt-2 text-sm">Get started with Consecuencia by AK</p>
         </div>
         <RegisterForm />
+        <div className="mt-4">
+          <ContinueAsGuest />
+        </div>
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="text-foreground font-medium hover:underline">

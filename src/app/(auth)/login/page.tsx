@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LoginForm } from "@/features/auth/components";
+import { LoginForm, ContinueAsGuest } from "@/features/auth/components";
 
 export default function LoginPage() {
   return (
@@ -10,6 +10,9 @@ export default function LoginPage() {
           <p className="text-muted-foreground mt-2 text-sm">Sign in to your account</p>
         </div>
         <LoginForm />
+        <div className="mt-4">
+          <ContinueAsGuest />
+        </div>
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="text-foreground font-medium hover:underline">

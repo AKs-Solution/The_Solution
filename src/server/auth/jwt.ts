@@ -1,10 +1,13 @@
 import { SignJWT, jwtVerify } from "jose";
 
 export const COOKIE_NAME = "consecuencia_session";
+export const GUEST_USER_ID = "guest";
+export const PUBLIC_ORGANIZATION_ID = "public";
 
 export interface AuthJwtPayload {
   userId: string;
   organizationId: string;
+  guest?: boolean;
 }
 
 function getSecretKey(): Uint8Array {
@@ -22,6 +25,7 @@ export async function signAuthToken(payload: AuthJwtPayload, expiresIn: string):
   return new SignJWT({
     userId: payload.userId,
     organizationId: payload.organizationId,
+    guest: payload.guest === true,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.userId)
@@ -33,6 +37,14 @@ export async function signAuthToken(payload: AuthJwtPayload, expiresIn: string):
 export async function verifyAuthToken(token: string): Promise<AuthJwtPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
+    const guest = payload.guest === true;
+    if (guest) {
+      return {
+        userId: GUEST_USER_ID,
+        organizationId: PUBLIC_ORGANIZATION_ID,
+        guest: true,
+      };
+    }
     const userId =
       typeof payload.userId === "string"
         ? payload.userId
@@ -41,8 +53,12 @@ export async function verifyAuthToken(token: string): Promise<AuthJwtPayload | n
           : "";
     const organizationId = typeof payload.organizationId === "string" ? payload.organizationId : "";
     if (!userId || !organizationId) return null;
-    return { userId, organizationId };
+    return { userId, organizationId, guest: false };
   } catch {
     return null;
   }
+}
+
+export function isGuestPayload(payload: AuthJwtPayload | null | undefined): boolean {
+  return payload?.guest === true;
 }

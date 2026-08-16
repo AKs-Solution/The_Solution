@@ -9,6 +9,7 @@ const REQUEST_ID_HEADER = "x-request-id";
 const NONCE_HEADER = "x-nonce";
 
 const publicPathPrefixes = [
+  "/api/auth/guest",
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/forgot-password",

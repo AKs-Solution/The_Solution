@@ -1,7 +1,8 @@
 import { prisma } from "@/server/db";
 import { AppError, UnauthorizedError } from "@/shared/errors";
 import { hashPassword, verifyPassword } from "./password-service";
-import { createSession, destroySession, validateSession } from "./session-service";
+import { createSession, destroySession, isGuestSession, validateSession } from "./session-service";
+import { GUEST_USER_ID, PUBLIC_ORGANIZATION_ID } from "./jwt";
 import { createVerificationToken, consumeVerificationToken } from "./token-service";
 import { sendPasswordResetEmail } from "@/server/mail";
 import { generateUniqueSlug } from "@/server/organizations/slug";
@@ -183,7 +184,7 @@ export async function loginUser(input: LoginInput): Promise<{ user: AuthUserResu
 
 export async function logoutUser(): Promise<void> {
   const payload = await validateSession();
-  if (payload) {
+  if (payload && !isGuestSession(payload)) {
     await prisma.authEvent.create({
       data: { userId: payload.userId, action: "auth.logout" },
     });
@@ -200,11 +201,26 @@ export interface CurrentUserResult {
   createdAt: Date;
   organizationId: string | null;
   organizationName: string | null;
+  guest: boolean;
 }
 
 export async function getCurrentUser(): Promise<CurrentUserResult | null> {
   const payload = await validateSession();
   if (!payload) return null;
+
+  if (isGuestSession(payload)) {
+    return {
+      id: GUEST_USER_ID,
+      email: "guest@public.consecuencia",
+      name: "Guest",
+      isEmailVerified: false,
+      lastLoginAt: null,
+      createdAt: new Date(),
+      organizationId: PUBLIC_ORGANIZATION_ID,
+      organizationName: "Public aerospace corpus",
+      guest: true,
+    };
+  }
 
   const user = await prisma.user.findUnique({ where: { id: payload.userId } });
   if (!user || user.status !== "active") {
@@ -226,6 +242,7 @@ export async function getCurrentUser(): Promise<CurrentUserResult | null> {
     createdAt: user.createdAt,
     organizationId: org?.id ?? payload.organizationId,
     organizationName: org?.name ?? null,
+    guest: false,
   };
 }
 

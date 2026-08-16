@@ -1,50 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Activity, AlertOctagon, Hash, ShieldAlert, TrendingUp, Zap } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw } from "lucide-react";
+import { PageContainer, PageHeader, useWorkspaceTabs } from "@/components/layout";
 import {
-  PageContainer,
-  Stack,
-  Widget,
-  WidgetGrid,
-  WidgetCustomizeMenu,
-  SubTabInspector,
-  type WidgetConfig,
-} from "@/components/layout";
-import { Badge } from "@/components/ui";
-import { EpistemicBadge } from "@/components/ui/epistemic-badge";
-import { useWorkspaceTabs } from "@/components/layout/workspace-tabs";
-
-const WIDGETS: WidgetConfig[] = [
-  {
-    id: "sentinel-alert-feed",
-    title: "Sentinel Alert Stream",
-    description: "Continuous surveillance of engineering hypotheses",
-    icon: ShieldAlert,
-    span: "md:col-span-2 xl:col-span-2",
-  },
-  {
-    id: "decision-velocity",
-    title: "Innovation Velocity",
-    description: "Index, maturity, and decision throughput",
-    icon: TrendingUp,
-    span: "md:col-span-2 xl:col-span-2",
-  },
-  {
-    id: "active-anomalies",
-    title: "Expectation Deviations",
-    description: "Hypotheses diverging from modeled expectations",
-    icon: AlertOctagon,
-    span: "md:col-span-2 xl:col-span-2",
-  },
-  {
-    id: "epistemic-matrix",
-    title: "Surveillance Epistemic Posture",
-    description: "Provenance of monitored signals",
-    icon: Activity,
-    span: "md:col-span-2 xl:col-span-2",
-  },
-];
+  Button,
+  EmptyState,
+  StatusPill,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 
 interface SentinelAlert {
   id: string;
@@ -52,33 +22,23 @@ interface SentinelAlert {
   type: string;
   reason: string;
   timestamp: string;
-  evidenceHashes?: string[];
 }
 
 interface SentinelDashboard {
   realtimeAlerts?: SentinelAlert[];
-  innovationVelocityIndex?: number;
-  programMaturityScore?: number;
-  activeDecisionsCount?: number;
-  deviatedDecisionsCount?: number;
-  technicalDebtHotspotsCount?: number;
-  agingAssumptionsCount?: number;
+}
+
+function formatWhen(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString();
 }
 
 export default function SentinelPage() {
-  const [dashboard, setDashboard] = useState<SentinelDashboard | null>(null);
+  const [alerts, setAlerts] = useState<SentinelAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selected, setSelected] = useState<string | null>(null);
   const { openTab } = useWorkspaceTabs();
-
-  const openInTab = (alert: SentinelAlert) =>
-    openTab({
-      kind: "sentinel",
-      ref: alert.id,
-      title: alert.title,
-      subtitle: alert.type,
-      href: `/sentinel/${alert.id}`,
-    });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -86,271 +46,91 @@ export default function SentinelPage() {
       const res = await fetch("/api/sentinel/executive-dashboard");
       if (res.ok) {
         const json = await res.json();
-        setDashboard(json.dashboard ?? null);
+        const dashboard = (json.dashboard ?? json.data ?? null) as SentinelDashboard | null;
+        setAlerts(dashboard?.realtimeAlerts ?? []);
+      } else {
+        setAlerts([]);
       }
     } catch {
-      // Sentinel engine unavailable — show empty posture.
+      setAlerts([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void loadData();
-    }, 0);
-    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial list fetch
+    void loadData();
   }, [loadData]);
-
-  const alerts = dashboard?.realtimeAlerts ?? [];
-  const selectedAlert = alerts.find((a) => a.id === selected) ?? null;
 
   return (
     <PageContainer>
-      <Stack gap={6}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-md border border-rose-500/20 bg-rose-500/10 text-rose-500">
-                <Activity className="size-4.5" />
-              </span>
-              <h1 className="text-foreground text-2xl font-extrabold tracking-tight md:text-3xl">
-                Decision Sentinel
-              </h1>
-              <Badge className="hidden border-rose-500/20 bg-rose-500/10 text-[9px] text-rose-600 sm:inline-flex">
-                LIVE
-              </Badge>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Realtime surveillance of active engineering hypotheses, expectation deviations, and
-              precedent alerts.
-            </p>
-          </div>
-          <WidgetCustomizeMenu widgets={WIDGETS} />
+      <PageHeader
+        title="Sentinel"
+        subtitle="Active alerts for this workspace."
+        action={
+          <Button
+            variant="secondary"
+            className="h-9"
+            onClick={() => void loadData()}
+            disabled={isLoading}
+          >
+            <RefreshCw className="mr-1.5 size-3.5" />
+            Refresh
+          </Button>
+        }
+      />
+
+      {isLoading ? (
+        <div className="rounded-lg border border-zinc-200 bg-white py-16 text-center text-sm text-zinc-500">
+          Loading alerts...
         </div>
-
-        <SubTabInspector activeTab="sentinel" className="rounded-xl border" />
-
-        {isLoading ? (
-          <div className="border-border bg-background text-muted-foreground flex items-center justify-center rounded-lg border py-24 text-sm">
-            Establishing sentinel telemetry...
-          </div>
-        ) : (
-          <WidgetGrid
-            widgets={WIDGETS}
-            columns="grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
-            render={(config) => {
-              switch (config.id) {
-                case "sentinel-alert-feed":
-                  return (
-                    <Widget key={config.id} config={config}>
-                      <div className="flex max-h-96 flex-col gap-2 overflow-y-auto">
-                        {alerts.length === 0 ? (
-                          <p className="text-muted-foreground py-10 text-center text-xs">
-                            No deviations under active surveillance.
-                          </p>
-                        ) : (
-                          alerts.map((alert) => (
-                            <button
-                              key={alert.id}
-                              type="button"
-                              onClick={() => {
-                                setSelected(alert.id);
-                                openInTab(alert);
-                              }}
-                              className={[
-                                "border-border hover:bg-surface-hover rounded-lg border p-3 text-left transition-colors",
-                                selected === alert.id ? "border-rose-500/40 bg-rose-500/5" : "",
-                              ].join(" ")}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="rounded border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-rose-600 uppercase">
-                                  {alert.type.replace("_", " ")}
-                                </span>
-                                <span className="text-muted-foreground font-mono text-[10px]">
-                                  {new Date(alert.timestamp).toLocaleString()}
-                                </span>
-                              </div>
-                              <p className="text-foreground mt-1.5 text-xs font-semibold">
-                                {alert.title}
-                              </p>
-                              <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs leading-relaxed">
-                                {alert.reason}
-                              </p>
-                              {alert.evidenceHashes != null && alert.evidenceHashes.length > 0 && (
-                                <span className="bg-muted text-muted-foreground mt-1.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px]">
-                                  <Hash className="size-3 text-emerald-500" aria-hidden="true" />
-                                  {alert.evidenceHashes?.[0]?.slice(0, 16)}...
-                                </span>
-                              )}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </Widget>
-                  );
-
-                case "decision-velocity":
-                  return (
-                    <Widget key={config.id} config={config}>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
-                            <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                              Velocity Index
-                            </span>
-                            <div className="text-foreground mt-1 flex items-baseline gap-1 text-2xl font-extrabold">
-                              {dashboard?.innovationVelocityIndex ?? 0}
-                              <span className="text-muted-foreground text-xs">/ 100</span>
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
-                            <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                              Program Maturity
-                            </span>
-                            <div className="text-foreground mt-1 text-2xl font-extrabold">
-                              {dashboard?.programMaturityScore ?? 0}%
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="border-border rounded-lg border p-3 text-center">
-                            <div className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                              Monitored
-                            </div>
-                            <div className="text-foreground mt-1 text-xl font-bold">
-                              {dashboard?.activeDecisionsCount ?? 0}
-                            </div>
-                          </div>
-                          <div className="border-border rounded-lg border p-3 text-center">
-                            <div className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                              Deviated
-                            </div>
-                            <div className="mt-1 text-xl font-bold text-amber-500">
-                              {dashboard?.deviatedDecisionsCount ?? 0}
-                            </div>
-                          </div>
-                          <div className="border-border rounded-lg border p-3 text-center">
-                            <div className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                              Debt Hotspots
-                            </div>
-                            <div className="mt-1 text-xl font-bold text-rose-500">
-                              {dashboard?.technicalDebtHotspotsCount ?? 0}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Widget>
-                  );
-
-                case "active-anomalies":
-                  return (
-                    <Widget key={config.id} config={config}>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {[
-                          {
-                            label: "Aging Assumptions",
-                            value: dashboard?.agingAssumptionsCount ?? 0,
-                            icon: <Zap className="size-5 text-indigo-500" aria-hidden="true" />,
-                          },
-                          {
-                            label: "Technical Debt Hotspots",
-                            value: dashboard?.technicalDebtHotspotsCount ?? 0,
-                            icon: (
-                              <AlertOctagon className="size-5 text-rose-500" aria-hidden="true" />
-                            ),
-                          },
-                        ].map((stat) => (
-                          <div
-                            key={stat.label}
-                            className="border-border hover:bg-surface-hover flex items-center justify-between rounded-lg border p-4 transition-colors"
-                          >
-                            <div className="flex flex-col gap-1">
-                              <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                                {stat.label}
-                              </span>
-                              <span className="text-foreground text-2xl font-extrabold">
-                                {stat.value}
-                              </span>
-                            </div>
-                            {stat.icon}
-                          </div>
-                        ))}
-                        <p className="text-muted-foreground text-xs leading-relaxed sm:col-span-2">
-                          Deviation detection compares modeled decision expectations against
-                          ingested evidence. Any mismatch is surfaced here with full traceability to
-                          source hashes.
-                        </p>
-                      </div>
-                    </Widget>
-                  );
-
-                case "epistemic-matrix":
-                  return (
-                    <Widget key={config.id} config={config}>
-                      <div className="flex flex-col gap-2.5">
-                        {(
-                          [
-                            { status: "RECORDED", count: dashboard?.activeDecisionsCount ?? 0 },
-                            { status: "DERIVED", count: alerts.length },
-                            { status: "INFERRED", count: dashboard?.agingAssumptionsCount ?? 0 },
-                            { status: "GAP", count: dashboard?.deviatedDecisionsCount ?? 0 },
-                          ] as const
-                        ).map((row) => (
-                          <div
-                            key={row.status}
-                            className="border-border hover:bg-surface-hover flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors"
-                          >
-                            <EpistemicBadge status={row.status} showDot />
-                            <span className="text-foreground font-mono text-sm font-bold">
-                              {row.count}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </Widget>
-                  );
-
-                default:
-                  return null;
-              }
-            }}
-          />
-        )}
-
-        {selectedAlert && (
-          <div className="border-border bg-background rounded-lg border p-4">
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                Alert detail
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className="text-muted-foreground hover:text-foreground text-xs font-semibold"
-              >
-                Close
-              </button>
-            </div>
-            <h3 className="text-foreground text-sm font-bold">{selectedAlert.title}</h3>
-            <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-              {selectedAlert.reason}
-            </p>
-            {selectedAlert.evidenceHashes != null && selectedAlert.evidenceHashes.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {selectedAlert.evidenceHashes?.map((hash) => (
-                  <span
-                    key={hash}
-                    className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"
+      ) : alerts.length === 0 ? (
+        <EmptyState
+          title="No alerts"
+          description="When surveillance finds a deviation, it will appear here."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>System</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Timestamp</TableHead>
+              <TableHead> </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {alerts.map((alert) => (
+              <TableRow key={alert.id}>
+                <TableCell className="font-medium text-zinc-900">{alert.title}</TableCell>
+                <TableCell className="text-zinc-500">{alert.type.replaceAll("_", " ")}</TableCell>
+                <TableCell>
+                  <StatusPill status="INFERRED" />
+                </TableCell>
+                <TableCell className="text-zinc-500">{formatWhen(alert.timestamp)}</TableCell>
+                <TableCell className="text-right">
+                  <Link
+                    href={`/sentinel/${alert.id}`}
+                    onClick={() =>
+                      openTab({
+                        kind: "sentinel",
+                        ref: alert.id,
+                        title: alert.title,
+                        href: `/sentinel/${alert.id}`,
+                      })
+                    }
+                    className="text-sm font-medium text-zinc-900 no-underline hover:underline"
                   >
-                    {hash.slice(0, 24)}...
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </Stack>
+                    View details
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </PageContainer>
   );
 }

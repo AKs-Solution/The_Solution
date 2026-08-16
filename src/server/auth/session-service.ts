@@ -1,8 +1,17 @@
 import { cookies } from "next/headers";
-import { COOKIE_NAME, signAuthToken, verifyAuthToken, type AuthJwtPayload } from "./jwt";
+import {
+  COOKIE_NAME,
+  GUEST_USER_ID,
+  PUBLIC_ORGANIZATION_ID,
+  isGuestPayload,
+  signAuthToken,
+  verifyAuthToken,
+  type AuthJwtPayload,
+} from "./jwt";
 
 const SESSION_EXPIRY = "24h";
 const REMEMBER_ME_EXPIRY = "30d";
+const GUEST_TOKEN_EXPIRY = "12h";
 
 export type SessionPayload = AuthJwtPayload;
 
@@ -31,11 +40,30 @@ export async function createSession(
   return token;
 }
 
+export async function createGuestSession(): Promise<string> {
+  const token = await signAuthToken(
+    { userId: GUEST_USER_ID, organizationId: PUBLIC_ORGANIZATION_ID, guest: true },
+    GUEST_TOKEN_EXPIRY,
+  );
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+  return token;
+}
+
 export async function validateSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   return verifyAuthToken(token);
+}
+
+export function isGuestSession(session: SessionPayload | null | undefined): boolean {
+  return isGuestPayload(session);
 }
 
 export async function destroySession(): Promise<void> {
@@ -53,4 +81,4 @@ export async function destroyAllUserSessions(): Promise<void> {
   await destroySession();
 }
 
-export { COOKIE_NAME };
+export { COOKIE_NAME, GUEST_USER_ID, PUBLIC_ORGANIZATION_ID };

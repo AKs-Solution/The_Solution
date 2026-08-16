@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireActiveOrganization } from "@/server/organizations/organization-context";
-import { validateSession } from "@/server/auth/session-service";
+import { isGuestSession, validateSession } from "@/server/auth/session-service";
 import { requirePermission } from "@/server/rbac";
 import { executeUnifiedSearch } from "@/server/retrieval/unified-search";
+import { mapRecordToSearchHit, searchPublicCorpus } from "@/server/public-aerospace/corpus";
 import { AppError } from "@/shared/errors";
 
 const searchQuerySchema = z.object({
@@ -16,7 +17,6 @@ const MIN_QUERY_LENGTH = 2;
 
 export async function GET(request: Request) {
   try {
-    const orgId = await requireActiveOrganization();
     const session = await validateSession();
     if (!session) {
       return NextResponse.json(
@@ -24,7 +24,6 @@ export async function GET(request: Request) {
         { status: 401 },
       );
     }
-    await requirePermission(orgId, session.userId, "organization:read");
 
     const url = new URL(request.url);
     const parsed = searchQuerySchema.safeParse(Object.fromEntries(url.searchParams.entries()));
@@ -44,6 +43,16 @@ export async function GET(request: Request) {
     if (q.length < MIN_QUERY_LENGTH) {
       return NextResponse.json({ data: [] });
     }
+
+    if (isGuestSession(session)) {
+      const hits = searchPublicCorpus(q, limit)
+        .map(mapRecordToSearchHit)
+        .filter((item) => (type ? item.type === type : true));
+      return NextResponse.json({ data: hits });
+    }
+
+    const orgId = await requireActiveOrganization();
+    await requirePermission(orgId, session.userId, "organization:read");
 
     const unifiedResult = await executeUnifiedSearch({
       organizationId: orgId,

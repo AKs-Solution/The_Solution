@@ -4,6 +4,7 @@ export {
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
+  GuestRestrictedError,
   ConfigurationError,
   RateLimitedError,
 } from "./app-error";
