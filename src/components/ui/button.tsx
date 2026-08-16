@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type ButtonHTMLAttributes, forwardRef } from "react";
+import { type AnchorHTMLAttributes, type ButtonHTMLAttributes, forwardRef, type Ref } from "react";
 import { cn } from "@/shared/utils";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,7 +33,20 @@ const sizeStyles: Record<NonNullable<ButtonProps["size"]>, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = "", variant = "primary", size = "md", as = "button", href, target, rel, type, ...props }, ref) => {
+  (
+    {
+      className = "",
+      variant = "primary",
+      size = "md",
+      as = "button",
+      href,
+      target,
+      rel,
+      type,
+      ...props
+    },
+    ref,
+  ) => {
     const classes = cn(
       "focus-visible:ring-ring inline-flex cursor-pointer items-center justify-center font-medium transition-all duration-150 select-none focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none",
       variantStyles[variant],
@@ -44,18 +57,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isAnchor = as === "a" || typeof href === "string";
 
     if (isAnchor) {
-      // Render as anchor. Cast ref to any because it's an anchor element now.
       return (
-        // eslint-disable-next-line jsx-a11y/anchor-has-content
-        <a ref={ref as any} className={classes} href={href} target={target} rel={rel} {...(props as any)}>
+        <a
+          ref={ref as unknown as Ref<HTMLAnchorElement>}
+          className={classes}
+          href={href}
+          target={target}
+          rel={rel}
+          {...(props as unknown as AnchorHTMLAttributes<HTMLAnchorElement>)}
+        >
           {props.children}
         </a>
       );
     }
 
-    return (
-      <button ref={ref} type={type ?? "button"} className={classes} {...(props as any)} />
-    );
+    return <button ref={ref} type={type ?? "button"} className={classes} {...props} />;
   },
 );
 
