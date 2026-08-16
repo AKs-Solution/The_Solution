@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { removeMember } from "@/server/organizations";
 import { changeMemberRole } from "@/server/rbac";
+import { requireOrganizationMembership } from "@/server/organizations/organization-context";
 import { AppError, ForbiddenError } from "@/shared/errors";
 
 export async function PATCH(
@@ -9,6 +10,7 @@ export async function PATCH(
 ) {
   try {
     const { id, userId } = await params;
+    await requireOrganizationMembership(id);
     const body = await request.json();
     const { role } = body;
 
@@ -44,6 +46,7 @@ export async function DELETE(
 ) {
   try {
     const { id, userId } = await params;
+    await requireOrganizationMembership(id);
     await removeMember(id, userId);
     return NextResponse.json({ data: { message: "Member removed" } });
   } catch (error) {

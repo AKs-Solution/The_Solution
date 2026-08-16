@@ -26,6 +26,31 @@ export async function clearActiveOrganizationId(): Promise<void> {
   await createSession(session.userId, session.organizationId);
 }
 
+export async function requireOrganizationMembership(organizationId: string): Promise<string> {
+  const session = await validateSession();
+  if (!session) {
+    throw new ForbiddenError("Not authenticated");
+  }
+  if (isGuestSession(session)) {
+    throw new GuestRestrictedError();
+  }
+
+  const membership = await prisma.organizationMember.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: session.userId,
+      },
+    },
+  });
+
+  if (!membership || membership.status !== "active") {
+    throw new ForbiddenError("Access to this organization denied");
+  }
+
+  return organizationId;
+}
+
 export async function requireActiveOrganization(): Promise<string> {
   const session = await validateSession();
   if (!session) {

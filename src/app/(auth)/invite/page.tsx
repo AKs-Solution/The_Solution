@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface Preview {
   organizationName: string;
-  email: string | null;
+  emailHint: string | null;
   role: string;
   expiresAt: string;
   status: string;
@@ -89,10 +89,10 @@ function InviteAcceptInner() {
               <span className="font-medium text-slate-900">{preview.organizationName}</span> as{" "}
               <span className="font-medium text-slate-900">{preview.role}</span>.
             </p>
-            {preview.email ? (
+            {preview.emailHint ? (
               <p>
                 This invite was sent to{" "}
-                <span className="font-medium text-slate-900">{preview.email}</span>.
+                <span className="font-medium text-slate-900">{preview.emailHint}</span>.
               </p>
             ) : null}
             <p className="text-xs text-slate-500">

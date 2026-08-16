@@ -17,6 +17,7 @@ interface InvitationListProps {
 
 export function InvitationList({ invitations }: InvitationListProps) {
   const [actionId, setActionId] = useState<string | null>(null);
+  const rows = Array.isArray(invitations) ? invitations : [];
 
   async function handleAccept(id: string) {
     setActionId(id);
@@ -42,7 +43,7 @@ export function InvitationList({ invitations }: InvitationListProps) {
     }
   }
 
-  if (invitations.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="border-border flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
         <p className="text-muted-foreground text-sm">No pending invitations</p>
@@ -52,7 +53,7 @@ export function InvitationList({ invitations }: InvitationListProps) {
 
   return (
     <div className="divide-border border-border divide-y rounded-lg border">
-      {invitations.map((inv) => (
+      {rows.map((inv) => (
         <div key={inv.id} className="flex items-center justify-between px-4 py-3">
           <div className="flex flex-col">
             <span className="text-foreground text-sm font-medium">{inv.organizationName}</span>

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { listMembers, inviteMember } from "@/server/organizations";
+import { requireOrganizationMembership } from "@/server/organizations/organization-context";
 import { AppError, ValidationError } from "@/shared/errors";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await requireOrganizationMembership(id);
     const members = await listMembers(id);
     return NextResponse.json({ data: members });
   } catch (error) {
@@ -21,6 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await requireOrganizationMembership(id);
     const body = await request.json();
     const { name, email, role } = body;
 

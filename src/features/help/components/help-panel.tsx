@@ -16,7 +16,17 @@ export function HelpPanel() {
   useEffect(() => {
     const onOpen = () => setOpen(true);
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      const target = event.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (event.key === "?" && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        event.preventDefault();
+        setOpen(true);
+      }
     };
     window.addEventListener("consecuencia:open-help", onOpen);
     window.addEventListener("keydown", onKey);

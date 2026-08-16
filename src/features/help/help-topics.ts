@@ -97,6 +97,51 @@ export const HELP_TOPICS: HelpTopic[] = [
     keywords: ["compliance", "as9100", "certification", "audit"],
     routes: ["/compliance"],
   },
+  {
+    id: "industry-graph",
+    title: "Query the industry failure graph",
+    category: "How-to",
+    summary:
+      "Public NTSB, AD, and SDR records are queryable from Explore and the failure graph when those tables contain data.",
+    steps: [
+      "Open Explore (guest) or Failure Graph from the rail.",
+      "Search by mechanism, component, or material.",
+      "Open a node to inspect the source record. Empty tables mean no public corpus is loaded in this environment.",
+    ],
+    href: "/explore",
+    keywords: ["ntsb", "ad", "sdr", "industry", "graph", "explore"],
+    routes: ["/explore", "/failure-graph"],
+  },
+  {
+    id: "manufacturing-validation",
+    title: "Run manufacturing validation",
+    category: "How-to",
+    summary:
+      "Drawing assessments evaluate GD&T and process parameters against deterministic manufacturing rules. Each result cites the rule applied.",
+    steps: [
+      "Open Drawings and upload or open a revision.",
+      "Run assessment. Read pass, fail, or not evaluated per rule group.",
+      "Keep the drawing tab open while you record a related decision.",
+    ],
+    href: "/drawings",
+    keywords: ["gdt", "manufacturing", "tolerance", "producibility", "drawing"],
+    routes: ["/drawings"],
+  },
+  {
+    id: "search-memory",
+    title: "Search institutional memory",
+    category: "How-to",
+    summary:
+      "Search decisions, evidence, and related records in this organization. Results cite source records.",
+    steps: [
+      "Open Search from the rail.",
+      "Enter a part, supplier, or decision phrase.",
+      "Open a hit to inspect evidence status and provenance.",
+    ],
+    href: "/search",
+    keywords: ["search", "memory", "precedent"],
+    routes: ["/search"],
+  },
 ];
 
 export function topicsForPath(pathname: string): HelpTopic[] {

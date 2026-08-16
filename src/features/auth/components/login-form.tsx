@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { safeInternalPath } from "@/shared/security/safe-internal-path";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -17,11 +18,7 @@ export function LoginForm() {
   const [isPending, setIsPending] = useState(false);
 
   const postLoginDestination = () => {
-    const next = searchParams.get("next");
-    if (next && next.startsWith("/") && !next.startsWith("//") && next !== "/login") {
-      return next;
-    }
-    return "/dashboard";
+    return safeInternalPath(searchParams.get("next"), "/dashboard");
   };
 
   async function handleSubmit(e: FormEvent) {

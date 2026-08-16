@@ -1,11 +1,12 @@
 import {
   ArrowRight,
+  BookOpen,
   FileCheck2,
   GitBranch,
   Layers,
-  Lock,
   Network,
   Radar,
+  Search,
   ShieldCheck,
   Workflow,
 } from "lucide-react";
@@ -16,84 +17,148 @@ import { FRESHNESS_LINE } from "@/features/marketing/content";
 import { ContinueAsGuest } from "@/features/auth/components";
 
 const METRICS = [
-  { value: "100% Deterministic", label: "Zero Generative Hallucinations" },
-  { value: "< 30s Traceability", label: "Full AS9100 Matrix Generation" },
-  { value: "500+ NTSB Precedents", label: "Live Failure Mode Cross-Checking" },
-  { value: "SHA-256 Verified", label: "Cryptographic Evidence Chains" },
+  { value: "Deterministic", label: "No generative step between record and finding" },
+  { value: "Epistemic", label: "Recorded, derived, inferred, or typed gap" },
+  { value: "Active", label: "Decision Sentinel watches standing decisions" },
+  { value: "SHA-256", label: "Tamper-evident compliance dossier export" },
 ] as const;
 
-const WORKFLOW = [
+const PROBLEMS = [
   {
-    step: "01",
-    title: "Ingest Specs",
-    body: "PDF specs, STEP/DXF CAD blueprints, and extracted GD&T callouts become recorded inputs. Nothing else enters the evaluation.",
-    icon: Layers,
+    title: "The retiring engineer",
+    body: "Decades of judgment leave with a person. Why a supplier was dropped, why a tolerance was tightened, which disposition held — almost none of it written down retrievably.",
   },
   {
-    step: "02",
-    title: "AST Physics Verification",
-    body: "AST evaluation across 15 deterministic manufacturing rules. Contradictions are findings, not chat suggestions.",
+    title: "The repeated mistake",
+    body: "The precedent that would have prevented scrap, rework, or field consequence existed. It could not be found in time.",
+  },
+  {
+    title: "The fragmentation",
+    body: "Rationale scattered across PLM, ERP, quality, supplier portals, email, and spreadsheets. No system connects an engineering choice to its downstream outcome.",
+  },
+  {
+    title: "The silent drift",
+    body: "Decisions rest on specs, directives, and supplier realities that change. Invalidated assumptions are discovered by failure unless something watches.",
+  },
+] as const;
+
+const PILLARS = [
+  {
+    title: "Memory",
+    body: "The permanent record: decisions, outcomes, evidence, and the linked public failure history of the industry.",
+    icon: BookOpen,
+  },
+  {
+    title: "Reasoning",
+    body: "Every claim carries an explicit evidence status. Absence is typed rather than blank. Precedent validity is computed from the records.",
     icon: Workflow,
   },
   {
-    step: "03",
-    title: "Sentinel Surveillance",
-    body: "Real-time surveillance cross-referenced against NTSB records and FAA airworthiness directives.",
+    title: "Vigilance",
+    body: "Standing decisions under surveillance. When a directive, field cluster, or revision touches a basis, the memory speaks unprompted.",
     icon: Radar,
-  },
-  {
-    step: "04",
-    title: "Cryptographic Dossier Minting",
-    body: "Minted SHA-256 evidence chain and instant audit dossier export for airworthiness review.",
-    icon: FileCheck2,
   },
 ] as const;
 
 const CAPABILITIES = [
   {
-    title: "CAD Tolerance & Producibility Risk Engine",
-    body: "Evaluate GD&T callouts, stack-ups, and material substitutions against physical invariants before a drawing leaves the program.",
-    icon: Layers,
+    title: "Searchable institutional memory",
+    body: "Plain-language search across decision history. Every result traces to a source record in this organization.",
+    icon: Search,
+    href: "/search",
   },
   {
-    title: "Decision Sentinel & Aging Assumption Monitor",
-    body: "Watch active flight deviations and assumptions that have outlived their evidence. Alert before they become a non-conformance.",
-    icon: Radar,
-  },
-  {
-    title: "Cross-Program Contagion Ripple Graph",
-    body: "See which interfaces, suppliers, and decisions inherit a change when a revision or AD lands on a related assembly.",
-    icon: GitBranch,
-  },
-  {
-    title: "Cryptographic Compliance Ledger",
-    body: "Bind every derived finding to a requirement ID, timestamp, and SHA-256 hash. Export an inspectable dossier, not a screenshot pack.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Airworthiness Precedent Knowledge Graph",
-    body: "Cross-check current design intent against a curated graph of historical failure modes, ADs, and SDR patterns.",
+    title: "Industry failure graph",
+    body: "Public NTSB findings, airworthiness directives, and service difficulty reports, queryable by mechanism, component, and material. Guest explorer uses this corpus when records are loaded.",
     icon: Network,
+    href: "/explore",
   },
   {
-    title: "Air-Gapped & Defense-Grade Data Isolation",
-    body: "Tenant isolation by default. Enterprise Defense / OEM adds on-premise and air-gapped options for ITAR-controlled programs.",
-    icon: Lock,
+    title: "Decision validation",
+    body: "Validate a change against precedent. Each precedent returns a computed validity verdict: still valid, or superseded and labelled as such.",
+    icon: ShieldCheck,
+    href: "/precedents",
+  },
+  {
+    title: "Manufacturing validation",
+    body: "Proposed GD&T and process parameters checked against deterministic manufacturing rule groups. Results are pass, fail, or not evaluated, each citing the rule applied.",
+    icon: Layers,
+    href: "/drawings",
+  },
+  {
+    title: "Decision contagion",
+    body: "Traverse the relationship graph to see what a change touches: parts, programs, suppliers, and expandable source records.",
+    icon: GitBranch,
+    href: "/failure-graph",
+  },
+  {
+    title: "Decision Sentinel",
+    body: "Standing decisions watched against new directives, field reports, and revisions. Alerts attach the evidence span. Nothing probabilistic.",
+    icon: Radar,
+    href: "/sentinel",
+  },
+  {
+    title: "Reasoning trace",
+    body: "Any answer can emit its derivation: records touched, rules applied, replayable for an auditor.",
+    icon: Workflow,
+    href: "/reasoning",
+  },
+  {
+    title: "Compliance export",
+    body: "A tamper-evident dossier for a decision: precedent, ripple, evidence, Sentinel history, and a reproducible integrity hash.",
+    icon: FileCheck2,
+    href: "/compliance",
   },
 ] as const;
 
-const COMPLIANCE = [
+const REASONING = [
   {
-    std: "AS9100 Rev D",
-    clause: "§8.3",
-    note: "Design and development controls, recorded evidence",
+    title: "Epistemic status",
+    body: "Every claim carries recorded, derived, inferred, asserted, or unknown. Absence is typed and queryable.",
   },
   {
-    std: "FAR 25.1309",
-    clause: "§25.1309",
-    note: "Equipment, systems, and installations safety assessment",
+    title: "Temporal validity",
+    body: "Precedent validity is computed, not stated. Later records can supersede earlier ones.",
   },
-  { std: "ISO 9001", clause: "§7.5", note: "Documented information with cryptographic integrity" },
+  {
+    title: "Decision quality, not outcome luck",
+    body: "Process is scored from records present at decision time and stored immutably. Outcomes never rewrite it.",
+  },
+  {
+    title: "Negative knowledge",
+    body: "What was considered and rejected, and recorded dissent, stays searchable. Walking away is precedent too.",
+  },
+  {
+    title: "Counterfactual discipline",
+    body: "Modeled numbers carry an assumption chain, separated from measured fact.",
+  },
+  {
+    title: "Rules separated from evidence",
+    body: "A precedent is what happened. A rule is what the engineering basis permits. Neither stands in for the other.",
+  },
+] as const;
+
+const WORKFLOW = [
+  {
+    step: "01",
+    title: "Ingest records",
+    body: "Drawings, specs, and decisions become recorded inputs. New organizations start empty. Nothing is invented to fill the gap.",
+  },
+  {
+    step: "02",
+    title: "Validate against two histories",
+    body: "Your decisions and the public industry graph. Manufacturing rules return pass, fail, or not evaluated.",
+  },
+  {
+    step: "03",
+    title: "Watch standing decisions",
+    body: "Sentinel compares new directives, field clusters, and revisions against the basis of open decisions.",
+  },
+  {
+    step: "04",
+    title: "Export the dossier",
+    body: "Reasoning trace, evidence chain, and SHA-256 integrity hash for audit and airworthiness review.",
+  },
 ] as const;
 
 const USE_CASES = [
@@ -107,13 +172,13 @@ const USE_CASES = [
     href: "/use-cases/as9100-compliance",
     kicker: "Quality system",
     title: "AS9100 compliance",
-    body: "Section 8.3 design controls and automated traceability matrices.",
+    body: "Section 8.3 design controls and reconstructable decision dossiers.",
   },
   {
     href: "/vs/predictive-ai",
     kicker: "Category",
     title: "vs. predictive AI",
-    body: "Why deterministic verification is not a generative model with a better prompt.",
+    body: "Deterministic, not predictive. What happened, with proof, and the moment that proof stops holding.",
   },
 ] as const;
 
@@ -128,34 +193,39 @@ export default function Home() {
         />
 
         <section className="relative mx-auto max-w-5xl px-6 pt-16 pb-6 text-center sm:pt-24">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-xs text-slate-700 shadow-xs">
+          <p className="font-mono text-[11px] font-semibold tracking-[0.2em] text-slate-500 uppercase">
+            Consecuencia by AK
+          </p>
+          <div className="mt-5 mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-xs text-slate-700 shadow-xs">
             <span className="size-1.5 rounded-full bg-blue-600" aria-hidden="true" />
-            AS9100 Rev D & FAR Part 25 Deterministic Verification Engine
+            Deterministic decision intelligence for aerospace complexity
           </div>
           <h1 className="mx-auto max-w-4xl text-4xl leading-[1.12] font-bold tracking-[-0.03em] text-slate-900 sm:text-5xl lg:text-6xl">
-            Aerospace Decision Intelligence, Grounded in Mathematical Truth.
+            Connect every engineering decision to its consequence.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
-            Traditional AI hallucinates. Consecuencia mathematically verifies CAD tolerances,
-            material substitutions, and engineering decisions with cryptographic certainty.
+            Make that link searchable, provable, permanent, and alive. The engine does not invent,
+            infer from a language model, or hallucinate. Where the record is silent, it shows the
+            gap as a gap.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <ContinueAsGuest
-              label="Launch Mission Console — Free Guest Access →"
+              label="Launch guest explorer"
               compact
               variant="primary"
               className="inline-flex"
               buttonClassName="h-auto rounded-lg bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700"
             />
             <Link
-              href="/demo"
+              href="/contact"
               className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-medium text-slate-900 no-underline shadow-xs hover:bg-slate-50"
             >
-              Schedule Technical Evaluation
+              Contact us
             </Link>
           </div>
           <p className="mt-3 font-mono text-xs text-slate-500">
-            Instant browser evaluation · No credit card required · AS9100 ready
+            Guest mode uses public NTSB, AD, and SDR records · New accounts start empty · No sample
+            tenant data
           </p>
         </section>
 
@@ -172,29 +242,58 @@ export default function Home() {
           <ConsolePreview />
         </div>
 
-        <section id="workflow" className="relative mx-auto max-w-6xl scroll-mt-24 px-6 py-24">
-          <p className="text-center font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
-            Workflow
+        <section id="thesis" className="relative mx-auto max-w-3xl scroll-mt-24 px-6 py-20">
+          <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            The thesis
           </p>
-          <h2 className="mt-2 text-center text-3xl font-semibold tracking-tight text-slate-900">
-            How deterministic verification works
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            Every field failure begins with a decision.
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-slate-500">
-            Ingest specs, verify physics, watch assumptions, mint the dossier.
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
+            Someone chose a material. Approved a supplier. Signed off on a process change.
+            Dispositioned a nonconforming part. Today that reasoning lives in one engineer&apos;s
+            memory, a buried email thread, a spreadsheet no one can find. Consecuencia is a system
+            of record, a system of reasoning, and a system that watches.
           </p>
-          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-4">
-            {WORKFLOW.map((item) => (
+        </section>
+
+        <section id="problem" className="relative scroll-mt-24 border-y border-slate-200 bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-24">
+            <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+              The problem
+            </p>
+            <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-slate-900">
+              Four problems no existing system was built to solve.
+            </h2>
+            <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {PROBLEMS.map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-xl border border-slate-200 bg-slate-50/60 p-6"
+                >
+                  <h3 className="text-[15px] font-semibold text-slate-900">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="what-it-is" className="relative mx-auto max-w-6xl scroll-mt-24 px-6 py-24">
+          <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            What it is
+          </p>
+          <h2 className="mt-2 max-w-2xl text-3xl font-semibold tracking-tight text-slate-900">
+            Where PLM tracks what a part is, Consecuencia tracks why the decision was made.
+          </h2>
+          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {PILLARS.map((item) => (
               <article
-                key={item.step}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+                key={item.title}
+                className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
               >
-                <div className="mb-4 flex items-center justify-between">
-                  <item.icon className="size-4 text-slate-400" />
-                  <span className="font-mono text-[11px] font-semibold text-slate-400">
-                    {item.step}
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
+                <item.icon className="mb-4 size-4 text-blue-600" />
+                <h3 className="text-[15px] font-semibold text-slate-900">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.body}</p>
               </article>
             ))}
@@ -207,12 +306,12 @@ export default function Home() {
         >
           <div className="mx-auto max-w-6xl px-6 py-24">
             <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
-              Capabilities
+              The product
             </p>
             <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-slate-900">
-              The verification surface, not a chatbot.
+              What the engineer gets.
             </h2>
-            <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
               {CAPABILITIES.map((item) => (
                 <article
                   key={item.title}
@@ -227,75 +326,79 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="compliance" className="relative mx-auto max-w-6xl scroll-mt-24 px-6 py-24">
-          <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
-            Compliance
+        <section id="workflow" className="relative mx-auto max-w-6xl scroll-mt-24 px-6 py-24">
+          <p className="text-center font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            Workflow
           </p>
-          <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-slate-900">
-            Bound to the clauses reviewers already cite.
+          <h2 className="mt-2 text-center text-3xl font-semibold tracking-tight text-slate-900">
+            From record to living hypothesis.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
-            AS9100 Rev D Section 8.3, FAR 25.1309, and ISO 9001 documented information — requirement
-            IDs plus cryptographic proofs.
-          </p>
-          <div className="mt-10 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50">
-                <tr>
-                  <th className="p-3.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Standard
-                  </th>
-                  <th className="p-3.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Clause
-                  </th>
-                  <th className="p-3.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Mapping
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPLIANCE.map((row) => (
-                  <tr key={row.std} className="border-b border-slate-100 last:border-0">
-                    <td className="p-3.5 font-medium text-slate-900">{row.std}</td>
-                    <td className="p-3.5 font-mono text-xs text-slate-600">{row.clause}</td>
-                    <td className="p-3.5 text-slate-500">{row.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-4">
+            {WORKFLOW.map((item) => (
+              <article
+                key={item.step}
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+              >
+                <span className="font-mono text-[11px] font-semibold text-blue-700">
+                  {item.step}
+                </span>
+                <h3 className="mt-3 text-sm font-semibold text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.body}</p>
+              </article>
+            ))}
           </div>
         </section>
 
         <section
-          id="use-cases"
-          className="relative scroll-mt-24 border-t border-slate-200 bg-white"
+          id="reasoning"
+          className="relative scroll-mt-24 border-y border-slate-200 bg-white"
         >
           <div className="mx-auto max-w-6xl px-6 py-24">
             <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
-              Use cases
+              The reasoning layer
             </p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-              Where programs start.
+            <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-slate-900">
+              Every claim knows its own evidence.
             </h2>
-            <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-              {USE_CASES.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group flex flex-col rounded-xl border border-slate-200 bg-slate-50/50 p-6 no-underline transition-colors hover:border-slate-300 hover:bg-white"
+            <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {REASONING.map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-xl border border-slate-200 bg-slate-50/60 p-6"
                 >
-                  <p className="font-mono text-[11px] tracking-wider text-slate-400 uppercase">
-                    {item.kicker}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold text-slate-900">{item.title}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-500">{item.body}</p>
-                  <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-900">
-                    Read
-                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
+                  <h3 className="text-[15px] font-semibold text-slate-900">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.body}</p>
+                </article>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section id="use-cases" className="relative mx-auto max-w-6xl scroll-mt-24 px-6 py-24">
+          <p className="font-mono text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+            Use cases
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            Where programs start.
+          </h2>
+          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {USE_CASES.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group flex flex-col rounded-xl border border-slate-200 bg-slate-50/50 p-6 no-underline transition-colors hover:border-slate-300 hover:bg-white"
+              >
+                <p className="font-mono text-[11px] tracking-wider text-slate-400 uppercase">
+                  {item.kicker}
+                </p>
+                <h3 className="mt-2 text-base font-semibold text-slate-900">{item.title}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-500">{item.body}</p>
+                <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-slate-900">
+                  Read
+                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
 
@@ -310,25 +413,25 @@ export default function Home() {
         <section className="relative mx-auto max-w-6xl px-6 pb-20">
           <div className="rounded-2xl bg-slate-900 px-8 py-14 text-center text-white sm:px-12">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Eliminate unverified assumptions from your flight systems.
+              The first domino of motion.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
-              Replace probabilistic guesswork with a recorded evaluation and an inspectable evidence
-              chain.
+              Explore public records as a guest, or contact us for a technical evaluation on your
+              program.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <ContinueAsGuest
-                label="Launch Guest Sandbox Now"
+                label="Continue as guest"
                 compact
                 variant="primary"
                 className="inline-flex"
                 buttonClassName="h-auto rounded-lg bg-blue-600 px-8 py-3.5 text-base font-medium text-white hover:bg-blue-700"
               />
               <Link
-                href="/pricing"
+                href="/contact"
                 className="rounded-lg border border-slate-700 px-6 py-3.5 text-sm font-medium text-white no-underline hover:bg-slate-800"
               >
-                View pricing
+                Contact us
               </Link>
             </div>
           </div>

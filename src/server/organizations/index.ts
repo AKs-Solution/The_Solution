@@ -15,6 +15,7 @@ export {
   acceptInvitationByToken,
   acceptInvitationForUser,
   previewInvitationByToken,
+  assertInvitationEmailMatches,
   declineInvitation,
   removeMember,
   leaveOrganization,
@@ -34,5 +35,6 @@ export {
   setActiveOrganizationId,
   clearActiveOrganizationId,
   requireActiveOrganization,
+  requireOrganizationMembership,
   resolveActiveOrganization,
 } from "./organization-context";

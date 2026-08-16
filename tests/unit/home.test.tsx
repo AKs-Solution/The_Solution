@@ -26,7 +26,7 @@ describe("Home Page", () => {
 
   it("renders the description", () => {
     render(<Home />);
-    expect(screen.getByText(/Traditional AI predicts. We verify./i)).toBeInTheDocument();
+    expect(screen.getByText(/does not invent/i)).toBeInTheDocument();
   });
 
   it("renders key call-to-action buttons", () => {

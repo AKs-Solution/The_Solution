@@ -24,6 +24,9 @@ const GUEST_ALLOWED_PREFIXES = [
   "/reasoning",
   "/help",
   "/dashboard",
+  "/invite",
+  "/login",
+  "/register",
 ];
 
 function isGuestAllowedPath(pathname: string): boolean {

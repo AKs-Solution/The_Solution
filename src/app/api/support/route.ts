@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { sendDemoInquiryEmail, isMailConfigured } from "@/server/mail";
+import { isMailConfigured, sendCustomerCareEmail } from "@/server/mail";
 import { persistInboxSubmission } from "@/server/marketing/inbox-submission";
-import { contactInquirySchema, isConsumerEmailDomain } from "@/server/marketing/contact-inquiry";
-import { isHoneypotTriggered } from "@/server/marketing/support-inquiry";
-import { contactInquiryRateLimiter } from "@/server/security/rate-limiter";
+import { isHoneypotTriggered, supportInquirySchema } from "@/server/marketing/support-inquiry";
+import { supportInquiryRateLimiter } from "@/server/security/rate-limiter";
 import { rateLimitedResponse } from "@/server/security/response-helpers";
 import { RateLimitedError } from "@/shared/errors";
 import { logger } from "@/shared/logging";
@@ -15,16 +14,16 @@ export async function POST(request: Request) {
       request.headers.get("x-real-ip") ??
       "unknown";
 
-    const retryAfter = contactInquiryRateLimiter.check(ipAddress);
+    const retryAfter = supportInquiryRateLimiter.check(ipAddress);
     if (retryAfter !== null) {
       return rateLimitedResponse(
-        new RateLimitedError("Too many evaluation requests. Try again later.", retryAfter),
+        new RateLimitedError("Too many support requests. Try again later.", retryAfter),
       );
     }
-    contactInquiryRateLimiter.record(ipAddress);
+    supportInquiryRateLimiter.record(ipAddress);
 
     const body: unknown = await request.json();
-    const parsed = contactInquirySchema.safeParse(body);
+    const parsed = supportInquirySchema.safeParse(body);
     if (!parsed.success) {
       const details: Record<string, string[]> = {};
       for (const issue of parsed.error.issues) {
@@ -35,40 +34,32 @@ export async function POST(request: Request) {
     }
 
     if (isHoneypotTriggered(parsed.data.companyUrl)) {
-      return NextResponse.json({ data: { message: "Evaluation request received" } });
+      return NextResponse.json({ data: { message: "Support request received" } });
     }
 
-    if (isConsumerEmailDomain(parsed.data.workEmail)) {
-      return NextResponse.json(
-        {
-          error: "Use a work or agency email address.",
-          details: { workEmail: ["Use a work or agency email address."] },
-        },
-        { status: 400 },
-      );
-    }
+    logger.info("Customer-care submission received", { category: parsed.data.category });
 
-    logger.info("Technical evaluation inquiry received", {
-      organization: parsed.data.organization,
-      role: parsed.data.role,
+    const delivered = await sendCustomerCareEmail({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      category: parsed.data.category,
+      subject: parsed.data.subject,
+      message: parsed.data.message,
+      diagnostics: parsed.data.diagnostics,
     });
 
-    const delivered = await sendDemoInquiryEmail(parsed.data);
     const persisted = await persistInboxSubmission({
-      kind: "interest",
-      email: parsed.data.workEmail,
-      name: parsed.data.fullName,
-      organization: parsed.data.organization,
-      subject: "Technical evaluation request",
-      message: parsed.data.useCase,
-      metadata: { role: parsed.data.role },
+      kind: "customer_care",
+      email: parsed.data.email,
+      name: parsed.data.name,
+      subject: parsed.data.subject,
+      message: parsed.data.message,
+      metadata: { category: parsed.data.category },
       delivered,
     });
 
     if (delivered) {
-      return NextResponse.json({
-        data: { message: "Evaluation request received" },
-      });
+      return NextResponse.json({ data: { message: "Support request received" } });
     }
 
     if (persisted) {
@@ -81,7 +72,7 @@ export async function POST(request: Request) {
       );
     }
 
-    logger.warn("Interest inquiry dropped: mail not configured and persist failed", {
+    logger.warn("Customer-care inquiry dropped: mail not configured and persist failed", {
       mailConfigured: isMailConfigured(),
     });
     return NextResponse.json(

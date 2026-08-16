@@ -9,12 +9,36 @@ interface LogEntry {
 
 const isDev = (): boolean => process.env.NODE_ENV === "development";
 
+const SENSITIVE_KEY = /token|password|secret|authorization|cookie|inviteurl|set-cookie/i;
+const TOKEN_IN_VALUE = /(?:token|password|secret)=([^&\s]+)/gi;
+
+function redactValue(value: unknown): unknown {
+  if (typeof value === "string") {
+    return value.replace(TOKEN_IN_VALUE, (match, captured: string) =>
+      match.replace(captured, "[redacted]"),
+    );
+  }
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return redactContext(value as Record<string, unknown>);
+  }
+  return value;
+}
+
+function redactContext(context?: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (!context) return undefined;
+  const redacted: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(context)) {
+    redacted[key] = SENSITIVE_KEY.test(key) ? "[redacted]" : redactValue(value);
+  }
+  return redacted;
+}
+
 function createEntry(
   level: LogLevel,
   message: string,
   context?: Record<string, unknown>,
 ): LogEntry {
-  return { level, message, timestamp: new Date().toISOString(), context };
+  return { level, message, timestamp: new Date().toISOString(), context: redactContext(context) };
 }
 
 const LOG_LEVELS: LogLevel[] = ["debug", "info", "warn", "error"];

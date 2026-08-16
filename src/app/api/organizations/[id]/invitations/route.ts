@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { listOrganizationInvitations } from "@/server/organizations";
+import { requireOrganizationMembership } from "@/server/organizations/organization-context";
 import { AppError } from "@/shared/errors";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await requireOrganizationMembership(id);
     const invitations = await listOrganizationInvitations(id);
     return NextResponse.json({ data: invitations });
   } catch (error) {

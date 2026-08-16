@@ -6,11 +6,12 @@ export const DATE_MODIFIED = "2026-08-16T00:00:00Z";
 
 export const FRESHNESS_LINE = "Last updated: August 2026 · Engine v4.2.1 · AS9100 Rev D Aligned";
 
-export const DEFAULT_TITLE = "Consecuencia — Deterministic Verification for Aerospace Engineering";
-export const TITLE_TEMPLATE = "%s | Consecuencia — Aerospace Decision Intelligence";
+export const DEFAULT_TITLE =
+  "Consecuencia by AK — Deterministic Decision Intelligence for Aerospace";
+export const TITLE_TEMPLATE = "%s | Consecuencia by AK";
 
 export const DEFAULT_DESCRIPTION =
-  "Mathematically verify CAD tolerances, material substitutions, and engineering decisions with cryptographic certainty. AS9100 Rev D & FAR Part 25 audit-ready.";
+  "Connect every aerospace engineering decision to its consequence. Searchable memory, computed precedent validity, manufacturing rule checks, Decision Sentinel, and SHA-256 compliance export. No generative hallucinations.";
 
 export const SEO_KEYWORDS = [
   "aerospace verification software",
@@ -27,32 +28,32 @@ export const MARKETING_FAQS: ReadonlyArray<{ question: string; answer: string }>
   {
     question: "How does Consecuencia prevent generative AI hallucinations?",
     answer:
-      "There is no generative step between measurement and conclusion. Recorded CAD callouts, material specs, and requirements are evaluated against a closed set of physical invariants. Pass/fail is derived from those rules, so the engine cannot invent a tolerance or a certification path.",
+      "There is no generative step between record and conclusion. Findings are anchored to stored records and deterministic rules. Where the record is silent, the product shows a typed gap. It does not invent citations.",
   },
   {
-    question: "What CAD file formats are currently supported for ingestion?",
+    question: "What is available on day one, before we upload our history?",
     answer:
-      "PDF drawing packages, DXF and STEP geometry, and extracted GD&T callouts. Quality procedures can be attached as PDF or structured text. Guest evaluation uses the public aerospace corpus; organization tenants ingest their own controlled artifacts.",
+      "Guest explorer can query public NTSB, AD, and SDR records when those tables have data. Organization accounts start empty: your decisions, drawings, and evidence are only what you record. Nothing is seeded to look busy.",
   },
   {
-    question: "Can this software be deployed in air-gapped / on-premise environments?",
+    question: "Which product capabilities are in the live workspace?",
     answer:
-      "Yes. Engineering Team is a managed web workspace. Enterprise Defense / OEM includes custom tenant isolation, on-premise or air-gapped deployment, dedicated ITAR compliance guarantees, and custom DSL rule engines.",
+      "Searchable memory, industry failure graph, decision and manufacturing validation, contagion / relationship graph, Decision Sentinel, reasoning traces, compliance export with integrity hash, epistemic status, negative knowledge, and org invites. Air-gapped OEM tenancy is an Enterprise evaluation path, not a self-serve installer in this web app.",
   },
   {
-    question: "How is epistemic certainty (RECORDED, DERIVED, INFERRED, UNKNOWN) calculated?",
+    question: "How is epistemic status calculated?",
     answer:
       "RECORDED is an ingested artifact. DERIVED is a deterministic rule result over recorded inputs. INFERRED is a bounded graph conclusion that still cites its premises. UNKNOWN / GAP is a missing required input. Status is never sampled from a language model.",
   },
   {
-    question: "What compliance standards are built into the automated reporting?",
+    question: "Where do contact and complaints go?",
     answer:
-      "AS9100 Rev D Section 8.3 design and development controls, FAR 25.1309 equipment, systems, and installations, and ISO 9001 documented-information alignment. Reports bind findings to requirement IDs, timestamps, and SHA-256 evidence hashes.",
+      "Product interest, waitlist, and contact requests go to ak.consecuencia@gmail.com. Complaints, support tickets, and customer-care submissions go to customercare.consecuencia@outlook.com.",
   },
   {
-    question: "How does the guest sandbox differ from full enterprise deployment?",
+    question: "How does guest mode differ from a signed-in organization?",
     answer:
-      "Guest mode is instant browser evaluation on public NTSB, AD, and SDR records, with no credit card and a session that ends when the browser closes. Enterprise adds tenant isolation, private CAD ingest, Sentinel surveillance, export dossiers, and optional air-gapped deployment.",
+      "Guest mode is a browser session on public records, with no credit card, ending when the browser closes. A registered organization is empty until you ingest and decide. Team features include invites, Sentinel on your decisions, and SHA-256 dossiers.",
   },
 ];
 

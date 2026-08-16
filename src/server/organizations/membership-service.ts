@@ -44,10 +44,16 @@ export interface InviteCreatedResult {
 
 export interface InvitationPreview {
   organizationName: string;
-  email: string | null;
+  emailHint: string | null;
   role: string;
   expiresAt: Date;
   status: string;
+}
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "***";
+  return `${local.slice(0, 1)}***@${domain}`;
 }
 
 function inviteUrlFor(token: string): string {
@@ -289,7 +295,7 @@ export async function acceptInvitationByToken(
     where: { token },
     include: { organization: { select: { name: true } } },
   });
-  if (!invitation) throw new NotFoundError("Invitation", token);
+  if (!invitation) throw new NotFoundError("Invitation");
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
@@ -309,8 +315,25 @@ export async function acceptInvitationForUser(
     where: { token },
     include: { organization: { select: { name: true } } },
   });
-  if (!invitation) throw new NotFoundError("Invitation", token);
+  if (!invitation) throw new NotFoundError("Invitation");
   return completeInvitationAcceptance(invitation, userId, userEmail);
+}
+
+export async function assertInvitationEmailMatches(token: string, email: string): Promise<void> {
+  if (!token || token.length < 16) {
+    throw new ValidationError({ token: ["Invitation token is invalid"] });
+  }
+  const invitation = await prisma.invitation.findUnique({
+    where: { token },
+    select: { email: true, status: true, expiresAt: true },
+  });
+  if (!invitation) throw new NotFoundError("Invitation");
+  if (invitation.status !== "pending" || invitation.expiresAt < new Date()) {
+    throw new ValidationError({ invitation: ["Invitation is no longer valid"] });
+  }
+  if (invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
+    throw new ForbiddenError("Use the email address this invitation was sent to");
+  }
 }
 
 export async function previewInvitationByToken(token: string): Promise<InvitationPreview> {
@@ -322,7 +345,7 @@ export async function previewInvitationByToken(token: string): Promise<Invitatio
     where: { token },
     include: { organization: { select: { name: true } } },
   });
-  if (!invitation) throw new NotFoundError("Invitation", token);
+  if (!invitation) throw new NotFoundError("Invitation");
 
   let status = invitation.status;
   if (invitation.status === "pending" && invitation.expiresAt < new Date()) {
@@ -331,7 +354,7 @@ export async function previewInvitationByToken(token: string): Promise<Invitatio
 
   return {
     organizationName: invitation.organization.name,
-    email: invitation.email,
+    emailHint: invitation.email ? maskEmail(invitation.email) : null,
     role: invitation.role,
     expiresAt: invitation.expiresAt,
     status,
@@ -426,7 +449,10 @@ export async function listPendingInvitations(): Promise<InvitationResult[]> {
     where: {
       status: "pending",
       expiresAt: { gt: new Date() },
-      OR: [{ userId: session.userId }, ...(user?.email ? [{ email: user.email }] : [])],
+      OR: [
+        { userId: session.userId },
+        ...(user?.email ? [{ email: user.email.toLowerCase() }] : []),
+      ],
     },
     include: {
       organization: { select: { name: true } },

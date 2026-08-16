@@ -118,6 +118,8 @@ export function MemberList({
   const router = useRouter();
   const [showInvite, setShowInvite] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  const memberRows = Array.isArray(members) ? members : [];
+  const pendingInvites = Array.isArray(invitations) ? invitations : [];
 
   async function handleRemove(userId: string) {
     if (!confirm("Are you sure you want to remove this member?")) return;
@@ -139,9 +141,9 @@ export function MemberList({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-sm">
-            {members.length} member{members.length !== 1 ? "s" : ""}
-            {invitations.length > 0
-              ? ` · ${invitations.length} pending invite${invitations.length !== 1 ? "s" : ""}`
+            {memberRows.length} member{memberRows.length !== 1 ? "s" : ""}
+            {pendingInvites.length > 0
+              ? ` · ${pendingInvites.length} pending invite${pendingInvites.length !== 1 ? "s" : ""}`
               : ""}
           </p>
           <Can permission="members:invite">
@@ -151,13 +153,13 @@ export function MemberList({
           </Can>
         </div>
 
-        {invitations.length > 0 && (
+        {pendingInvites.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Pending invitations
             </span>
             <div className="divide-border border-border divide-y rounded-lg border border-dashed">
-              {invitations.map((inv) => (
+              {pendingInvites.map((inv) => (
                 <div key={inv.id} className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-full text-xs font-medium">
@@ -181,12 +183,12 @@ export function MemberList({
         )}
 
         <div className="divide-y divide-slate-200 rounded-lg border border-slate-200">
-          {members.length === 0 ? (
+          {memberRows.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-slate-500">
               No teammates yet. Invite someone by email to share this organization.
             </p>
           ) : (
-            members.map((member) => (
+            memberRows.map((member) => (
               <MemberRow
                 key={member.id}
                 member={member}

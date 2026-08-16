@@ -65,7 +65,9 @@ export default function OrganizationSettingsPage() {
 
         if (membersRes.ok) {
           const membersData = await membersRes.json();
-          if (!cancelled) setMembers(membersData.data);
+          if (!cancelled) {
+            setMembers(Array.isArray(membersData.data) ? membersData.data : []);
+          }
         }
 
         if (meRes.ok) {
@@ -75,7 +77,9 @@ export default function OrganizationSettingsPage() {
 
         if (invitesRes.ok) {
           const invitesData = await invitesRes.json();
-          if (!cancelled) setInvitations(invitesData.data);
+          if (!cancelled) {
+            setInvitations(Array.isArray(invitesData.data) ? invitesData.data : []);
+          }
         }
       } catch {
         if (!cancelled) router.push("/organizations");
@@ -93,7 +97,7 @@ export default function OrganizationSettingsPage() {
     fetch(`/api/organizations/${params.id}/invitations`)
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
-        if (json) setInvitations(json.data);
+        if (json) setInvitations(Array.isArray(json.data) ? json.data : []);
       })
       .catch(() => {
         // Ignore refresh failures

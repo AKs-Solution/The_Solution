@@ -2571,4 +2571,20 @@ model MissingEvidenceRecord {
   @@index([sessionId])
 }
 
+model InboxSubmission {
+  id           String   @id @default(cuid())
+  kind         String
+  email        String
+  name         String?
+  organization String?
+  subject      String?
+  message      String
+  metadata     Json?
+  delivered    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([kind])
+  @@index([createdAt])
+}
+
 

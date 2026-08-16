@@ -35,6 +35,7 @@ export const contactInquirySchema = z.object({
     .trim()
     .min(10, "Describe the program or use case")
     .max(4000, "Keep the use case under 4,000 characters"),
+  companyUrl: z.string().max(200).optional(),
 });
 
 export type ContactInquiry = z.infer<typeof contactInquirySchema>;

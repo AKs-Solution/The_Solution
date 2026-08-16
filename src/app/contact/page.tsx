@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DemoInquiryForm, MarketingShell } from "@/components/marketing";
+import { DemoInquiryForm, CustomerCareForm, MarketingShell } from "@/components/marketing";
 import { pageMetadata } from "@/features/marketing/metadata";
 
 export const metadata: Metadata = pageMetadata(
@@ -24,13 +24,26 @@ export default function ContactPage() {
             stay on corporate channels.
           </p>
           <ul className="mt-8 space-y-3 text-sm leading-relaxed text-slate-600">
-            <li>Live CAD drawing GD&T risk evaluation</li>
-            <li>Decision Sentinel surveillance demo</li>
-            <li>SHA-256 compliance package export</li>
+            <li>Product interest and evaluation requests</li>
+            <li>Decision Sentinel and industry-graph walkthrough</li>
+            <li>Complaints and support via the customer-care form</li>
           </ul>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-xs">
-          <DemoInquiryForm />
+        <div className="space-y-8">
+          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-xs">
+            <h2 className="text-sm font-semibold text-slate-900">Product interest</h2>
+            <p className="mt-1 mb-4 text-sm text-slate-500">
+              Request a technical evaluation. Use a work or agency email.
+            </p>
+            <DemoInquiryForm />
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-xs">
+            <h2 className="text-sm font-semibold text-slate-900">Customer care</h2>
+            <p className="mt-1 mb-4 text-sm text-slate-500">
+              Complaints, support tickets, and product feedback.
+            </p>
+            <CustomerCareForm />
+          </div>
         </div>
       </div>
     </MarketingShell>

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { config } from "@/shared/config";
+import { customerCareInbox, interestInbox } from "./inboxes";
 
 const EMAIL_FROM = process.env.EMAIL_FROM ?? "Consecuencia <onboarding@resend.dev>";
 
@@ -80,12 +81,16 @@ export async function sendInvitationEmail(
   inviteUrl: string,
   recipientName?: string,
 ): Promise<boolean> {
-  const greeting = recipientName?.trim() ? `Hi ${recipientName.trim()},` : "";
+  const safeOrg = escapeHtml(organizationName);
+  const safeRole = escapeHtml(role);
+  const safeGreeting = recipientName?.trim() ? `Hi ${escapeHtml(recipientName.trim())},` : "";
+  const safeInviteUrl = encodeURI(inviteUrl);
+  const greetingText = recipientName?.trim() ? `Hi ${recipientName.trim()},` : "";
   return sendMail({
     to,
     subject: `You're invited to join ${organizationName} on Consecuencia`,
     text: [
-      greeting,
+      greetingText,
       `You've been invited to join the ${organizationName} workspace on Consecuencia as ${role}.`,
       "",
       `Accept the invitation: ${inviteUrl}`,
@@ -96,11 +101,11 @@ export async function sendInvitationEmail(
       .join("\n"),
     html: `
       <div style="font-family: ui-sans-serif, system-ui, sans-serif; max-width: 480px; margin: 0 auto; color: #18181b;">
-        <h2 style="color: #18181b;">You're invited to ${organizationName}</h2>
-        ${greeting ? `<p style="color: #3f3f46;">${greeting}</p>` : ""}
-        <p style="color: #3f3f46;">You've been invited to join the ${organizationName} workspace on Consecuencia as <strong>${role}</strong>.</p>
+        <h2 style="color: #18181b;">You're invited to ${safeOrg}</h2>
+        ${safeGreeting ? `<p style="color: #3f3f46;">${safeGreeting}</p>` : ""}
+        <p style="color: #3f3f46;">You've been invited to join the ${safeOrg} workspace on Consecuencia as <strong>${safeRole}</strong>.</p>
         <p>
-          <a href="${inviteUrl}" style="display: inline-block; background: #2563eb; color: #fafafa; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">Accept invitation</a>
+          <a href="${safeInviteUrl}" style="display: inline-block; background: #2563eb; color: #fafafa; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 600;">Accept invitation</a>
         </p>
         <p style="font-size: 13px; color: #71717a;">This invitation expires in 7 days.</p>
       </div>
@@ -122,8 +127,8 @@ export async function sendDemoInquiryEmail(input: {
   organization: string;
   role: string;
   useCase: string;
-}): Promise<void> {
-  const inbox = process.env.CONTACT_INBOX ?? process.env.EMAIL_FROM ?? "onboarding@resend.dev";
+}): Promise<boolean> {
+  const inbox = interestInbox();
   const roleLabel = input.role.replaceAll("_", " ");
   const subject = `Technical evaluation request — ${input.organization}`;
   const text = [
@@ -138,7 +143,7 @@ export async function sendDemoInquiryEmail(input: {
     input.useCase,
   ].join("\n");
 
-  await sendMail({
+  return sendMail({
     to: inbox,
     subject,
     text,
@@ -151,6 +156,51 @@ export async function sendDemoInquiryEmail(input: {
         <p><strong>Role:</strong> ${escapeHtml(roleLabel)}</p>
         <p><strong>Primary program / use case</strong></p>
         <p style="white-space: pre-wrap;">${escapeHtml(input.useCase)}</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendCustomerCareEmail(input: {
+  name: string;
+  email: string;
+  category: string;
+  subject: string;
+  message: string;
+  diagnostics?: string;
+}): Promise<boolean> {
+  const inbox = customerCareInbox();
+  const categoryLabel = input.category.replaceAll("_", " ");
+  const text = [
+    `New Consecuencia ${categoryLabel} submission`,
+    "",
+    `Name: ${input.name}`,
+    `Email: ${input.email}`,
+    `Category: ${categoryLabel}`,
+    `Subject: ${input.subject}`,
+    "",
+    input.message,
+    input.diagnostics ? `\n--- diagnostics ---\n${input.diagnostics}` : "",
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+
+  return sendMail({
+    to: inbox,
+    subject: `[${categoryLabel}] ${input.subject}`,
+    text,
+    html: `
+      <div style="font-family: ui-sans-serif, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+        <h2>${escapeHtml(categoryLabel)}</h2>
+        <p><strong>Name:</strong> ${escapeHtml(input.name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(input.email)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(input.subject)}</p>
+        <p style="white-space: pre-wrap;">${escapeHtml(input.message)}</p>
+        ${
+          input.diagnostics
+            ? `<p><strong>Diagnostics</strong></p><pre style="white-space: pre-wrap; font-size: 12px; color: #334155;">${escapeHtml(input.diagnostics)}</pre>`
+            : ""
+        }
       </div>
     `,
   });

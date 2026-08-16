@@ -3,7 +3,8 @@
 import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "@/shared/utils";
 
-export type EpistemicStatus = "RECORDED" | "DERIVED" | "INFERRED" | "UNKNOWN" | "GAP" | "CRITICAL";
+export type EpistemicStatus =
+  "RECORDED" | "DERIVED" | "INFERRED" | "ASSERTED" | "UNKNOWN" | "GAP" | "CRITICAL";
 
 export interface EpistemicBadgeProps extends HTMLAttributes<HTMLSpanElement> {
   status: EpistemicStatus;
@@ -25,6 +26,10 @@ const STATUS_STYLES: Record<EpistemicStatus, { badge: string; dot: string }> = {
     badge: "bg-amber-50 text-amber-700 border-amber-200",
     dot: "bg-amber-500",
   },
+  ASSERTED: {
+    badge: "bg-blue-50 text-blue-700 border-blue-200",
+    dot: "bg-blue-600",
+  },
   UNKNOWN: {
     badge: "bg-rose-50 text-rose-700 border-rose-200",
     dot: "bg-rose-500",
@@ -43,6 +48,7 @@ const DEFAULT_LABELS: Record<EpistemicStatus, string> = {
   RECORDED: "RECORDED",
   DERIVED: "DERIVED",
   INFERRED: "INFERRED",
+  ASSERTED: "ASSERTED",
   UNKNOWN: "UNKNOWN",
   GAP: "GAP",
   CRITICAL: "CRITICAL",
@@ -50,7 +56,7 @@ const DEFAULT_LABELS: Record<EpistemicStatus, string> = {
 
 function normalizeStatus(value: string | null | undefined): EpistemicStatus {
   const v = (value ?? "").toUpperCase();
-  if (v === "RECORDED" || v === "DERIVED" || v === "INFERRED") return v;
+  if (v === "RECORDED" || v === "DERIVED" || v === "INFERRED" || v === "ASSERTED") return v;
   if (v === "UNKNOWN" || v === "GAP" || v === "CRITICAL") return v;
   return "UNKNOWN";
 }

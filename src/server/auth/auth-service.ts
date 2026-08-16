@@ -8,7 +8,7 @@ import { sendPasswordResetEmail } from "@/server/mail";
 import { generateUniqueSlug } from "@/server/organizations/slug";
 import {
   acceptInvitationForUser,
-  previewInvitationByToken,
+  assertInvitationEmailMatches,
 } from "@/server/organizations/membership-service";
 
 export interface RegisterInput {
@@ -78,17 +78,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: AuthUs
   }
 
   if (input.inviteToken) {
-    const preview = await previewInvitationByToken(input.inviteToken);
-    if (preview.status !== "pending") {
-      throw new AppError("This invitation is no longer valid", "INVITE_INVALID", 400);
-    }
-    if (preview.email && preview.email.toLowerCase() !== input.email.toLowerCase()) {
-      throw new AppError(
-        "Use the email address this invitation was sent to",
-        "INVITE_EMAIL_MISMATCH",
-        403,
-      );
-    }
+    await assertInvitationEmailMatches(input.inviteToken, input.email);
   }
 
   const passwordHash = hashPassword(input.password);

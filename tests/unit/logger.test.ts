@@ -66,4 +66,18 @@ describe("logger", () => {
     expect(spy.mock.calls[0][0]).toContain("dev-only detail");
     expect(() => JSON.parse(spy.mock.calls[0][0] as string)).toThrow();
   });
+
+  it("redacts tokens from log context", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    logger.info("invitation created", {
+      token: "super-secret",
+      inviteUrl: "https://example.com/invite?token=abc",
+    });
+
+    const payload = JSON.parse(spy.mock.calls[0][0] as string);
+    expect(payload.context.token).toBe("[redacted]");
+    expect(payload.context.inviteUrl).toBe("[redacted]");
+  });
 });

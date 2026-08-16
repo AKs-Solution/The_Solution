@@ -1,19 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InviteMemberDialog } from "./invite-member-dialog";
 
 export function InviteLauncher() {
   const [open, setOpen] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [canInvite, setCanInvite] = useState(false);
+  const pendingOpenRef = useRef(false);
 
   useEffect(() => {
     const onOpen = () => {
-      if (canInvite && organizationId) setOpen(true);
+      if (canInvite && organizationId) {
+        setOpen(true);
+        return;
+      }
+      pendingOpenRef.current = true;
     };
     window.addEventListener("consecuencia:open-invite", onOpen);
     return () => window.removeEventListener("consecuencia:open-invite", onOpen);
+  }, [canInvite, organizationId]);
+
+  useEffect(() => {
+    if (!canInvite || !organizationId || !pendingOpenRef.current) return;
+    pendingOpenRef.current = false;
+    setOpen(true);
   }, [canInvite, organizationId]);
 
   useEffect(() => {

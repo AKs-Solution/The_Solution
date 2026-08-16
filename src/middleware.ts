@@ -4,6 +4,7 @@ import { buildContentSecurityPolicy, generateNonce } from "@/server/security/csp
 import { isSameOriginRequest } from "@/server/security/csrf";
 import { logger } from "@/shared/logging";
 import { COOKIE_NAME, verifyAuthToken } from "@/server/auth/jwt";
+import { isSafeInternalPath } from "@/shared/security/safe-internal-path";
 
 const REQUEST_ID_HEADER = "x-request-id";
 const NONCE_HEADER = "x-nonce";
@@ -17,10 +18,13 @@ const publicPathPrefixes = [
   "/api/auth/logout",
   "/api/health",
   "/api/contact",
+  "/api/support",
   "/login",
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/invite",
+  "/api/invitations/preview",
   "/demo",
   "/contact",
   "/pricing",
@@ -39,6 +43,7 @@ const publicPageExactPaths = new Set([
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/invite",
   "/demo",
   "/contact",
   "/pricing",
@@ -123,7 +128,10 @@ export async function middleware(request: NextRequest) {
     }
 
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
+    const nextPath = `${pathname}${request.nextUrl.search}`;
+    if (isSafeInternalPath(nextPath) && nextPath !== "/login") {
+      loginUrl.searchParams.set("next", nextPath);
+    }
     const response = NextResponse.redirect(loginUrl);
     applySecurityHeaders(response, nonce, isProd);
     return response;

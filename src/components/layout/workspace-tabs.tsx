@@ -56,7 +56,26 @@ function isHomeTab(id: string): boolean {
   return id === HOME_TAB.id;
 }
 
+const NON_WORKSPACE_PREFIXES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/invite",
+  "/demo",
+  "/contact",
+  "/pricing",
+  "/use-cases",
+];
+
+function isNonWorkspacePath(pathname: string): boolean {
+  return NON_WORKSPACE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 export function isWorkspaceRoute(pathname: string): boolean {
+  if (isNonWorkspacePath(pathname) || pathname === "/") return false;
   return (
     pathname === "/dashboard" ||
     pathname === "/explore" ||
@@ -130,11 +149,10 @@ const LEDGER_TABS: Array<{ path: string; title: string }> = [
 
 /**
  * Derives the deterministic tab model for a given route. Returns null for
- * routes that should not surface in the workspace tab bar (auth, settings,
- * legacy comparison jobs, etc.).
+ * routes that should not surface in the workspace tab bar (auth, marketing).
  */
 export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
-  if (pathname === "/") return null;
+  if (pathname === "/" || isNonWorkspacePath(pathname)) return null;
 
   // Drawing comparison jobs are inspected on their dedicated route but still
   // surface a workspace tab keyed to the job id.
@@ -437,7 +455,9 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setActiveTabId(null);
+    const current = activeTabIdRef.current;
+    if (current && tabsRef.current.some((tab) => tab.id === current)) return;
+    setActiveTabId(HOME_TAB.id);
   }, [pathname, hydrated, identityKey, scopedIdentity]);
 
   useEffect(() => {

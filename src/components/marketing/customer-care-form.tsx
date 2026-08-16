@@ -2,11 +2,24 @@
 
 import { useState } from "react";
 import { Button, Input, Select, Textarea } from "@/components/ui";
-import { ENGINEERING_ROLES } from "@/features/marketing/content";
 
-const ROLE_OPTIONS = ENGINEERING_ROLES.map((role) => ({ value: role.value, label: role.label }));
+const CATEGORY_OPTIONS = [
+  { value: "complaint", label: "Complaint" },
+  { value: "support", label: "Support" },
+  { value: "feedback", label: "Feedback" },
+];
 
-export function DemoInquiryForm() {
+export function CustomerCareForm({
+  defaultName = "",
+  defaultEmail = "",
+  defaultSubject = "",
+  includeDiagnostics,
+}: {
+  defaultName?: string;
+  defaultEmail?: string;
+  defaultSubject?: string;
+  includeDiagnostics?: string;
+}) {
   const [pending, setPending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -20,16 +33,17 @@ export function DemoInquiryForm() {
 
     const form = new FormData(event.currentTarget);
     const payload = {
-      fullName: String(form.get("fullName") ?? ""),
-      workEmail: String(form.get("workEmail") ?? ""),
-      organization: String(form.get("organization") ?? ""),
-      role: String(form.get("role") ?? ""),
-      useCase: String(form.get("useCase") ?? ""),
+      name: String(form.get("name") ?? ""),
+      email: String(form.get("email") ?? ""),
+      category: String(form.get("category") ?? "support"),
+      subject: String(form.get("subject") ?? ""),
+      message: String(form.get("message") ?? ""),
       companyUrl: String(form.get("companyUrl") ?? ""),
+      diagnostics: includeDiagnostics,
     };
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -46,12 +60,12 @@ export function DemoInquiryForm() {
           }
         }
         setFieldErrors(nextErrors);
-        setError(json.error ?? "Unable to submit the evaluation request.");
+        setError(json.error ?? "Unable to submit this request.");
         return;
       }
       setSubmitted(true);
     } catch {
-      setError("Unable to submit the evaluation request.");
+      setError("Unable to submit this request.");
     } finally {
       setPending(false);
     }
@@ -59,11 +73,10 @@ export function DemoInquiryForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-6">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
         <h3 className="text-base font-semibold text-slate-900">Request received</h3>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          An aerospace engineer will follow up to schedule a 20-minute technical evaluation. Check
-          your work inbox for confirmation.
+          Customer care will follow up at the email you provided.
         </p>
       </div>
     );
@@ -73,52 +86,48 @@ export function DemoInquiryForm() {
     <form onSubmit={(event) => void onSubmit(event)} className="relative space-y-4">
       {error && <p className="text-sm text-rose-700">{error}</p>}
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-        <label htmlFor="company-url-interest">Company URL</label>
-        <input id="company-url-interest" name="companyUrl" tabIndex={-1} autoComplete="off" />
+        <label htmlFor="company-url-care">Company URL</label>
+        <input id="company-url-care" name="companyUrl" tabIndex={-1} autoComplete="off" />
       </div>
       <Input
-        name="fullName"
-        label="Full Name"
+        name="name"
+        label="Name"
         required
+        defaultValue={defaultName}
         autoComplete="name"
-        error={fieldErrors.fullName}
+        error={fieldErrors.name}
       />
       <Input
-        name="workEmail"
+        name="email"
         type="email"
-        label="Work Email"
+        label="Email"
         required
+        defaultValue={defaultEmail}
         autoComplete="email"
-        error={fieldErrors.workEmail}
-      />
-      <Input
-        name="organization"
-        label="Organization / Defense Agency"
-        required
-        autoComplete="organization"
-        error={fieldErrors.organization}
+        error={fieldErrors.email}
       />
       <Select
-        name="role"
-        label="Engineering Role"
+        name="category"
+        label="Category"
         required
-        placeholder="Select a role"
-        options={ROLE_OPTIONS}
-        error={fieldErrors.role}
+        defaultValue="support"
+        options={CATEGORY_OPTIONS}
+        error={fieldErrors.category}
       />
-      <Textarea
-        name="useCase"
-        label="Primary Program / Use Case"
+      <Input
+        name="subject"
+        label="Subject"
         required
-        rows={5}
-        error={fieldErrors.useCase}
+        defaultValue={defaultSubject}
+        error={fieldErrors.subject}
       />
+      <Textarea name="message" label="Message" required rows={5} error={fieldErrors.message} />
       <Button
         type="submit"
         disabled={pending}
         className="h-11 w-full bg-blue-600 hover:bg-blue-700"
       >
-        {pending ? "Submitting..." : "Schedule Technical Evaluation →"}
+        {pending ? "Submitting..." : "Send to customer care"}
       </Button>
     </form>
   );

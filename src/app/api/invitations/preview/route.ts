@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 import { previewInvitationByToken } from "@/server/organizations";
-import { AppError, ValidationError } from "@/shared/errors";
+import { invitationPreviewRateLimiter } from "@/server/security/rate-limiter";
+import { rateLimitedResponse } from "@/server/security/response-helpers";
+import { AppError, RateLimitedError, ValidationError } from "@/shared/errors";
 
 export async function GET(request: Request) {
   try {
+    const ipAddress =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
+    const retryAfter = invitationPreviewRateLimiter.check(ipAddress);
+    if (retryAfter !== null) {
+      return rateLimitedResponse(
+        new RateLimitedError("Too many invitation lookups. Try again later.", retryAfter),
+      );
+    }
+    invitationPreviewRateLimiter.record(ipAddress);
+
     const token = new URL(request.url).searchParams.get("token") ?? "";
     const preview = await previewInvitationByToken(token);
     return NextResponse.json({ data: preview });

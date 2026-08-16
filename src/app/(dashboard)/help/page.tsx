@@ -11,13 +11,13 @@ import {
   Wifi,
   Database,
   XCircle,
-  Send,
 } from "lucide-react";
 import { PageContainer, Stack } from "@/components/layout";
-import { Card, CardContent, Button, Input, Textarea, Badge } from "@/components/ui";
+import { Card, CardContent, Button, Badge, Input } from "@/components/ui";
 import { EpistemicBadge, type EpistemicStatus } from "@/components/ui/epistemic-badge";
 import { cn } from "@/shared/utils";
 
+import { CustomerCareForm } from "@/components/marketing";
 import { searchHelpTopics } from "@/features/help";
 
 const GLOSSARY: { term: string; status: EpistemicStatus; definition: string }[] = [
@@ -40,6 +40,12 @@ const GLOSSARY: { term: string; status: EpistemicStatus; definition: string }[] 
       "Reasoned from context, precedent, or analogy rather than direct measurement. Useful for triage, requires verification before action.",
   },
   {
+    term: "ASSERTED",
+    status: "ASSERTED",
+    definition:
+      "Stated by an engineer without a recorded measurement yet. Visible, auditable, and not treated as observed fact.",
+  },
+  {
     term: "UNKNOWN / GAP",
     status: "GAP",
     definition:
@@ -59,11 +65,10 @@ const initialHealth: HealthResult = { api: "checking", database: "checking" };
 export default function HelpPage() {
   const [query, setQuery] = useState("");
   const [health, setHealth] = useState<HealthResult>(initialHealth);
-  const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountEmail, setAccountEmail] = useState("");
   const [includeDiagnostics, setIncludeDiagnostics] = useState(true);
-  const [feedback, setFeedback] = useState("");
-  const [sent, setSent] = useState(false);
+  const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -82,7 +87,20 @@ export default function HelpPage() {
         if (!cancelled) setHealth({ api: "down", database: "unreachable" });
       }
     }
-    runDiagnostics();
+    async function loadAccount() {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (cancelled) return;
+        setAccountName(typeof json.data?.name === "string" ? json.data.name : "");
+        setAccountEmail(typeof json.data?.email === "string" ? json.data.email : "");
+      } catch {
+        // Form still works without a prefilled account.
+      }
+    }
+    void runDiagnostics();
+    void loadAccount();
     return () => {
       cancelled = true;
     };
@@ -105,34 +123,11 @@ export default function HelpPage() {
   const handleCopyDiagnostics = async () => {
     try {
       await navigator.clipboard.writeText(diagnosticsText);
-      setFeedback("Diagnostics copied to clipboard");
+      setCopyStatus("Diagnostics copied to clipboard");
     } catch {
-      setFeedback("Clipboard unavailable — copy manually from the report below");
+      setCopyStatus("Clipboard unavailable — copy manually from the report below");
     }
   };
-
-  async function handleSubmitReport(e: React.FormEvent) {
-    e.preventDefault();
-    if (!subject.trim() || !description.trim()) return;
-
-    const report = [
-      `Subject: ${subject.trim()}`,
-      ``,
-      description.trim(),
-      ``,
-      `---`,
-      includeDiagnostics ? diagnosticsText : "Diagnostics excluded.",
-    ].join("\n");
-
-    try {
-      await navigator.clipboard.writeText(report);
-      setSent(true);
-      setSubject("");
-      setDescription("");
-    } catch {
-      setFeedback("Could not copy the report automatically. Please copy it manually.");
-    }
-  }
 
   return (
     <PageContainer>
@@ -158,7 +153,7 @@ export default function HelpPage() {
               aria-label="Search documentation"
               placeholder="Search guides, keywords, topics..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
               className="h-10 border-slate-200 bg-white pl-9"
             />
           </div>
@@ -287,7 +282,7 @@ export default function HelpPage() {
               <Button type="button" variant="secondary" onClick={handleCopyDiagnostics}>
                 <ClipboardCopy className="mr-2 size-3.5" /> Copy diagnostics
               </Button>
-              {feedback && <p className="text-xs text-emerald-700">{feedback}</p>}
+              {copyStatus && <p className="text-xs text-emerald-700">{copyStatus}</p>}
             </CardContent>
           </Card>
 
@@ -298,57 +293,21 @@ export default function HelpPage() {
                 <ShieldCheck className="size-4 text-slate-500" />
                 <h3 className="text-sm font-bold text-slate-900">Contact Support / Report a Bug</h3>
               </div>
-
-              {sent ? (
-                <div className="flex flex-col items-center gap-3 py-8 text-center">
-                  <CheckCircle2 className="size-8 text-emerald-600" />
-                  <p className="text-sm font-semibold text-slate-900">Report drafted and copied</p>
-                  <p className="max-w-sm text-xs text-slate-500">
-                    Paste the report into an email to your platform administrator or support
-                    channel. Diagnostics are included so the team can act faster.
-                  </p>
-                  <Button type="button" variant="secondary" onClick={() => setSent(false)}>
-                    Submit another report
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitReport} className="flex flex-col gap-4">
-                  <Input
-                    label="Subject"
-                    type="text"
-                    placeholder="e.g. Invite email not delivered"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                  />
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-900">Description</label>
-                    <Textarea
-                      rows={4}
-                      placeholder="Describe what happened, what you expected, and any steps to reproduce..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <label className="flex items-center gap-2 text-xs text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={includeDiagnostics}
-                      onChange={(e) => setIncludeDiagnostics(e.target.checked)}
-                      className="accent-emerald-600"
-                    />
-                    Include system diagnostics in the report
-                  </label>
-                  <Button
-                    type="submit"
-                    className="bg-emerald-600 text-slate-50 hover:bg-emerald-700"
-                  >
-                    <Send className="mr-2 size-3.5" /> Draft report
-                  </Button>
-                  {feedback && <p className="text-xs text-amber-700">{feedback}</p>}
-                </form>
-              )}
+              <label className="flex items-center gap-2 text-xs text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={includeDiagnostics}
+                  onChange={(e) => setIncludeDiagnostics(e.target.checked)}
+                  className="accent-blue-600"
+                />
+                Include system diagnostics in the report
+              </label>
+              <CustomerCareForm
+                defaultName={accountName}
+                defaultEmail={accountEmail}
+                defaultSubject="Help center report"
+                includeDiagnostics={includeDiagnostics ? diagnosticsText : undefined}
+              />
             </CardContent>
           </Card>
         </div>

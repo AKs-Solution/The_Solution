@@ -10,10 +10,13 @@ import {
   isWorkspaceRoute,
 } from "@/components/layout/workspace-tabs";
 
-const { pathnameMock, pushMock } = vi.hoisted(() => ({
+const { pathnameMock, pushMock, TEST_IDENTITY } = vi.hoisted(() => ({
   pathnameMock: { value: "/" },
   pushMock: { value: vi.fn() },
+  TEST_IDENTITY: "test-user:test-org",
 }));
+
+const TABS_STORAGE_KEY = `consecuencia.tabs.v1:${TEST_IDENTITY}`;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -24,6 +27,15 @@ vi.mock("next/navigation", () => ({
   }),
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => pathnameMock.value,
+}));
+
+vi.mock("@/features/auth/components/guest-mode", () => ({
+  useGuestMode: () => ({
+    isGuest: false,
+    ready: true,
+    identityKey: TEST_IDENTITY,
+    requestUpgrade: () => undefined,
+  }),
 }));
 
 function Probe() {
@@ -146,8 +158,11 @@ describe("workspace tabs engine", () => {
       expect(isWorkspaceRoute("/drawings/drw-1")).toBe(true);
       expect(isWorkspaceRoute("/executive-dashboard")).toBe(true);
       expect(isWorkspaceRoute("/drawings/comparisons/cmp-1")).toBe(true);
+      expect(isWorkspaceRoute("/help")).toBe(true);
+      expect(isWorkspaceRoute("/settings")).toBe(true);
       expect(isWorkspaceRoute("/")).toBe(false);
-      expect(isWorkspaceRoute("/settings")).toBe(false);
+      expect(isWorkspaceRoute("/login")).toBe(false);
+      expect(isWorkspaceRoute("/invite")).toBe(false);
     });
 
     it("deriveTabFromPathname creates ledger tabs for list routes", () => {
@@ -165,44 +180,53 @@ describe("workspace tabs engine", () => {
     });
 
     it("deriveTabFromPathname returns null for non-workspace routes", () => {
-      expect(deriveTabFromPathname("/settings")).toBeNull();
+      expect(deriveTabFromPathname("/login")).toBeNull();
+      expect(deriveTabFromPathname("/invite")).toBeNull();
       expect(deriveTabFromPathname("/")).toBeNull();
+    });
+
+    it("deriveTabFromPathname creates ledger tabs for settings and help", () => {
+      expect(deriveTabFromPathname("/settings")?.id).toBe("ledger:/settings");
+      expect(deriveTabFromPathname("/help")?.title).toBe("Help");
     });
   });
 
-  it("renders no tabs on a non-workspace route", async () => {
+  it("keeps the home tab on a non-workspace route", async () => {
     await renderProbe("/");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("0");
-    expect(screen.getByTestId("active")).toHaveTextContent("none");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("active")).toHaveTextContent("ledger:/dashboard");
   });
 
-  it("close-all empties the tab list", async () => {
+  it("close-all keeps the pinned home tab", async () => {
     const user = userEvent.setup();
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "close-all" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("0");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("active")).toHaveTextContent("ledger:/dashboard");
   });
 
   it("derives a ledger tab from the current pathname on mount", async () => {
     await renderProbe("/decisions");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
     expect(screen.getByTestId("active")).toHaveTextContent("ledger:/decisions");
     expect(screen.getByTestId("active-title")).toHaveTextContent("Decision Audit Trail");
   });
 
   it("derives a record detail tab and marks it as auto-created", async () => {
     await renderProbe("/decisions/dec-1");
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
-    expect(decisionTabIsAuto()).toBe(true);
+    await waitFor(() => {
+      expect(decisionTabIsAuto()).toBe(true);
+    });
   });
 
   it("openTab adds a tab, activates it, and pushes the href", async () => {
     const user = userEvent.setup();
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(pushMock.value).toHaveBeenCalledWith("/decisions/dec-1", { scroll: false });
   });
@@ -212,8 +236,8 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-dec-updated" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
-    expect(screen.getByTestId("ids")).toHaveTextContent("decision:dec-1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("ids")).toHaveTextContent("ledger:/dashboard,decision:dec-1");
     expect(screen.getByTestId("active-title")).toHaveTextContent("Updated title");
   });
 
@@ -222,7 +246,7 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-drawing" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("3");
     await user.click(screen.getByRole("button", { name: "activate-dec" }));
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(pushMock.value).toHaveBeenCalledWith("/decisions/dec-1", { scroll: false });
@@ -234,7 +258,7 @@ describe("workspace tabs engine", () => {
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "open-drawing" }));
     await user.click(screen.getByRole("button", { name: "close-drawing" }));
-    expect(screen.getByTestId("tab-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("tab-count")).toHaveTextContent("2");
     expect(screen.getByTestId("active")).toHaveTextContent("decision:dec-1");
     expect(screen.getByTestId("ids")).not.toHaveTextContent("drawing:drw-1");
   });
@@ -244,9 +268,9 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await user.click(screen.getByRole("button", { name: "pin-dec" }));
-    expect(screen.getByTestId("pins")).toHaveTextContent("decision:dec-1");
+    expect(screen.getByTestId("pins").textContent).toContain("decision:dec-1");
     await user.click(screen.getByRole("button", { name: "pin-dec" }));
-    expect(screen.getByTestId("pins")).toHaveTextContent("");
+    expect(screen.getByTestId("pins").textContent).not.toContain("decision:dec-1");
   });
 
   it("scoped values are isolated per active tab", async () => {
@@ -279,7 +303,7 @@ describe("workspace tabs engine", () => {
     await renderProbe("/");
     await user.click(screen.getByRole("button", { name: "open-dec" }));
     await waitFor(() => {
-      const raw = window.localStorage.getItem("consecuencia.tabs.v1");
+      const raw = window.localStorage.getItem(TABS_STORAGE_KEY);
       expect(raw).toBeTruthy();
       const parsed: Array<{ id: string; auto?: boolean }> = JSON.parse(raw!);
       const ids = parsed.map((t) => t.id);
@@ -289,7 +313,7 @@ describe("workspace tabs engine", () => {
 });
 
 function decisionTabIsAuto(): boolean {
-  const raw = window.localStorage.getItem("consecuencia.tabs.v1");
+  const raw = window.localStorage.getItem(TABS_STORAGE_KEY);
   if (!raw) return false;
   const parsed: Array<{ id: string; auto?: boolean }> = JSON.parse(raw);
   const tab = parsed.find((t) => t.id === "decision:dec-1");

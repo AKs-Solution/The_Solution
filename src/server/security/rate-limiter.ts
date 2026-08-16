@@ -97,3 +97,15 @@ export const contactInquiryRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   maxAttempts: 5,
 });
+
+export const supportInquiryRateLimiter = createRateLimiter({
+  namespace: "support-inquiry",
+  windowMs: 15 * 60 * 1000,
+  maxAttempts: 5,
+});
+
+export const invitationPreviewRateLimiter = createRateLimiter({
+  namespace: "invitation-preview",
+  windowMs: 15 * 60 * 1000,
+  maxAttempts: 30,
+});
