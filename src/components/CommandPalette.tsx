@@ -148,12 +148,11 @@ export function CommandPalette() {
   const handleNewDecision = () => {
     setOpen(false);
     openTab({
-      kind: "decision",
+      kind: "ledger",
       ref: "/decisions",
-      title: "New Decision",
+      title: "Decision Audit Trail",
       href: "/decisions",
     });
-    router.push("/decisions");
   };
 
   const handleSyncSurveillance = () => {

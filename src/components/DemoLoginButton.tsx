@@ -23,10 +23,9 @@ export function DemoLoginButton({
     try {
       await fetch("/api/auth/demo", { method: "POST" }).catch(() => null);
       router.push("/dashboard");
-      window.location.href = "/dashboard";
     } catch (err) {
       console.error("Demo login error:", err);
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     } finally {
       setIsPending(false);
     }

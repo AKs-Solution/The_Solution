@@ -39,7 +39,7 @@ export interface DecisionMilestoneInput {
 const MEMORY_DECISIONS: any[] = [];
 
 export async function createDecision(input: CreateDecisionInput) {
-  if ("question" in input && input.question) {
+  if ("question" in input) {
     if (!input.question || input.question.trim().length === 0) {
       throw new ValidationError({ question: ["Question is required"] });
     }
@@ -180,8 +180,9 @@ export async function finalizeDecision(
   }
 
   let result: any = null;
+  let existing: any = null;
   try {
-    const existing = await (prisma as any).decision?.findFirst({
+    existing = await (prisma as any).decision?.findFirst({
       where: { id, organizationId, deletedAt: null },
     });
     if (existing && (prisma as any).decision?.update) {
@@ -228,8 +229,8 @@ export async function finalizeDecision(
       await createPrecedent({
         organizationId,
         decisionId: id,
-        title: "Engineering Decision",
-        engineeringQuestion: "Engineering verification inquiry",
+        title: existing?.question || "Engineering Decision",
+        engineeringQuestion: existing?.question || "Engineering verification inquiry",
         decisionMade: finalDecision,
         summary: rationale,
         domain: "ENGINEERING",

@@ -64,7 +64,7 @@ export async function executeUnifiedSearch(
       designPatterns,
     ] = await Promise.all([
       filterType("ENTITY")
-        ? (prisma as any).engineeringEntity
+        ? ((prisma as any).engineeringEntity
             ?.findMany({
               where: {
                 organizationId,
@@ -78,11 +78,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("DECISION")
-        ? (prisma as any).engineeringDecision
+        ? ((prisma as any).engineeringDecision
             ?.findMany({
               where: {
                 organizationId,
@@ -95,11 +95,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("DOCUMENT")
-        ? (prisma as any).ingestionDocument
+        ? ((prisma as any).ingestionDocument
             ?.findMany({
               where: {
                 organizationId,
@@ -109,11 +109,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("PRECEDENT")
-        ? (prisma as any).historicalPrecedent
+        ? ((prisma as any).historicalPrecedent
             ?.findMany({
               where: {
                 organizationId,
@@ -127,11 +127,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("RULE")
-        ? (prisma as any).rule
+        ? ((prisma as any).rule
             ?.findMany({
               where: {
                 organizationId,
@@ -145,11 +145,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("SUPPLIER")
-        ? (prisma as any).supplier
+        ? ((prisma as any).supplier
             ?.findMany({
               where: {
                 organizationId,
@@ -163,11 +163,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { updatedAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("PROGRAM")
-        ? (prisma as any).program
+        ? ((prisma as any).program
             ?.findMany({
               where: {
                 organizationId,
@@ -179,11 +179,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("CONTRADICTION")
-        ? (prisma as any).contradiction
+        ? ((prisma as any).contradiction
             ?.findMany({
               where: {
                 organizationId,
@@ -196,11 +196,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("ASSUMPTION")
-        ? (prisma as any).assumptionRecord
+        ? ((prisma as any).assumptionRecord
             ?.findMany({
               where: {
                 OR: [
@@ -211,11 +211,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("REJECTED_ALTERNATIVE")
-        ? (prisma as any).alternativeRecord
+        ? ((prisma as any).alternativeRecord
             ?.findMany({
               where: {
                 status: "REJECTED",
@@ -228,11 +228,11 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
 
       filterType("LESSON_LEARNED")
-        ? (prisma as any).drawingDesignPattern
+        ? ((prisma as any).drawingDesignPattern
             ?.findMany({
               where: {
                 organizationId,
@@ -245,7 +245,7 @@ export async function executeUnifiedSearch(
               take: perCategoryLimit,
               orderBy: { createdAt: "desc" },
             })
-            .catch(() => []) ?? []
+            .catch(() => []) ?? [])
         : Promise.resolve([]),
     ]);
 
@@ -269,7 +269,7 @@ export async function executeUnifiedSearch(
         title: d.description,
         subtitle: `Decision • ${d.decisionType} (${d.status})`,
         description: d.rationale,
-        href: `/decisions`,
+        href: `/decisions/${d.id}`,
         score: 0.95,
         createdAt: d.createdAt?.toISOString?.() || new Date().toISOString(),
       });
@@ -307,7 +307,7 @@ export async function executeUnifiedSearch(
         title: r.name,
         subtitle: `Rule • ${r.category} (${r.severity})`,
         description: r.description || undefined,
-        href: `/rules`,
+        href: `/rules/${r.id}`,
         score: 0.85,
         createdAt: r.createdAt?.toISOString?.() || new Date().toISOString(),
       });
@@ -320,7 +320,7 @@ export async function executeUnifiedSearch(
         title: s.name,
         subtitle: `Supplier • ${s.supplierType} (${s.status})`,
         description: s.description || undefined,
-        href: `/suppliers`,
+        href: `/suppliers/${s.id}`,
         score: 0.85,
         createdAt: s.createdAt?.toISOString?.() || new Date().toISOString(),
       });
@@ -345,7 +345,7 @@ export async function executeUnifiedSearch(
         title: c.label,
         subtitle: `Contradiction • ${c.severity} (${c.status})`,
         description: c.description,
-        href: `/contradictions`,
+        href: `/contradictions/${c.id}`,
         score: 0.8,
         createdAt: c.createdAt?.toISOString?.() || new Date().toISOString(),
       });

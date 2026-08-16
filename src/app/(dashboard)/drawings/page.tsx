@@ -403,14 +403,14 @@ export default function DrawingsDashboardPage() {
                   {comparisons.map((c) => (
                     <Link
                       key={c.id}
-                      href={`/drawings/${c.id}`}
+                      href={`/drawings/comparisons/${c.id}`}
                       onClick={() =>
                         openTab({
                           kind: "drawing",
                           ref: c.id,
-                          title: `Drawing Inspection ${c.id.substring(0, 8)}`,
+                          title: `Drawing Comparison ${c.id.substring(0, 8)}`,
                           subtitle: c.status ?? "READY",
-                          href: `/drawings/${c.id}`,
+                          href: `/drawings/comparisons/${c.id}`,
                         })
                       }
                       className="group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-100 p-5 text-left transition-all hover:border-zinc-400 hover:bg-zinc-100"

@@ -130,7 +130,6 @@ export function Header() {
       title: mod.label,
       href: mod.href,
     });
-    router.push(mod.href);
   };
 
   const handleQuickSync = async () => {

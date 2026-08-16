@@ -17,6 +17,14 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
+  const postLoginDestination = () => {
+    const next = searchParams.get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//") && next !== "/login") {
+      return next;
+    }
+    return "/dashboard";
+  };
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -35,7 +43,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push(postLoginDestination());
       router.refresh();
     } catch {
       setError("An unexpected error occurred");
@@ -54,7 +62,7 @@ export function LoginForm() {
         setError(err.error || "Demo login failed");
         return;
       }
-      router.push("/dashboard");
+      router.push(postLoginDestination());
       router.refresh();
     } catch {
       setError("An unexpected error occurred during demo login");
@@ -118,7 +126,7 @@ export function LoginForm() {
           <span className="w-full border-t border-zinc-200" />
         </div>
         <div className="relative flex justify-center text-[10px] tracking-wider uppercase">
-          <span className="bg-white px-2 text-zinc-500 font-mono">Or Instant Access</span>
+          <span className="bg-white px-2 font-mono text-zinc-500">Or Instant Access</span>
         </div>
       </div>
 

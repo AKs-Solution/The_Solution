@@ -88,6 +88,7 @@ export function WorkspaceTabBar() {
       activateTab(tabId);
     } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
+      if (tabs.length === 0) return;
       const direction = e.key === "ArrowRight" ? 1 : -1;
       const next = (index + direction + tabs.length) % tabs.length;
       tabRefs.current[next]?.focus();

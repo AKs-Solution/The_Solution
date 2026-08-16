@@ -48,7 +48,6 @@ function isHomeTab(id: string): boolean {
 }
 
 export function isWorkspaceRoute(pathname: string): boolean {
-  if (pathname.startsWith("/drawings/comparisons")) return false;
   return (
     pathname === "/decisions" ||
     pathname.startsWith("/decisions/") ||
@@ -56,6 +55,7 @@ export function isWorkspaceRoute(pathname: string): boolean {
     pathname.startsWith("/sentinel/") ||
     pathname === "/drawings" ||
     pathname.startsWith("/drawings/") ||
+    pathname === "/failure-graph" ||
     pathname === "/executive-dashboard" ||
     pathname === "/precedents" ||
     pathname === "/certification"
@@ -69,6 +69,7 @@ const LEDGER_TABS: Array<{ path: string; title: string }> = [
   { path: "/decisions", title: "Decision Audit Trail" },
   { path: "/sentinel", title: "Decision Sentinel" },
   { path: "/drawings", title: "Drawing Intelligence" },
+  { path: "/failure-graph", title: "Failure Graph & Contagion" },
 ];
 
 /**
@@ -79,8 +80,21 @@ const LEDGER_TABS: Array<{ path: string; title: string }> = [
 export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
   if (pathname === "/") return null;
 
-  // Legacy comparison jobs keep their own inspector route and don't surface a tab.
-  if (pathname.startsWith("/drawings/comparisons")) return null;
+  // Drawing comparison jobs are inspected on their dedicated route but still
+  // surface a workspace tab keyed to the job id.
+  if (pathname.startsWith("/drawings/comparisons/")) {
+    const ref = pathname.slice("/drawings/comparisons/".length).split("/")[0];
+    if (!ref) return null;
+    return {
+      id: tabIdFor("drawing", ref),
+      kind: "drawing",
+      ref,
+      title: `Drawing Comparison ${ref.slice(0, 12)}`,
+      href: `/drawings/comparisons/${ref}`,
+      pinned: false,
+      auto: true,
+    };
+  }
 
   const detail = (
     prefix: string,
@@ -103,9 +117,24 @@ export function deriveTabFromPathname(pathname: string): WorkspaceTab | null {
   };
 
   return (
-    detail("/decisions", "decision", (ref) => `Decision ${ref.slice(0, 12)}`, (ref) => `/decisions/${ref}`) ??
-    detail("/sentinel", "sentinel", (ref) => `Sentinel Alert ${ref.slice(0, 12)}`, (ref) => `/sentinel/${ref}`) ??
-    detail("/drawings", "drawing", (ref) => `Drawing ${ref.slice(0, 12)}`, (ref) => `/drawings/${ref}`) ??
+    detail(
+      "/decisions",
+      "decision",
+      (ref) => `Decision ${ref.slice(0, 12)}`,
+      (ref) => `/decisions/${ref}`,
+    ) ??
+    detail(
+      "/sentinel",
+      "sentinel",
+      (ref) => `Sentinel Alert ${ref.slice(0, 12)}`,
+      (ref) => `/sentinel/${ref}`,
+    ) ??
+    detail(
+      "/drawings",
+      "drawing",
+      (ref) => `Drawing ${ref.slice(0, 12)}`,
+      (ref) => `/drawings/${ref}`,
+    ) ??
     (() => {
       const match = LEDGER_TABS.find((t) => t.path === pathname);
       if (!match) return null;
@@ -187,7 +216,10 @@ export interface WorkspaceTabsValue {
   closeTab: (id: string) => void;
   closeTabs: (ids?: string[]) => void;
   togglePin: (id: string) => void;
-  updateTab: (id: string, patch: Partial<Pick<WorkspaceTab, "title" | "subtitle" | "href" | "pinned">>) => void;
+  updateTab: (
+    id: string,
+    patch: Partial<Pick<WorkspaceTab, "title" | "subtitle" | "href" | "pinned">>,
+  ) => void;
   getScopedValue: <T>(tabId: string, key: string) => T | undefined;
   setScopedValue: (tabId: string, key: string, value: unknown) => void;
   saveScrollPosition: (tabId: string) => void;
@@ -201,10 +233,7 @@ function persistSession(activeTabId: string | null) {
   try {
     const raw = window.sessionStorage.getItem(SESSION_KEY);
     const parsed = raw ? JSON.parse(raw) : {};
-    window.sessionStorage.setItem(
-      SESSION_KEY,
-      JSON.stringify({ ...parsed, activeTabId }),
-    );
+    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...parsed, activeTabId }));
   } catch {
     // Storage unavailable — workspace tabs remain in-memory only.
   }
@@ -316,9 +345,16 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       setTabs((prev) => {
         const existing = prev.find((t) => t.id === id);
         if (existing) {
+          if (isHomeTab(id)) return prev;
           return prev.map((t) =>
             t.id === id
-              ? { ...t, title: options.title, subtitle: options.subtitle, href: options.href, pinned: t.pinned || options.pinned === true }
+              ? {
+                  ...t,
+                  title: options.title,
+                  subtitle: options.subtitle,
+                  href: options.href,
+                  pinned: t.pinned || options.pinned === true,
+                }
               : t,
           );
         }
@@ -339,7 +375,8 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       setActiveTabId(id);
       const outgoing = activeTabIdRef.current;
       if (outgoing && typeof window !== "undefined") scrollYRef.current[outgoing] = window.scrollY;
-      const current = typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
+      const current =
+        typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
       if (current !== options.href) router.push(options.href, { scroll: false });
       return id;
     },
@@ -353,7 +390,8 @@ export function WorkspaceTabsProvider({ children }: { children: ReactNode }) {
       const outgoing = activeTabIdRef.current;
       if (outgoing && typeof window !== "undefined") scrollYRef.current[outgoing] = window.scrollY;
       setActiveTabId(id);
-      const current = typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
+      const current =
+        typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "";
       if (current !== tab.href) router.push(tab.href, { scroll: false });
       restoreScrollPosition(id);
     },

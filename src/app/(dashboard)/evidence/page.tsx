@@ -539,14 +539,18 @@ export default function EvidencePage() {
                                 ↑ {link.relationType.replace(/_/g, " ").toLowerCase()}
                               </span>
                               <div className="flex items-center gap-2">
-                                <Link
-                                  href={
-                                    link.node.entityId ? `/entities/${link.node.entityId}` : "#"
-                                  }
-                                  className="bg-muted text-muted-foreground hover:text-foreground rounded px-2 py-1 text-xs transition-colors"
-                                >
-                                  {link.node.label}
-                                </Link>
+                                {link.node.entityId ? (
+                                  <Link
+                                    href={`/entities/${link.node.entityId}`}
+                                    className="bg-muted text-muted-foreground hover:text-foreground rounded px-2 py-1 text-xs transition-colors"
+                                  >
+                                    {link.node.label}
+                                  </Link>
+                                ) : (
+                                  <span className="bg-muted text-muted-foreground rounded px-2 py-1 text-xs">
+                                    {link.node.label}
+                                  </span>
+                                )}
                                 {link.node.documentName && (
                                   <span className="text-muted-foreground text-xs">
                                     · {link.node.documentName}

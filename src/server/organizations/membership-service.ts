@@ -4,6 +4,7 @@ import { validateSession } from "@/server/auth/session-service";
 import { DEFAULT_ROLES } from "@/server/rbac/permissions";
 import { sendInvitationEmail } from "@/server/mail";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/shared/errors";
+import type { Invitation, OrganizationMember, User } from "@prisma/client";
 
 export const INVITABLE_ROLE_SLUGS = new Set(
   DEFAULT_ROLES.filter((r) => r.slug !== "owner").map((r) => r.slug),
@@ -109,7 +110,7 @@ export async function inviteMember(
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  let invitee: any = null;
+  let invitee: User | null = null;
   try {
     invitee = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   } catch {
@@ -117,7 +118,7 @@ export async function inviteMember(
   }
 
   if (invitee) {
-    let existingMember: any = null;
+    let existingMember: OrganizationMember | null = null;
     try {
       existingMember = await prisma.organizationMember.findUnique({
         where: {
@@ -135,7 +136,7 @@ export async function inviteMember(
     }
   }
 
-  let existingInvitation: any = null;
+  let existingInvitation: Invitation | null = null;
   try {
     existingInvitation = await prisma.invitation.findFirst({
       where: {
@@ -174,13 +175,15 @@ export async function inviteMember(
     invitationId = invitation.id;
     if (invitation.organization?.name) orgName = invitation.organization.name;
 
-    await (prisma as any).authEvent?.create({
-      data: {
-        userId: session.userId,
-        action: "organization.member.invited",
-        metadata: { organizationId, email: normalizedEmail },
-      },
-    }).catch(() => null);
+    await prisma.authEvent
+      .create({
+        data: {
+          userId: session.userId,
+          action: "organization.member.invited",
+          metadata: { organizationId, email: normalizedEmail },
+        },
+      })
+      .catch(() => null);
   } catch (err) {
     console.warn("[MembershipService] DB offline fallback invite creation:", err);
   }

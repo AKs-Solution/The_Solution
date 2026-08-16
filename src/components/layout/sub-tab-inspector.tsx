@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FileText, FileCheck, BookCheck, Activity, GitBranch, type LucideIcon } from "lucide-react";
 import { cn } from "@/shared/utils";
 import { useWorkspaceTabs } from "./workspace-tabs";
@@ -39,7 +39,7 @@ const DEFAULT_SUB_TABS: SubTabOption[] = [
     badge: "LIVE",
     href: "/sentinel",
   },
-  { id: "reasoning", label: "Reasoning Trace", icon: GitBranch, href: "/decisions" },
+  { id: "reasoning", label: "Reasoning Trace", icon: GitBranch, href: "/reasoning" },
 ];
 
 interface SubTabInspectorProps {
@@ -53,7 +53,6 @@ export function SubTabInspector({
   onTabChange,
   className = "",
 }: SubTabInspectorProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const { openTab } = useWorkspaceTabs();
   const [internalActiveTab, setInternalActiveTab] = useState<SubTabId>("overview");
@@ -81,7 +80,6 @@ export function SubTabInspector({
         title: tab.label,
         href: tab.href,
       });
-      router.push(tab.href);
     }
   };
 

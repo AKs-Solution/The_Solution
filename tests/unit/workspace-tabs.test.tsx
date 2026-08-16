@@ -145,7 +145,7 @@ describe("workspace tabs engine", () => {
       expect(isWorkspaceRoute("/sentinel/alert-1")).toBe(true);
       expect(isWorkspaceRoute("/drawings/drw-1")).toBe(true);
       expect(isWorkspaceRoute("/executive-dashboard")).toBe(true);
-      expect(isWorkspaceRoute("/drawings/comparisons/cmp-1")).toBe(false);
+      expect(isWorkspaceRoute("/drawings/comparisons/cmp-1")).toBe(true);
       expect(isWorkspaceRoute("/")).toBe(false);
       expect(isWorkspaceRoute("/settings")).toBe(false);
     });

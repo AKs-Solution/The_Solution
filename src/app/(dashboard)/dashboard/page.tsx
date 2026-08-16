@@ -1178,7 +1178,7 @@ export default function WorkspacePage() {
                           return (
                             <Link
                               key={docId}
-                              href={`/documents/${docId}`}
+                              href={`/ingestion/documents/${docId}`}
                               className="group flex items-start gap-2.5 rounded border border-transparent p-2 text-left transition-all hover:border-zinc-200 hover:bg-zinc-50"
                             >
                               <FileText className="mt-0.5 size-4 shrink-0 text-zinc-400 group-hover:text-zinc-600" />
