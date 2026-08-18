@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { useWorkspaceTabs, type WorkspaceTabKind } from "./workspace-tabs";
+import { useWorkspaceTabs, HOME_TAB, type WorkspaceTabKind } from "./workspace-tabs";
 
 const KIND_ICON_MAP: Record<WorkspaceTabKind, LucideIcon> = {
   decision: FileText,
@@ -152,6 +152,7 @@ export function WorkspaceTabBar() {
         {tabs.map((tab, index) => {
           const Icon = KIND_ICON_MAP[tab.kind] ?? FileText;
           const isActive = tab.id === activeTabId;
+          const isHome = tab.id === HOME_TAB.id;
 
           return (
             <div
@@ -202,7 +203,7 @@ export function WorkspaceTabBar() {
                   {tab.pinned ? <PinOff className="size-2.5" /> : <Pin className="size-2.5" />}
                 </button>
 
-                {!tab.pinned && (
+                {!isHome && !tab.pinned && (
                   <button
                     type="button"
                     title="Close tab"

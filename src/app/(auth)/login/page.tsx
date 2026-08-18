@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { LoginForm, ContinueAsGuest } from "@/features/auth/components";
 
 export default function LoginPage() {
@@ -13,12 +12,6 @@ export default function LoginPage() {
         <div className="mt-4">
           <ContinueAsGuest />
         </div>
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-700">
-            Create one
-          </Link>
-        </p>
       </div>
     </div>
   );

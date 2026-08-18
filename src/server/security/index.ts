@@ -5,7 +5,7 @@ export {
   passwordResetRateLimiter,
 } from "./rate-limiter";
 export type { RateLimiter, RateLimiterOptions } from "./rate-limiter";
-export { generateNonce, buildContentSecurityPolicy } from "./csp";
+export { buildContentSecurityPolicy } from "./csp";
 export { requiresCsrfCheck, isSameOriginRequest } from "./csrf";
 export type { CsrfCheckInput } from "./csrf";
 export { recordSecurityEvent } from "./security-events";

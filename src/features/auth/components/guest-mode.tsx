@@ -176,9 +176,6 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
             <Button variant="secondary" as="a" href="/login">
               Sign In
             </Button>
-            <Button as="a" href="/register">
-              Create Account
-            </Button>
           </div>
         </Modal>
       )}

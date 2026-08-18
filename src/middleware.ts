@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { buildContentSecurityPolicy, generateNonce } from "@/server/security/csp";
+import { buildContentSecurityPolicy } from "@/server/security/csp";
 import { isSameOriginRequest } from "@/server/security/csrf";
 import { logger } from "@/shared/logging";
 import { COOKIE_NAME, verifyAuthToken } from "@/server/auth/jwt";
 import { isSafeInternalPath } from "@/shared/security/safe-internal-path";
 
 const REQUEST_ID_HEADER = "x-request-id";
-const NONCE_HEADER = "x-nonce";
 
 const publicPathPrefixes = [
   "/api/auth/guest",
@@ -49,8 +48,8 @@ const publicPageExactPaths = new Set([
   "/pricing",
 ]);
 
-function applySecurityHeaders(response: NextResponse, nonce: string, isProd: boolean): void {
-  response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(nonce, isProd));
+function applySecurityHeaders(response: NextResponse, isProd: boolean): void {
+  response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(isProd));
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -73,10 +72,8 @@ export async function middleware(request: NextRequest) {
   const isProd = process.env.NODE_ENV === "production";
 
   const requestId = request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID();
-  const nonce = generateNonce();
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(REQUEST_ID_HEADER, requestId);
-  requestHeaders.set(NONCE_HEADER, nonce);
 
   const proto =
     request.headers.get("x-forwarded-proto") ??
@@ -103,14 +100,14 @@ export async function middleware(request: NextRequest) {
       { error: "Cross-origin request rejected", code: "CSRF_REJECTED" },
       { status: 403 },
     );
-    applySecurityHeaders(response, nonce, isProd);
+    applySecurityHeaders(response, isProd);
     return response;
   }
 
   if (isPublicPath(pathname)) {
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set(REQUEST_ID_HEADER, requestId);
-    applySecurityHeaders(response, nonce, isProd);
+    applySecurityHeaders(response, isProd);
     return response;
   }
 
@@ -123,7 +120,7 @@ export async function middleware(request: NextRequest) {
         { error: "Not authenticated", code: "UNAUTHORIZED" },
         { status: 401, headers: { [REQUEST_ID_HEADER]: requestId } },
       );
-      applySecurityHeaders(response, nonce, isProd);
+      applySecurityHeaders(response, isProd);
       return response;
     }
 
@@ -133,7 +130,7 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("next", nextPath);
     }
     const response = NextResponse.redirect(loginUrl);
-    applySecurityHeaders(response, nonce, isProd);
+    applySecurityHeaders(response, isProd);
     return response;
   }
 
@@ -142,7 +139,7 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(REQUEST_ID_HEADER, requestId);
-  applySecurityHeaders(response, nonce, isProd);
+  applySecurityHeaders(response, isProd);
   return response;
 }
 
