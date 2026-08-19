@@ -29,7 +29,7 @@ export function NavHeader() {
               CONSECUENCIA
             </span>
             <span className="mt-0.5 font-mono text-[10px] tracking-[0.2em] text-slate-500">
-              BY AK
+              BY Aᴷ
             </span>
           </span>
         </Link>

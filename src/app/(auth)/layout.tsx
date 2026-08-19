@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-extrabold tracking-wider text-slate-900 uppercase">
-              Consecuencia by AK
+              Consecuencia by Aᴷ
             </span>
             <span className="font-mono text-[10px] font-medium text-slate-500">
               Aerospace Intelligence

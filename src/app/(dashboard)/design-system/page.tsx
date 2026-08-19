@@ -82,7 +82,7 @@ export default function DesignSystemPage() {
       <Stack gap={8}>
         <Section
           title="Design System"
-          description="Enterprise UI component library for Consecuencia by AK. All components support light and dark mode, keyboard navigation, and screen readers."
+          description="Enterprise UI component library for Consecuencia by Aᴷ. All components support light and dark mode, keyboard navigation, and screen readers."
         >
           <Breadcrumb items={breadcrumbItems} />
         </Section>
@@ -165,7 +165,7 @@ export default function DesignSystemPage() {
         <Section title="Avatar" description="User avatar with image or initials fallback.">
           <Stack direction="row" gap={3} align="center">
             <Avatar size="sm" initials="JD" />
-            <Avatar size="md" initials="AK" />
+            <Avatar size="md" initials="Aᴷ" />
             <Avatar size="lg" initials="MS" />
           </Stack>
         </Section>
@@ -239,7 +239,7 @@ export default function DesignSystemPage() {
         <Section title="Accordion" description="Expandable content sections.">
           <Accordion type="single" defaultValue={["item-1"]}>
             <AccordionItem value="item-1">
-              <AccordionTrigger>What is Consecuencia by AK?</AccordionTrigger>
+              <AccordionTrigger>What is Consecuencia by Aᴷ?</AccordionTrigger>
               <AccordionContent>
                 An Aerospace Decision Intelligence & Engineering Reality Platform that verifies engineering truth through
                 deterministic, evidence-based reasoning.
@@ -395,7 +395,7 @@ export default function DesignSystemPage() {
               <KeyValue
                 direction="column"
                 pairs={[
-                  { key: "Project", value: "Consecuencia by AK" },
+                  { key: "Project", value: "Consecuencia by Aᴷ" },
                   { key: "Version", value: "0.1.0" },
                   { key: "Status", value: "Production Certified" },
                   { key: "Last Deployed", value: "2026-07-13" },

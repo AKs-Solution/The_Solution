@@ -8,7 +8,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Create an account</h1>
-          <p className="mt-2 text-sm text-slate-500">Get started with Consecuencia by AK</p>
+          <p className="mt-2 text-sm text-slate-500">Get started with Consecuencia by Aᴷ</p>
         </div>
         <Suspense fallback={<p className="text-sm text-slate-500">Loading...</p>}>
           <RegisterForm />

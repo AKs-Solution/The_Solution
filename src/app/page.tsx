@@ -11,7 +11,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Link from "next/link";
-import { ConsolePreview, MarketingFaq, MarketingShell } from "@/components/marketing";
+import { MarketingFaq, MarketingShell } from "@/components/marketing";
 import { HomeStructuredData } from "@/components/seo/structured-data";
 import { FRESHNESS_LINE } from "@/features/marketing/content";
 import { ContinueAsGuest } from "@/features/auth/components";
@@ -194,14 +194,14 @@ export default function Home() {
 
         <section className="relative mx-auto max-w-5xl px-6 pt-16 pb-6 text-center sm:pt-24">
           <p className="font-mono text-[11px] font-semibold tracking-[0.2em] text-slate-500 uppercase">
-            Consecuencia by AK
+            Consecuencia by Aᴷ
           </p>
           <div className="mt-5 mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-xs text-slate-700 shadow-xs">
             <span className="size-1.5 rounded-full bg-blue-600" aria-hidden="true" />
             Deterministic decision intelligence for aerospace complexity
           </div>
           <h1 className="mx-auto max-w-4xl text-4xl leading-[1.12] font-bold tracking-[-0.03em] text-slate-900 sm:text-5xl lg:text-6xl">
-            Connect every engineering decision to its consequence.
+            Consecuencia by Aᴷ
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
             Make that link searchable, provable, permanent, and alive. The engine does not invent,
@@ -236,10 +236,6 @@ export default function Home() {
               <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.label}</p>
             </div>
           ))}
-        </div>
-
-        <div className="relative px-6">
-          <ConsolePreview />
         </div>
 
         <section id="thesis" className="relative mx-auto max-w-3xl scroll-mt-24 px-6 py-20">

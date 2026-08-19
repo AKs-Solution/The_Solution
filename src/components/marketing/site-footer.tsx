@@ -36,7 +36,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 md:grid-cols-4">
         <div>
           <p className="text-[13px] font-semibold tracking-[0.16em] text-slate-900">CONSECUENCIA</p>
-          <p className="mt-0.5 font-mono text-[10px] tracking-[0.2em] text-slate-400">BY AK</p>
+          <p className="mt-0.5 font-mono text-[10px] tracking-[0.2em] text-slate-400">BY Aᴷ</p>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
             Deterministic verification for mission-critical aerospace engineering.
           </p>

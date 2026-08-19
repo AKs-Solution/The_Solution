@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   BadgeCheck,
   LifeBuoy,
+  Phone,
   ClipboardCopy,
   CheckCircle2,
   Wifi,
@@ -292,6 +293,18 @@ export default function HelpPage() {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-4 text-slate-500" />
                 <h3 className="text-sm font-bold text-slate-900">Contact Support / Report a Bug</h3>
+              </div>
+              <div className="flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <a
+                  href="tel:+917019844552"
+                  className="flex items-center gap-2 text-sm font-semibold text-slate-900 no-underline hover:text-blue-700"
+                >
+                  <Phone className="size-4 text-blue-600" />
+                  <span className="font-mono">+91 7019844552</span>
+                </a>
+                <p className="text-xs text-slate-500">
+                  Call for immediate assistance — response and callback within 12 hours.
+                </p>
               </div>
               <label className="flex items-center gap-2 text-xs text-slate-600">
                 <input

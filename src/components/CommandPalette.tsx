@@ -414,7 +414,7 @@ export function CommandPalette() {
                     <kbd className="rounded bg-slate-100 px-1 py-0.5 text-slate-500">⌘K</kbd> Search
                   </span>
                 </div>
-                <span className="font-semibold text-emerald-400">CONSECUENCIA BY AK</span>
+                <span className="font-semibold text-emerald-400">CONSECUENCIA BY Aᴷ</span>
               </div>
             </div>
           )}
