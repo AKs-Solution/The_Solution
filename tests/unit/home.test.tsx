@@ -16,6 +16,10 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("@/components/seo/structured-data", () => ({
+  HomeStructuredData: () => null,
+}));
+
 import Home from "@/app/page";
 
 describe("Home Page", () => {
@@ -26,7 +30,7 @@ describe("Home Page", () => {
 
   it("renders the description", () => {
     render(<Home />);
-    expect(screen.getByText(/does not invent/i)).toBeInTheDocument();
+    expect(screen.getByText(/engine does not invent/i)).toBeInTheDocument();
   });
 
   it("renders key call-to-action buttons", () => {

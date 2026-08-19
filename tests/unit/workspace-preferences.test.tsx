@@ -6,6 +6,25 @@ import {
   useWorkspacePreferences,
 } from "@/components/layout/workspace-preferences";
 
+const { TEST_IDENTITY } = vi.hoisted(() => ({
+  TEST_IDENTITY: "test-user:test-org",
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/",
+}));
+
+vi.mock("@/features/auth/components/guest-mode", () => ({
+  useGuestMode: () => ({
+    isGuest: false,
+    ready: true,
+    identityKey: TEST_IDENTITY,
+    requestUpgrade: () => undefined,
+  }),
+}));
+
 function Probe() {
   const ctx = useWorkspacePreferences();
   return (
@@ -150,7 +169,7 @@ describe("WorkspacePreferencesProvider", () => {
     await renderProbe();
     await user.click(screen.getByRole("button", { name: "set-compact" }));
     await waitFor(() => {
-      const raw = window.localStorage.getItem("consecuencia.workspace.v1");
+      const raw = window.localStorage.getItem(`consecuencia.workspace.v1:${TEST_IDENTITY}`);
       expect(raw).toBeTruthy();
       expect(JSON.parse(raw!).density).toBe("compact");
     });
