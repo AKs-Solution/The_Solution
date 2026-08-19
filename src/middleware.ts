@@ -48,6 +48,39 @@ const publicPageExactPaths = new Set([
   "/pricing",
 ]);
 
+const adminConsole =
+  process.env.NEXT_PUBLIC_ADMIN_CONSOLE === "1" || process.env.NEXT_PUBLIC_ADMIN_CONSOLE === "true";
+
+function isAdminPath(pathname: string): boolean {
+  return pathname === "/ops" || pathname === "/api/admin" || pathname.startsWith("/api/admin/");
+}
+
+const adminConsolePathPrefixes = [
+  "/api/admin/",
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/auth/guest",
+  "/api/health",
+  "/_next/",
+];
+
+const adminConsolePagePaths = new Set([
+  "/ops",
+  "/login",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+]);
+
+function notFoundResponse(requestId: string, isProd: boolean): NextResponse {
+  const response = NextResponse.json(
+    { error: "Not found", code: "NOT_FOUND" },
+    { status: 404, headers: { [REQUEST_ID_HEADER]: requestId } },
+  );
+  applySecurityHeaders(response, isProd);
+  return response;
+}
+
 function applySecurityHeaders(response: NextResponse, isProd: boolean): void {
   response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(isProd));
   response.headers.set("X-Frame-Options", "DENY");
@@ -81,6 +114,22 @@ export async function middleware(request: NextRequest) {
   const host =
     request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
   const expectedOrigin = `${proto}://${host}`;
+
+  if (adminConsole) {
+    if (pathname === "/" || pathname === "/dashboard") {
+      const response = NextResponse.redirect(new URL("/ops", request.url));
+      applySecurityHeaders(response, isProd);
+      return response;
+    }
+    const allowedInConsole =
+      adminConsolePagePaths.has(pathname) ||
+      adminConsolePathPrefixes.some((prefix) => pathname.startsWith(prefix));
+    if (!allowedInConsole) {
+      return notFoundResponse(requestId, isProd);
+    }
+  } else if (isAdminPath(pathname)) {
+    return notFoundResponse(requestId, isProd);
+  }
 
   if (
     pathname.startsWith("/api/") &&
