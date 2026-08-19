@@ -5,7 +5,7 @@
   "description": "Consecuencia by AK — Engineering Reality Platform verifying engineering truth through deterministic, evidence-based reasoning",
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && node scripts/push-schema.mjs && next build",
     "start": "next start",
     "lint": "eslint src/ tests/",
     "lint:fix": "eslint src/ tests/ --fix",
