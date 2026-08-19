@@ -205,3 +205,35 @@ export async function sendCustomerCareEmail(input: {
     `,
   });
 }
+
+export async function sendAdminReplyEmail(input: {
+  to: string;
+  name?: string;
+  originalSubject: string;
+  body: string;
+}): Promise<boolean> {
+  const safeGreeting = input.name?.trim() ? `Hi ${escapeHtml(input.name.trim())},` : "";
+  const subject = `Re: ${input.originalSubject}`;
+  const text = [
+    safeGreeting,
+    "",
+    "A Consecuencia team member replied to your inquiry:",
+    "",
+    input.body,
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+
+  return sendMail({
+    to: input.to,
+    subject,
+    text,
+    html: `
+      <div style="font-family: ui-sans-serif, system-ui, sans-serif; max-width: 480px; margin: 0 auto; color: #0f172a;">
+        ${safeGreeting ? `<p style="color: #334155;">${safeGreeting}</p>` : ""}
+        <p style="color: #334155;">A Consecuencia team member replied to your inquiry:</p>
+        <p style="white-space: pre-wrap; border-left: 3px solid #2563eb; padding-left: 12px; color: #0f172a;">${escapeHtml(input.body)}</p>
+      </div>
+    `,
+  });
+}
